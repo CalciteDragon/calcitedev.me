@@ -1,0 +1,58 @@
+# CLAUDE.md — Personal Portfolio (calcitedev.me)
+
+## Project
+
+Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** — Angular 19, TypeScript, SCSS, deployed as a static site on Render at **calcitedev.me**. Dark cyberpunk aesthetic with pixel-art accents and neon glow effects.
+
+## Documentation (LIVING DOCS — KEEP UPDATED)
+
+All planning and design docs live in `/docs`. **These are living documents.** Update them whenever the project changes — new components, revised architecture, design tweaks, completed phases, changed decisions. If you build it, document it. If you change it, update the doc. Stale docs are worse than no docs.
+
+| Doc | Purpose |
+|-----|---------|
+| [docs/overview.md](docs/overview.md) | Vision, identity, tech stack, core pages, non-functional goals, content strategy |
+| [docs/architecture.md](docs/architecture.md) | Folder structure, routing, component tree, data flow, SSR strategy, deploy pipeline |
+| [docs/design.md](docs/design.md) | Color palette, typography, layout grid, glow/lighting effects, hero section spec, component visual specs, animation guidelines, responsive strategy |
+| [docs/conventions.md](docs/conventions.md) | Naming, file organization, component patterns (smart/presentational/canvas), SCSS conventions, code quality, git workflow |
+| [docs/development.md](docs/development.md) | Phased development plan (0–11), dependency graph, task checklists, parallel work tracks, scope notes |
+| [docs/questions.md](docs/questions.md) | Clarifying questions — answered and remaining open items |
+
+**Read the relevant docs before starting work on any phase or feature.** Check `docs/development.md` to understand what phase we're in and what's next.
+
+## Key Decisions
+
+- **Static site deployment** (pre-rendered, no Node SSR at runtime)
+- **No backend / no CMS** — all content is static TypeScript data files in `src/app/data/`
+- **Placeholder-first development** — pixel art assets and project screenshots use placeholders; Tyler creates real art in parallel. Placeholders must be trivially swappable (just change a file path or drop in a new image).
+- **Easter eggs are non-load-bearing** — the site works cleanly without them. Physics, controllable rocket, peelable corner, and sound effects are layered on top in Phase 8.
+- **Deferred for future versions:** blog, resume PDF, GitHub API, analytics, light mode toggle, experience timeline, contact form.
+
+## Skills
+
+- **UI Implementer** (`.claude/skills/ui-implementer/SKILL.md`): Use when Tyler provides a design reference (Figma link, screenshot, mockup) and wants pixel-perfect implementation. Triggers on design URLs, screenshot paths, or "implement this UI" intent. Handles validation loops with design fidelity scoring. Note: the skill's default references React/Tailwind — adapt prompts to Angular/SCSS for this project.
+
+## Tech Stack Quick Reference
+
+- Angular 19 (standalone components, signals, OnPush change detection)
+- TypeScript (strict mode)
+- SCSS + CSS custom properties (see design.md for full token list)
+- Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code), Press Start 2P (pixel accents)
+- Canvas API for background scene (stars, mountains, UFO, rocket)
+- Pre-rendered static build on Render
+
+## Conventions (Quick)
+
+- Standalone components only — no NgModules
+- Signal-based inputs (`input()` / `input.required()`) and outputs (`output()`)
+- OnPush change detection everywhere
+- `inject()` function, not constructor injection
+- Guard canvas/browser APIs with `isPlatformBrowser()` for SSR compatibility
+- CSS custom properties for all colors/glows — never hard-code hex in component SCSS
+- Mobile-first responsive (base → `min-width` queries)
+- Conventional commits: `feat:`, `fix:`, `style:`, `refactor:`, `docs:`, `chore:`
+
+## When Starting a Session
+
+1. Check `docs/development.md` for current progress and next phase
+2. Read the relevant docs for context before writing code
+3. After completing work, update docs to reflect changes (mark tasks complete, note new components, revise architecture if needed)
