@@ -54,9 +54,9 @@ Phase 0: Scaffold & Global Styles
 **Dependencies:** None
 
 **Tasks:**
-- [ ] `ng new` with Angular 19, standalone, SCSS, SSR enabled, routing
-- [ ] Configure `tsconfig.json` strict mode
-- [ ] Set up global SCSS partials:
+- [x] `ng new` with Angular 19, standalone, SCSS, SSR enabled, routing
+- [x] Configure `tsconfig.json` strict mode
+- [x] Set up global SCSS partials:
   - `_variables.scss` — full color palette, spacing scale (8px), breakpoints, glow presets
   - `_reset.scss` — CSS reset/normalize
   - `_typography.scss` — `@font-face` for Space Grotesk, Inter, JetBrains Mono (+ Press Start 2P for pixel text)
@@ -64,8 +64,8 @@ Phase 0: Scaffold & Global Styles
   - `_glow.scss` — neon box-shadow presets per accent color
   - `_animations.scss` — shared keyframes (fadeIn, slideUp, glow pulse)
   - `styles.scss` — imports all partials, sets `:root` CSS custom properties
-- [ ] Create folder skeleton: `core/`, `layout/`, `shared/`, `features/`, `models/`, `data/`, `assets/pixel-art/`, `assets/images/`, `assets/icons/`
-- [ ] Verify `ng serve` runs clean
+- [x] Create folder skeleton: `core/`, `layout/`, `shared/`, `features/`, `models/`, `data/`, `assets/pixel-art/`, `assets/images/`, `assets/icons/`
+- [x] Verify `ng serve` runs clean
 
 **Deliverable:** App compiles and shows a blank page with correct fonts and CSS variables applied.
 

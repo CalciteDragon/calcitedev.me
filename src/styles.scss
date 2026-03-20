@@ -8,6 +8,10 @@
 @use 'styles/typography';
 @use 'styles/animations';
 
+// Note: _glow.scss and _mixins.scss are not imported here because they produce
+// no CSS output at global scope — they contain only SCSS mixins and functions.
+// Load them per-component via: @use 'styles/glow' as * or @use 'styles/mixins' as *
+
 // ======================
 // CSS Custom Properties (design tokens for runtime/component use)
 // ======================
