@@ -1,0 +1,69 @@
+// ======================
+// Color Palette (SCSS variables for compile-time use)
+// CSS custom properties are set on :root in styles.scss
+// ======================
+
+// Backgrounds
+$bg-primary: #0b0f1a;
+$bg-surface: #111827;
+$bg-border: #1e2a45;
+
+// Accents
+$accent-cyan: #22d3ee;
+$accent-blue: #3b82f6;
+$accent-purple: #8b5cf6;
+$accent-pink: #ec4899;
+$accent-gold: #f59e0b;
+
+// Text
+$text-primary: #e5e7eb;
+$text-secondary: #9ca3af;
+
+// ======================
+// Spacing Scale (8px base)
+// ======================
+
+$space-1: 0.5rem;   // 8px
+$space-2: 1rem;     // 16px
+$space-3: 1.5rem;   // 24px
+$space-4: 2rem;     // 32px
+$space-6: 3rem;     // 48px
+$space-8: 4rem;     // 64px
+$space-12: 6rem;    // 96px
+
+// ======================
+// Breakpoints
+// ======================
+
+$bp-sm: 480px;
+$bp-md: 768px;
+$bp-lg: 1024px;
+$bp-xl: 1280px;
+
+// ======================
+// Layout
+// ======================
+
+$max-content-width: 1200px;
+$section-padding-y: 5rem;              // 80px — desktop (design spec: 80-120px)
+$section-padding-y-mobile: $space-6;  // 48px — mobile
+$section-padding-x: $space-3;         // 24px — desktop
+$section-padding-x-mobile: $space-2;  // 16px — mobile
+
+// ======================
+// Border Radius
+// ======================
+
+$radius-sm: 6px;
+$radius-md: 12px;
+$radius-lg: 16px;
+$radius-full: 9999px;
+
+// ======================
+// Transitions
+// ======================
+
+$transition-fast: 150ms ease-out;
+$transition-base: 300ms ease-out;
+$transition-slow: 500ms ease-out;
+$ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
