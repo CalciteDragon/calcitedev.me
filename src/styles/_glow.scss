@@ -1,0 +1,75 @@
+@use 'variables' as *;
+
+// ======================
+// Neon Glow Mixin
+// ======================
+
+@mixin neon-glow($color, $intensity: 0.3) {
+  box-shadow:
+    0 0 15px rgba($color, $intensity),
+    inset 0 0 15px rgba($color, $intensity * 0.2);
+  border: 1px solid rgba($color, $intensity);
+}
+
+@mixin neon-glow-hover($color, $intensity: 0.5) {
+  box-shadow:
+    0 0 20px rgba($color, $intensity),
+    0 0 40px rgba($color, $intensity * 0.3),
+    inset 0 0 20px rgba($color, $intensity * 0.2);
+  border: 1px solid rgba($color, $intensity);
+}
+
+// ======================
+// Glow Presets (as mixins)
+// ======================
+
+@mixin glow-cyan($hover: false) {
+  @if $hover {
+    @include neon-glow-hover($accent-cyan);
+  } @else {
+    @include neon-glow($accent-cyan);
+  }
+}
+
+@mixin glow-blue($hover: false) {
+  @if $hover {
+    @include neon-glow-hover($accent-blue);
+  } @else {
+    @include neon-glow($accent-blue);
+  }
+}
+
+@mixin glow-purple($hover: false) {
+  @if $hover {
+    @include neon-glow-hover($accent-purple);
+  } @else {
+    @include neon-glow($accent-purple);
+  }
+}
+
+@mixin glow-pink($hover: false) {
+  @if $hover {
+    @include neon-glow-hover($accent-pink);
+  } @else {
+    @include neon-glow($accent-pink);
+  }
+}
+
+@mixin glow-gold($hover: false) {
+  @if $hover {
+    @include neon-glow-hover($accent-gold);
+  } @else {
+    @include neon-glow($accent-gold);
+  }
+}
+
+// ======================
+// Gradient Text
+// ======================
+
+@mixin gradient-text {
+  background: linear-gradient(135deg, $accent-cyan, $accent-blue, $accent-purple);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

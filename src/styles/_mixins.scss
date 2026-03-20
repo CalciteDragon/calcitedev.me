@@ -1,0 +1,59 @@
+@use 'variables' as *;
+
+// ======================
+// Responsive Breakpoints (mobile-first)
+// ======================
+
+@mixin sm {
+  @media (min-width: $bp-sm) { @content; }
+}
+
+@mixin md {
+  @media (min-width: $bp-md) { @content; }
+}
+
+@mixin lg {
+  @media (min-width: $bp-lg) { @content; }
+}
+
+@mixin xl {
+  @media (min-width: $bp-xl) { @content; }
+}
+
+// ======================
+// Layout
+// ======================
+
+@mixin content-container {
+  max-width: $max-content-width;
+  margin-inline: auto;
+  padding-inline: $section-padding-x-mobile;
+
+  @include md {
+    padding-inline: $section-padding-x;
+  }
+}
+
+@mixin section-spacing {
+  padding-block: $section-padding-y-mobile;
+
+  @include md {
+    padding-block: $section-padding-y;
+  }
+}
+
+// ======================
+// Reduced Motion
+// ======================
+
+@mixin motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    @content;
+  }
+}
+
+@mixin motion-reduced {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
