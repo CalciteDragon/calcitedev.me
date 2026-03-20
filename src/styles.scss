@@ -1,1 +1,96 @@
-/* You can add global styles to this file, and also import other style files */
+// ======================
+// Global Styles Entry Point
+// ======================
+// Import order matters — variables/reset first, then type, then decorative
+
+@use 'styles/variables' as *;
+@use 'styles/reset';
+@use 'styles/typography';
+@use 'styles/animations';
+
+// ======================
+// CSS Custom Properties (design tokens for runtime/component use)
+// ======================
+
+:root {
+  // Backgrounds
+  --bg-primary: #{$bg-primary};
+  --bg-surface: #{$bg-surface};
+  --bg-border: #{$bg-border};
+
+  // Accents
+  --accent-cyan: #{$accent-cyan};
+  --accent-blue: #{$accent-blue};
+  --accent-purple: #{$accent-purple};
+  --accent-pink: #{$accent-pink};
+  --accent-gold: #{$accent-gold};
+
+  // Text
+  --text-primary: #{$text-primary};
+  --text-secondary: #{$text-secondary};
+
+  // Gradients
+  --gradient-accent: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+
+  // Glow shadows (for use in component styles via var())
+  // Using raw RGB values since rgba() doesn't accept interpolated hex
+  --glow-cyan: 0 0 15px rgba(34, 211, 238, 0.3);
+  --glow-blue: 0 0 15px rgba(59, 130, 246, 0.3);
+  --glow-purple: 0 0 15px rgba(139, 92, 246, 0.3);
+  --glow-pink: 0 0 15px rgba(236, 72, 153, 0.3);
+  --glow-gold: 0 0 15px rgba(245, 158, 11, 0.3);
+
+  // Spacing (exposed for potential use in calc())
+  --space-1: #{$space-1};
+  --space-2: #{$space-2};
+  --space-3: #{$space-3};
+  --space-4: #{$space-4};
+  --space-6: #{$space-6};
+  --space-8: #{$space-8};
+
+  // Layout
+  --max-content-width: #{$max-content-width};
+}
+
+// ======================
+// Global Base Styles
+// ======================
+
+html {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+body {
+  background-color: var(--bg-primary);
+}
+
+// ======================
+// Selection Styling
+// ======================
+
+::selection {
+  background-color: rgba($accent-blue, 0.3);
+  color: $text-primary;
+}
+
+// ======================
+// Scrollbar Styling (Webkit)
+// ======================
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: $bg-primary;
+}
+
+::-webkit-scrollbar-thumb {
+  background: $bg-border;
+  border-radius: 4px;
+
+  &:hover {
+    background: rgba($accent-blue, 0.4);
+  }
+}
