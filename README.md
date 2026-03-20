@@ -1,59 +1,67 @@
-# Portfolio
+# calcitedev.me — Personal Portfolio
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)**. Dark cyberpunk aesthetic with pixel-art accents and neon glow effects.
 
-## Development server
+**Live site:** [calcitedev.me](https://calcitedev.me)
 
-To start a local development server, run:
+## Tech Stack
 
-```bash
-ng serve
-```
+| | |
+|---|---|
+| Framework | Angular 21 (standalone components, signals, OnPush) |
+| Language | TypeScript (strict mode) |
+| Styling | SCSS + CSS custom properties |
+| SSR | Angular SSR — pre-rendered static output |
+| Hosting | Render (static site) |
+| Fonts | Space Grotesk, Inter, JetBrains Mono, Press Start 2P |
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+## Development
 
 ```bash
-ng generate --help
+npm install
+ng serve          # dev server at localhost:4200
+ng build          # production build + pre-rendering → dist/
 ```
 
-## Building
+## Project Structure
 
-To build the project run:
-
-```bash
-ng build
+```
+src/
+├── styles/           # Global SCSS partials (variables, reset, typography, mixins, glow, animations)
+├── app/
+│   ├── core/         # Services, guards
+│   ├── layout/       # Navbar, footer shell
+│   ├── shared/       # Reusable components, directives, pipes
+│   ├── features/     # Page components (home, about, projects, contact)
+│   ├── models/       # TypeScript interfaces
+│   └── data/         # Static content (no CMS)
+└── assets/
+    ├── images/
+    ├── pixel-art/
+    ├── icons/
+    └── fonts/        # Self-hosted fonts (Phase 9)
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## Design System
 
-## Running unit tests
+CSS custom properties on `:root` expose all design tokens at runtime. SCSS variables and mixins in `src/styles/` are available per-component via `@use`:
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
+```scss
+@use 'styles/variables' as *;   // colors, spacing, breakpoints
+@use 'styles/mixins' as *;      // responsive breakpoints, layout
+@use 'styles/glow' as *;        // neon glow effects
 ```
 
-## Running end-to-end tests
+**Color palette:** `#0B0F1A` background · cyan `#22D3EE` · blue `#3B82F6` · purple `#8B5CF6` · pink `#EC4899` · gold `#F59E0B`
 
-For end-to-end (e2e) testing, run:
+## Docs
 
-```bash
-ng e2e
-```
+Planning and design docs live in [`/docs`](./docs):
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+| Doc | Purpose |
+|-----|---------|
+| [overview.md](docs/overview.md) | Vision, identity, pages, goals |
+| [architecture.md](docs/architecture.md) | Folder structure, routing, data flow |
+| [design.md](docs/design.md) | Color palette, typography, glow effects, animations |
+| [conventions.md](docs/conventions.md) | Naming, SCSS conventions, component patterns |
+| [development.md](docs/development.md) | Phased development plan (Phases 0–11) |
