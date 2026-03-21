@@ -82,11 +82,11 @@ Phase 0: Scaffold & Global Styles
 - [x] `NavbarComponent`:
   - Fixed position, semi-transparent `#0B0F1A` background, `backdrop-filter: blur(12px)`
   - Logo/brand text on the left (placeholder pixel icon)
-  - Nav links: About, Projects, Skills, Contact
+  - Nav links: About, Projects, Contact
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer
 - [x] `FooterComponent`:
-  - Centered social icon links (GitHub, Twitter/X, LinkedIn) — inline SVGs
+  - Centered social icon links (GitHub, Discord, LinkedIn) — inline SVGs
   - Copyright line
   - Icons glow on hover (GitHub=cyan, Twitter=blue, LinkedIn=purple)
 - [x] `app.routes.ts` — all routes defined with lazy-loaded `loadComponent`, wildcard redirect
