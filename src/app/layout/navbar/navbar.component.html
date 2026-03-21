@@ -1,0 +1,56 @@
+<header class="navbar">
+  <nav class="navbar__inner" aria-label="Main navigation">
+    <a class="navbar__brand" routerLink="/">
+      <span class="navbar__brand-icon pixel-text">C</span>
+      <span class="navbar__brand-text">CALCITE</span>
+    </a>
+
+    <!-- Desktop links (hidden on mobile) -->
+    <ul class="navbar__links">
+      <li>
+        <a class="navbar__link" routerLink="/about" routerLinkActive="navbar__link--active">About</a>
+      </li>
+      <li>
+        <a class="navbar__link" routerLink="/projects" routerLinkActive="navbar__link--active">Projects</a>
+      </li>
+      <li>
+        <a class="navbar__link" routerLink="/contact" routerLinkActive="navbar__link--active">Contact</a>
+      </li>
+    </ul>
+
+    <!-- Hamburger toggle (mobile only) -->
+    <button
+      class="navbar__hamburger"
+      [class.navbar__hamburger--open]="isMenuOpen()"
+      (click)="toggleMenu()"
+      [attr.aria-expanded]="isMenuOpen()"
+      aria-label="Toggle navigation menu"
+    >
+      <span class="navbar__hamburger-line"></span>
+      <span class="navbar__hamburger-line"></span>
+      <span class="navbar__hamburger-line"></span>
+    </button>
+  </nav>
+</header>
+
+<!-- Mobile overlay -->
+<div
+  class="navbar__overlay"
+  [class.navbar__overlay--visible]="isMenuOpen()"
+  (click)="closeMenu()"
+></div>
+
+<!-- Mobile drawer -->
+<div class="navbar__drawer" [class.navbar__drawer--open]="isMenuOpen()">
+  <ul class="navbar__drawer-links">
+    <li>
+      <a class="navbar__drawer-link" routerLink="/about" routerLinkActive="navbar__drawer-link--active" (click)="closeMenu()">About</a>
+    </li>
+    <li>
+      <a class="navbar__drawer-link" routerLink="/projects" routerLinkActive="navbar__drawer-link--active" (click)="closeMenu()">Projects</a>
+    </li>
+    <li>
+      <a class="navbar__drawer-link" routerLink="/contact" routerLinkActive="navbar__drawer-link--active" (click)="closeMenu()">Contact</a>
+    </li>
+  </ul>
+</div>

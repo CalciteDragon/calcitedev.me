@@ -78,19 +78,19 @@ Phase 0: Scaffold & Global Styles
 **Dependencies:** Phase 0
 
 **Tasks:**
-- [ ] `LayoutComponent` — wraps `<app-navbar>` + `<router-outlet>` + `<app-footer>`
-- [ ] `NavbarComponent`:
+- [x] `LayoutComponent` — wraps `<app-navbar>` + `<router-outlet>` + `<app-footer>`
+- [x] `NavbarComponent`:
   - Fixed position, semi-transparent `#0B0F1A` background, `backdrop-filter: blur(12px)`
   - Logo/brand text on the left (placeholder pixel icon)
-  - Nav links: About, Projects, Skills, Contact
+  - Nav links: About, Projects, Contact
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer
-- [ ] `FooterComponent`:
-  - Centered social icon links (GitHub, Twitter/X, LinkedIn) — placeholder SVGs
+- [x] `FooterComponent`:
+  - Centered social icon links (GitHub, Discord, LinkedIn) — inline SVGs
   - Copyright line
-  - Icons glow on hover
-- [ ] `app.routes.ts` — all routes defined with lazy-loaded `loadComponent`, wildcard redirect
-- [ ] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works
+  - Icons glow on hover (GitHub=cyan, Twitter=blue, LinkedIn=purple)
+- [x] `app.routes.ts` — all routes defined with lazy-loaded `loadComponent`, wildcard redirect
+- [x] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works
 
 **Deliverable:** Can navigate between all pages. Navbar and footer render on every route.
 

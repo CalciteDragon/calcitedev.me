@@ -1,0 +1,221 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// ============================
+// Navbar header bar
+// ============================
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 102;
+  height: var(--navbar-height);
+  background-color: rgba($bg-primary, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba($bg-border, 0.5);
+}
+
+.navbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  @include content-container;
+}
+
+// ============================
+// Brand / Logo
+// ============================
+
+.navbar__brand {
+  display: flex;
+  align-items: center;
+  gap: $space-1;
+  text-decoration: none;
+  transition: opacity $transition-fast;
+
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.navbar__brand-icon {
+  color: var(--accent-cyan);
+}
+
+.navbar__brand-text {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.25rem; // text-lg
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: 0.05em;
+}
+
+// ============================
+// Desktop nav links
+// ============================
+
+.navbar__links {
+  display: none;
+  align-items: center;
+  gap: $space-4;
+
+  @include md {
+    display: flex;
+  }
+}
+
+.navbar__link {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 0.875rem; // text-sm
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: $space-1 0;
+  position: relative;
+  transition: color $transition-base, text-shadow $transition-base;
+
+  &:hover {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px rgba($accent-cyan, 0.3);
+  }
+
+  &--active {
+    color: var(--accent-cyan);
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: 1px;
+    }
+  }
+}
+
+// ============================
+// Hamburger toggle (mobile)
+// ============================
+
+.navbar__hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: $space-1;
+
+  @include md {
+    display: none;
+  }
+}
+
+.navbar__hamburger-line {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 1px;
+  transition: transform $transition-base, opacity $transition-base;
+}
+
+.navbar__hamburger--open {
+  .navbar__hamburger-line:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+  }
+
+  .navbar__hamburger-line:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar__hamburger-line:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+  }
+}
+
+// ============================
+// Mobile overlay
+// ============================
+
+.navbar__overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity $transition-base;
+
+  &--visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  @include md {
+    display: none;
+  }
+}
+
+// ============================
+// Mobile drawer
+// ============================
+
+.navbar__drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 280px;
+  height: 100vh;
+  height: 100dvh;
+  background-color: var(--bg-surface);
+  border-left: 1px solid var(--bg-border);
+  z-index: 101;
+  transform: translateX(100%);
+  transition: transform $transition-base;
+  padding-top: calc(var(--navbar-height) + #{$space-4});
+
+  &--open {
+    transform: translateX(0);
+  }
+
+  @include md {
+    display: none;
+  }
+}
+
+.navbar__drawer-links {
+  display: flex;
+  flex-direction: column;
+  padding: 0 $space-3;
+}
+
+.navbar__drawer-link {
+  display: block;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.25rem; // text-lg
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: $space-2 0;
+  border-bottom: 1px solid rgba($bg-border, 0.5);
+  transition: color $transition-base, text-shadow $transition-base;
+
+  &:hover {
+    color: var(--accent-cyan);
+    text-shadow: 0 0 10px rgba($accent-cyan, 0.3);
+  }
+
+  &--active {
+    color: var(--accent-cyan);
+  }
+}
