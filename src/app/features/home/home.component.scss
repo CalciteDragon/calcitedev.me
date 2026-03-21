@@ -1,0 +1,10 @@
+@use 'mixins' as *;
+
+:host {
+  display: block;
+}
+
+.page {
+  @include content-container;
+  @include section-spacing;
+}
