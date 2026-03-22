@@ -9,6 +9,7 @@
 .card {
   background-color: var(--bg-surface);
   border-radius: $radius-md;
+  border: 1px solid transparent;
   overflow: hidden;
   transition: box-shadow $transition-base, border-color $transition-base;
 
