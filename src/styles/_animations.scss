@@ -65,3 +65,23 @@
     transform: none;
   }
 }
+
+// Scroll-reveal (toggled by ScrollRevealDirective)
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 500ms $ease-entrance, transform 500ms $ease-entrance;
+}
+
+.scroll-reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
