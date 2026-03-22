@@ -16,11 +16,11 @@ export class GlowDirective {
   private readonly isHovered = signal(false);
 
   private readonly glowMap: Record<string, string> = {
-    cyan: '0 0 20px rgba(34, 211, 238, 0.5), 0 0 40px rgba(34, 211, 238, 0.15)',
-    blue: '0 0 20px rgba(59, 130, 246, 0.5), 0 0 40px rgba(59, 130, 246, 0.15)',
-    purple: '0 0 20px rgba(139, 92, 246, 0.5), 0 0 40px rgba(139, 92, 246, 0.15)',
-    pink: '0 0 20px rgba(236, 72, 153, 0.5), 0 0 40px rgba(236, 72, 153, 0.15)',
-    gold: '0 0 20px rgba(245, 158, 11, 0.5), 0 0 40px rgba(245, 158, 11, 0.15)',
+    cyan: 'var(--glow-cyan)',
+    blue: 'var(--glow-blue)',
+    purple: 'var(--glow-purple)',
+    pink: 'var(--glow-pink)',
+    gold: 'var(--glow-gold)',
   };
 
   protected readonly currentGlow = computed(() => {

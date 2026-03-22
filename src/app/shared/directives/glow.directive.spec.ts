@@ -10,7 +10,7 @@ import { GlowDirective } from './glow.directive';
 class TestHostComponent {}
 
 @Component({
-  template: `<div appGlow>Default color</div>`,
+  template: `<div appGlow="unknown">Unknown color</div>`,
   standalone: true,
   imports: [GlowDirective],
 })
@@ -37,7 +37,7 @@ describe('GlowDirective', () => {
   it('should apply blue glow on mouseenter', () => {
     div.dispatchEvent(new MouseEvent('mouseenter'));
     fixture.detectChanges();
-    expect(div.style.boxShadow).toContain('59, 130, 246');
+    expect(div.style.boxShadow).toContain('var(--glow-blue)');
   });
 
   it('should remove glow on mouseleave', () => {
@@ -59,6 +59,6 @@ describe('GlowDirective', () => {
     const defaultDiv = defaultFixture.nativeElement.querySelector('div');
     defaultDiv.dispatchEvent(new MouseEvent('mouseenter'));
     defaultFixture.detectChanges();
-    expect(defaultDiv.style.boxShadow).toContain('34, 211, 238');
+    expect(defaultDiv.style.boxShadow).toContain('var(--glow-cyan)');
   });
 });
