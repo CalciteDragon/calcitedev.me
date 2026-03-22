@@ -1,0 +1,47 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'glow' as *;
+
+:host {
+  display: block;
+}
+
+.card {
+  background-color: var(--bg-surface);
+  border-radius: $radius-md;
+  overflow: hidden;
+  transition: box-shadow $transition-base, border-color $transition-base;
+
+  @include motion-safe {
+    transition: transform $transition-base, box-shadow $transition-base, border-color $transition-base;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  &--cyan {
+    @include glow-cyan;
+    &:hover { @include glow-cyan($hover: true); }
+  }
+
+  &--blue {
+    @include glow-blue;
+    &:hover { @include glow-blue($hover: true); }
+  }
+
+  &--purple {
+    @include glow-purple;
+    &:hover { @include glow-purple($hover: true); }
+  }
+
+  &--pink {
+    @include glow-pink;
+    &:hover { @include glow-pink($hover: true); }
+  }
+
+  &--gold {
+    @include glow-gold;
+    &:hover { @include glow-gold($hover: true); }
+  }
+}
