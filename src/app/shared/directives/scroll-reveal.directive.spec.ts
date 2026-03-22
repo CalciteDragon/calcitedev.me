@@ -9,6 +9,13 @@ import { ScrollRevealDirective } from './scroll-reveal.directive';
 })
 class TestHostComponent {}
 
+@Component({
+  template: `<div appScrollReveal [revealOnce]="false">Content</div>`,
+  standalone: true,
+  imports: [ScrollRevealDirective],
+})
+class RepeatRevealHostComponent {}
+
 describe('ScrollRevealDirective', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let div: HTMLElement;
@@ -52,7 +59,7 @@ describe('ScrollRevealDirective', () => {
   });
 
   it('should observe the host element', () => {
-    expect(mockObserve).toHaveBeenCalled();
+    expect(mockObserve).toHaveBeenCalledWith(div);
   });
 
   it('should add scroll-reveal--visible class when intersecting', () => {
@@ -68,5 +75,21 @@ describe('ScrollRevealDirective', () => {
   it('should disconnect observer on destroy', () => {
     fixture.destroy();
     expect(mockDisconnect).toHaveBeenCalled();
+  });
+
+  it('should remove scroll-reveal--visible class when not intersecting and revealOnce is false', () => {
+    const repeatFixture = TestBed.createComponent(RepeatRevealHostComponent);
+    repeatFixture.detectChanges();
+    const repeatDiv = repeatFixture.nativeElement.querySelector('div');
+
+    // IntersectionObserver was called again for this fixture — get the latest callback
+    const lastCall = (IntersectionObserver as ReturnType<typeof vi.fn>).mock.calls.at(-1)!;
+    const repeatCallback = lastCall[0] as (entries: Partial<IntersectionObserverEntry>[]) => void;
+
+    repeatCallback([{ isIntersecting: true, target: repeatDiv }]);
+    expect(repeatDiv.classList.contains('scroll-reveal--visible')).toBe(true);
+
+    repeatCallback([{ isIntersecting: false, target: repeatDiv }]);
+    expect(repeatDiv.classList.contains('scroll-reveal--visible')).toBe(false);
   });
 });
