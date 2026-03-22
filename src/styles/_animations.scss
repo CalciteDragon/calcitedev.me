@@ -56,16 +56,6 @@
   animation: slideUp 500ms $ease-entrance both;
 }
 
-// Respect prefers-reduced-motion
-@media (prefers-reduced-motion: reduce) {
-  .animate-fade-in,
-  .animate-slide-up {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-}
-
 // Scroll-reveal (toggled by ScrollRevealDirective)
 .scroll-reveal {
   opacity: 0;
@@ -78,7 +68,15 @@
   transform: translateY(0);
 }
 
+// Respect prefers-reduced-motion
 @media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
   .scroll-reveal {
     opacity: 1;
     transform: none;
