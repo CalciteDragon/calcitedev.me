@@ -56,6 +56,18 @@
   animation: slideUp 500ms $ease-entrance both;
 }
 
+// Scroll-reveal (toggled by ScrollRevealDirective)
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 500ms $ease-entrance, transform 500ms $ease-entrance;
+}
+
+.scroll-reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 // Respect prefers-reduced-motion
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
@@ -63,5 +75,11 @@
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }

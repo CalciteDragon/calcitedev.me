@@ -1,0 +1,67 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'glow' as *;
+@use 'typography' as *;
+
+:host {
+  display: inline-block;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $space-1;
+  padding: 0.75rem $space-4;
+  border-radius: $radius-md;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: $font-heading;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: box-shadow $transition-base, border-color $transition-base;
+
+  @include motion-safe {
+    transition: transform $transition-fast, box-shadow $transition-base, border-color $transition-base;
+
+    &:hover {
+      transform: scale(1.02);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  &--cyan {
+    @include glow-cyan;
+    &:hover { @include glow-cyan($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 2px; }
+  }
+
+  &--blue {
+    @include glow-blue;
+    &:hover { @include glow-blue($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+  }
+
+  &--purple {
+    @include glow-purple;
+    &:hover { @include glow-purple($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-purple); outline-offset: 2px; }
+  }
+
+  &--pink {
+    @include glow-pink;
+    &:hover { @include glow-pink($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-pink); outline-offset: 2px; }
+  }
+
+  &--gold {
+    @include glow-gold;
+    &:hover { @include glow-gold($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; }
+  }
+}

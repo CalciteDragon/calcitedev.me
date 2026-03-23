@@ -1,0 +1,18 @@
+@use 'variables' as *;
+@use 'typography' as *;
+
+:host {
+  display: inline-block;
+}
+
+.tech-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: $radius-sm;
+  font-family: $font-code;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  background-color: rgba($bg-border, 0.6);
+  border: 1px solid rgba($bg-border, 0.8);
+}
