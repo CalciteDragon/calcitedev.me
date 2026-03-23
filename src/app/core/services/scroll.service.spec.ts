@@ -65,19 +65,21 @@ describe('ScrollService', () => {
     const mockHome = { id: 'home' } as HTMLElement;
     const mockAbout = { id: 'about' } as HTMLElement;
 
-    const original = globalThis.IntersectionObserver;
-    globalThis.IntersectionObserver = class MockIO {
-      observe = observeSpy;
-      disconnect = disconnectSpy;
-      constructor(
-        callback: IntersectionObserverCallback,
-        options?: IntersectionObserverInit,
-      ) {
-        constructorCallCount++;
-        capturedCallback = callback;
-        capturedOptions = options ?? null;
-      }
-    } as unknown as typeof IntersectionObserver;
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class MockIO {
+        observe = observeSpy;
+        disconnect = disconnectSpy;
+        constructor(
+          callback: IntersectionObserverCallback,
+          options?: IntersectionObserverInit,
+        ) {
+          constructorCallCount++;
+          capturedCallback = callback;
+          capturedOptions = options ?? null;
+        }
+      },
+    );
 
     vi.spyOn(doc, 'getElementById').mockImplementation((id: string) => {
       if (id === 'home') return mockHome;
@@ -93,18 +95,18 @@ describe('ScrollService', () => {
     expect(observeSpy).toHaveBeenCalledTimes(2);
     expect(observeSpy).toHaveBeenCalledWith(mockHome);
     expect(observeSpy).toHaveBeenCalledWith(mockAbout);
-
-    globalThis.IntersectionObserver = original;
   });
 
   it('destroySectionObserver disconnects the observer', () => {
     const disconnectSpy = vi.fn();
 
-    const original = globalThis.IntersectionObserver;
-    globalThis.IntersectionObserver = class MockIO {
-      observe = vi.fn();
-      disconnect = disconnectSpy;
-    } as unknown as typeof IntersectionObserver;
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class MockIO {
+        observe = vi.fn();
+        disconnect = disconnectSpy;
+      },
+    );
 
     vi.spyOn(doc, 'getElementById').mockReturnValue({} as HTMLElement);
 
@@ -112,7 +114,75 @@ describe('ScrollService', () => {
     service.destroySectionObserver();
 
     expect(disconnectSpy).toHaveBeenCalledOnce();
+    // Second call must not throw (observer is nulled)
+    expect(() => service.destroySectionObserver()).not.toThrow();
+  });
 
-    globalThis.IntersectionObserver = original;
+  it('should update activeSection and URL hash when a non-home section intersects', () => {
+    let capturedCallback: IntersectionObserverCallback | null = null;
+
+    const mockAbout = { id: 'about' } as HTMLElement;
+
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class MockIO {
+        observe = vi.fn();
+        disconnect = vi.fn();
+        constructor(callback: IntersectionObserverCallback) {
+          capturedCallback = callback;
+        }
+      },
+    );
+
+    vi.spyOn(doc, 'getElementById').mockImplementation((id: string) => {
+      if (id === 'about') return mockAbout;
+      return null;
+    });
+
+    const replaceStateSpy = vi.spyOn(history, 'replaceState');
+
+    service.initSectionObserver(['about']);
+
+    capturedCallback!(
+      [{ isIntersecting: true, target: mockAbout } as unknown as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+
+    expect(service.activeSection()).toBe('about');
+    expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/#about');
+  });
+
+  it('should update activeSection and set URL to "/" when the home section intersects', () => {
+    let capturedCallback: IntersectionObserverCallback | null = null;
+
+    const mockHome = { id: 'home' } as HTMLElement;
+
+    vi.stubGlobal(
+      'IntersectionObserver',
+      class MockIO {
+        observe = vi.fn();
+        disconnect = vi.fn();
+        constructor(callback: IntersectionObserverCallback) {
+          capturedCallback = callback;
+        }
+      },
+    );
+
+    vi.spyOn(doc, 'getElementById').mockImplementation((id: string) => {
+      if (id === 'home') return mockHome;
+      return null;
+    });
+
+    const replaceStateSpy = vi.spyOn(history, 'replaceState');
+
+    service.initSectionObserver(['home']);
+
+    capturedCallback!(
+      [{ isIntersecting: true, target: mockHome } as unknown as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
+
+    expect(service.activeSection()).toBe('home');
+    expect(replaceStateSpy).toHaveBeenCalledWith(null, '', '/');
   });
 });

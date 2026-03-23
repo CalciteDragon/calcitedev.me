@@ -1,6 +1,7 @@
 import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 
+/** Tracks the active viewport section and provides smooth-scroll navigation. SSR-safe. */
 @Injectable({ providedIn: 'root' })
 export class ScrollService {
   private readonly document = inject(DOCUMENT);
@@ -16,6 +17,7 @@ export class ScrollService {
 
   initSectionObserver(sectionIds: string[]): void {
     if (!isPlatformBrowser(this.platformId)) return;
+    this.destroySectionObserver(); // Disconnect any previous observer before creating a new one
     this.observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
