@@ -232,7 +232,7 @@ Three cards below the hero: **About Me**, **Latest Projects**, **My Skills**
 ### Durations
 
 - Micro-interactions (hover, click): 150–300ms
-- Scroll reveals: 400–600ms
+- Scroll reveals: scroll-position-linked (not time-based) — animation progress maps directly to scroll position via `animation-timeline: view()`
 - Background elements (UFO bob, star twinkle): continuous, slow (2–5s loops)
 
 ### Easing
@@ -247,6 +247,7 @@ Three cards below the hero: **About Me**, **Latest Projects**, **My Skills**
 - Respect `prefers-reduced-motion` — disable non-essential animations
 - Use `transform` and `opacity` only (GPU-composited)
 - Reduce background complexity on small screens and low-power devices
+- Scroll reveal animations use CSS `animation-timeline: view()` — they are scroll-position-linked and naturally reverse on scroll-up. A `@supports` fallback ensures content is always visible in older browsers.
 
 ## Responsive Strategy
 

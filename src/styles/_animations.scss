@@ -56,16 +56,39 @@
   animation: slideUp 500ms $ease-entrance both;
 }
 
-// Scroll-reveal (toggled by ScrollRevealDirective)
-.scroll-reveal {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 500ms $ease-entrance, transform 500ms $ease-entrance;
+// ======================
+// Scroll-Driven Reveal
+// ======================
+// Keyframe for scroll-position-linked slide-up reveal.
+// Offset: 100px — provides a pronounced entrance visible at scroll speed.
+@keyframes scroll-reveal-slide {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.scroll-reveal--visible {
-  opacity: 1;
-  transform: translateY(0);
+// Supporting browsers: animation is live-linked to scroll position.
+// animation-range: entry 20% entry 100% — begins when 20% of the element
+// has entered the viewport, completes when fully visible; reverses on scroll-up.
+@supports (animation-timeline: view()) {
+  .scroll-reveal {
+    animation: scroll-reveal-slide ease-in-out both;
+    animation-timeline: view();
+    animation-range: entry 20% entry 100%;
+  }
+}
+
+// Fallback: unsupported browsers see elements immediately.
+@supports not (animation-timeline: view()) {
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 
 // Respect prefers-reduced-motion
@@ -78,8 +101,8 @@
   }
 
   .scroll-reveal {
+    animation: none;
     opacity: 1;
     transform: none;
-    transition: none;
   }
 }

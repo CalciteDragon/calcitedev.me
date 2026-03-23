@@ -112,7 +112,7 @@ Phase 0: Scaffold & Global Styles
 - [ ] `TechTagComponent` — tag for project tech stack (could use pixel-style font variant)
 - [ ] `SocialLinksComponent` — row of social icon links with individual glow colors on hover
 - [ ] `ProjectCardComponent` — card variant: thumbnail placeholder at top, title, description, tech tags, hover glow
-- [ ] `ScrollRevealDirective` — IntersectionObserver-based, adds a CSS class when element enters viewport, triggers fade/slide animation
+- [x] `ScrollRevealDirective` — CSS scroll-driven animation via `animation-timeline: view()`, adds `.scroll-reveal` class when on a browser platform; the CSS handles all animation logic
 - [ ] `GlowDirective` — applies neon glow box-shadow on hover with configurable color
 
 **Deliverable:** A mini component library. Can be visually tested in isolation on a scratch route or via `ng serve` on the home page.
