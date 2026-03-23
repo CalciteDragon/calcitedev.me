@@ -1,10 +1,9 @@
-@use 'mixins' as *;
-
 :host {
   display: block;
 }
 
-.page {
-  @include content-container;
-  @include section-spacing;
+// Solid dark background for Phase 4.
+// BackgroundSceneComponent (Phase 5) will be layered behind this content.
+.home {
+  background-color: var(--bg-primary);
 }

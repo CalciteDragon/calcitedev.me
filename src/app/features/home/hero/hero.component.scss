@@ -1,0 +1,95 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'glow' as *;
+
+:host {
+  display: block;
+}
+
+.hero {
+  @include content-container;
+  // 64px is approximate navbar height — tune in Phase 9 responsive pass
+  min-height: calc(100svh - 64px);
+  display: flex;
+  align-items: center;
+  padding-block: $space-8;
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-6;
+    width: 100%;
+
+    @include lg {
+      flex-direction: row;
+      align-items: center;
+      gap: $space-8;
+    }
+  }
+
+  &__avatar {
+    flex-shrink: 0;
+  }
+
+  &__avatar-img {
+    width: 160px;
+    height: 160px;
+    image-rendering: pixelated;
+
+    @include lg {
+      width: 220px;
+      height: 220px;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: $space-2;
+
+    @include lg {
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+
+  &__pre-heading {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.3em;
+    color: var(--text-secondary);
+    margin: 0;
+  }
+
+  &__name {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    margin: 0;
+    @include gradient-text;
+  }
+
+  &__alias {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.5rem, 1.5vw, 0.75rem);
+    color: var(--accent-gold);
+    letter-spacing: 0.1em;
+    margin: 0;
+  }
+
+  &__tagline {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.05em;
+    margin: $space-2 0 0;
+  }
+
+  &__subtitle {
+    font-size: 1rem;
+    color: var(--text-secondary);
+    margin: 0 0 $space-4;
+  }
+}
