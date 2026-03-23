@@ -1,0 +1,36 @@
+@use 'variables' as *;
+
+$chip-colors: (
+  'cyan': $accent-cyan,
+  'blue': $accent-blue,
+  'purple': $accent-purple,
+  'pink': $accent-pink,
+  'gold': $accent-gold,
+);
+
+:host {
+  display: inline-block;
+}
+
+.skill-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: $radius-full;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: rgba($bg-border, 0.5);
+  border: 1px solid transparent;
+  transition: border-color 200ms ease-out, box-shadow 200ms ease-out;
+
+  @each $name, $color in $chip-colors {
+    &--#{$name} {
+      color: $color;
+      border-color: rgba($color, 0.3);
+
+      &:hover {
+        box-shadow: 0 0 10px rgba($color, 0.2);
+      }
+    }
+  }
+}
