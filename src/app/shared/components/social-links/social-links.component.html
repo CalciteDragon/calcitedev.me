@@ -1,0 +1,19 @@
+<div class="social-links">
+  @for (link of links(); track link.platform) {
+    <a
+      [class]="'social-links__link social-links__link--' + link.platform"
+      [href]="link.url"
+      target="_blank"
+      rel="noopener noreferrer"
+      [attr.aria-label]="link.label"
+    >
+      @if (iconPaths[link.platform]) {
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path [attr.d]="iconPaths[link.platform]" />
+        </svg>
+      } @else {
+        <span class="social-links__label">{{ link.label }}</span>
+      }
+    </a>
+  }
+</div>

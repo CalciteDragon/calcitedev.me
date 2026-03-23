@@ -1,0 +1,50 @@
+@use 'variables' as *;
+
+$link-colors: (
+  'github': $accent-cyan,
+  'discord': $accent-blue,
+  'linkedin': $accent-purple,
+  'twitter': $accent-blue,
+);
+
+:host {
+  display: block;
+}
+
+.social-links {
+  display: flex;
+  align-items: center;
+  gap: $space-4;
+}
+
+.social-links__link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: color 300ms ease-out, filter 300ms ease-out;
+
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--accent-cyan);
+    outline-offset: 4px;
+    border-radius: 2px;
+  }
+
+  @each $platform, $color in $link-colors {
+    &--#{$platform}:hover {
+      color: $color;
+      filter: drop-shadow(0 0 8px rgba($color, 0.4));
+    }
+  }
+}
+
+.social-links__label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
