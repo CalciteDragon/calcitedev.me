@@ -1,0 +1,25 @@
+<section class="feature-cards" id="feature-cards" aria-label="Site sections">
+  <div class="feature-cards__grid">
+    @for (card of cards; track card.title) {
+      <app-card [glowColor]="card.glowColor">
+        <div class="feature-card">
+          <img
+            [src]="card.icon"
+            [alt]="card.iconAlt"
+            class="feature-card__icon"
+            width="64"
+            height="64"
+          />
+          <h3 class="feature-card__title">{{ card.title }}</h3>
+          <p class="feature-card__desc">{{ card.description }}</p>
+          <app-cta-button
+            [glowColor]="card.glowColor"
+            (ctaClick)="navigate(card.route)"
+          >
+            {{ card.ctaLabel }}
+          </app-cta-button>
+        </div>
+      </app-card>
+    }
+  </div>
+</section>
