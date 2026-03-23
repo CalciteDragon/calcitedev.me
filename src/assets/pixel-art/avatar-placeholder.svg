@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- head -->
+  <rect x="22" y="10" width="20" height="18" fill="#22D3EE" fill-opacity="0.85"/>
+  <!-- eyes -->
+  <rect x="26" y="16" width="4" height="4" fill="#0B0F1A"/>
+  <rect x="34" y="16" width="4" height="4" fill="#0B0F1A"/>
+  <!-- body -->
+  <rect x="18" y="30" width="28" height="18" fill="#22D3EE" fill-opacity="0.6"/>
+  <!-- laptop screen -->
+  <rect x="14" y="38" width="36" height="8" fill="#111827" stroke="#22D3EE" stroke-width="1" stroke-opacity="0.5"/>
+  <!-- laptop base -->
+  <rect x="12" y="46" width="40" height="4" fill="#1E2A45"/>
+</svg>

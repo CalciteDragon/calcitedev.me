@@ -1,8 +1,23 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 # CLAUDE.md — Personal Portfolio (calcitedev.me)
 
 ## Project
 
-Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** — Angular 19, TypeScript, SCSS, deployed as a static site on Render at **calcitedev.me**. Dark cyberpunk aesthetic with pixel-art accents and neon glow effects.
+Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** — Angular 21, TypeScript, SCSS, deployed as a static site on Render at **calcitedev.me**. Dark cyberpunk aesthetic with pixel-art accents and neon glow effects.
+
+## Dev Commands
+
+```bash
+npm start           # Dev server at localhost:4200
+npm run build       # Production static build (pre-renders all routes)
+npm test            # Run unit tests (vitest, no watch)
+ng generate component features/foo  # Scaffold a feature component
+```
+
+Tests use **vitest** via `@angular/build:unit-test`. No `karma.config.js` — configure test behavior in `angular.json`.
 
 ## Documentation (LIVING DOCS — KEEP UPDATED)
 
@@ -33,7 +48,7 @@ All planning and design docs live in `/docs`. **These are living documents.** Up
 
 ## Tech Stack Quick Reference
 
-- Angular 19 (standalone components, signals, OnPush change detection)
+- Angular 21 (standalone components, signals, OnPush change detection)
 - TypeScript (strict mode)
 - SCSS + CSS custom properties (see design.md for full token list)
 - Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code), Press Start 2P (pixel accents)
@@ -50,6 +65,32 @@ All planning and design docs live in `/docs`. **These are living documents.** Up
 - CSS custom properties for all colors/glows — never hard-code hex in component SCSS
 - Mobile-first responsive (base → `min-width` queries)
 - Conventional commits: `feat:`, `fix:`, `style:`, `refactor:`, `docs:`, `chore:`
+
+## Routing Architecture
+
+All routes are children of `LayoutComponent` (navbar + footer shell). Feature pages are lazy-loaded:
+
+```
+/          → HomeComponent
+/about     → AboutComponent
+/projects  → ProjectsComponent
+/contact   → ContactComponent
+```
+
+`app.routes.server.ts` contains SSR-specific route config (pre-render triggers). `ProjectDetailComponent` at `/projects/:slug` is planned for Phase 6.
+
+## SCSS Architecture
+
+Global partials live in `src/styles/` and are available project-wide via `@use` without path prefix (configured via `stylePreprocessorOptions.includePaths`):
+
+- `_variables.scss` — CSS custom property declarations and SCSS variables
+- `_mixins.scss` — Reusable layout/effect mixins
+- `_glow.scss` — Neon glow effect utilities
+- `_typography.scss` — Font declarations and text styles
+- `_animations.scss` — Keyframe animations
+- `_reset.scss` — Base reset
+
+Component SCSS uses `@use 'variables'` (not a relative path). Never hard-code hex values — always reference CSS custom properties.
 
 ## When Starting a Session
 
