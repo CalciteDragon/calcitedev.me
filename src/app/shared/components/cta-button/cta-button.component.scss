@@ -35,33 +35,33 @@
     }
   }
 
-  &:focus-visible {
-    outline: 2px solid var(--accent-cyan);
-    outline-offset: 2px;
-  }
-
   &--cyan {
     @include glow-cyan;
     &:hover { @include glow-cyan($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-cyan); outline-offset: 2px; }
   }
 
   &--blue {
     @include glow-blue;
     &:hover { @include glow-blue($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
   }
 
   &--purple {
     @include glow-purple;
     &:hover { @include glow-purple($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-purple); outline-offset: 2px; }
   }
 
   &--pink {
     @include glow-pink;
     &:hover { @include glow-pink($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-pink); outline-offset: 2px; }
   }
 
   &--gold {
     @include glow-gold;
     &:hover { @include glow-gold($hover: true); }
+    &:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 2px; }
   }
 }

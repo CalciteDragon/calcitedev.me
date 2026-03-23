@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { GlowColor } from '../../types/glow-color.type';
 
-export type GlowColor = 'cyan' | 'blue' | 'purple' | 'pink' | 'gold';
+export type { GlowColor } from '../../types/glow-color.type';
 
 @Component({
   selector: 'app-card',

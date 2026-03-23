@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
-import { GlowColor } from '../card/card.component';
+import { GlowColor } from '../../types/glow-color.type';
 
 @Component({
   selector: 'app-cta-button',
