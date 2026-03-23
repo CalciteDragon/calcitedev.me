@@ -128,15 +128,15 @@ Phase 0: Scaffold & Global Styles
 **Parallel with:** Phase 2
 
 **Tasks:**
-- [ ] `project.model.ts` — `Project` interface (title, slug, description, longDescription, tags, imageUrl, liveUrl?, githubUrl?, featured)
-- [ ] `skill.model.ts` — `Skill` interface (name, category, icon?)
-- [ ] `social-link.model.ts` — `SocialLink` interface (platform, url, icon, glowColor)
-- [ ] `projects.data.ts` — 4–6 placeholder projects with realistic titles/descriptions and placeholder image paths
-- [ ] `skills.data.ts` — full skills list organized by the 8 categories Tyler provided
-- [ ] `bio.data.ts` — placeholder bio text (Tyler fills in real copy later)
-- [ ] `social-links.data.ts` — GitHub, Twitter/X, LinkedIn entries
-- [ ] Create placeholder images in `assets/images/` — styled dark rectangles with project name text, matching the color palette
-- [ ] Create placeholder pixel-art sprites in `assets/pixel-art/` — simple colored rectangles or silhouettes for avatar, UFO, rocket, card icons
+- [x] `project.model.ts` — `Project` interface (title, slug, description, longDescription, tags, imageUrl, liveUrl?, githubUrl?, featured)
+- [x] `skill.model.ts` — `Skill` interface (name, category, icon?)
+- [x] `social-link.model.ts` — `SocialLink` interface (platform, url, icon, glowColor)
+- [x] `projects.data.ts` — 4–6 placeholder projects with realistic titles/descriptions and placeholder image paths
+- [x] `skills.data.ts` — full skills list organized by the 8 categories Tyler provided
+- [x] `bio.data.ts` — placeholder bio text (Tyler fills in real copy later)
+- [x] `social-links.data.ts` — GitHub, Twitter/X, LinkedIn entries
+- [x] Create placeholder images in `assets/images/` — styled dark rectangles with project name text, matching the color palette
+- [x] Create placeholder pixel-art sprites in `assets/pixel-art/` — simple colored rectangles or silhouettes for avatar, UFO, rocket, card icons
 
 **Deliverable:** `import { projectsData } from './data/projects.data'` works everywhere. Placeholder visuals exist for every slot.
 
