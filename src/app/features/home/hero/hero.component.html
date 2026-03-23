@@ -1,0 +1,24 @@
+<section class="hero" aria-label="Hero introduction">
+  <div class="hero__container">
+    <div class="hero__avatar">
+      <img
+        src="assets/pixel-art/avatar-placeholder.svg"
+        alt="Pixel art avatar of Tyler Hawthorn"
+        class="hero__avatar-img"
+        width="220"
+        height="220"
+      />
+    </div>
+
+    <div class="hero__content">
+      <p class="hero__pre-heading">HEY, I'M</p>
+      <h1 class="hero__name">{{ bio().name.toUpperCase() }}</h1>
+      <p class="hero__alias">AKA {{ bio().alias.toUpperCase() }}</p>
+      <p class="hero__tagline">{{ bio().tagline }}</p>
+      <p class="hero__subtitle">{{ bio().title }}</p>
+      <app-cta-button glowColor="cyan" (ctaClick)="scrollToFeatureCards()">
+        View My Work
+      </app-cta-button>
+    </div>
+  </div>
+</section>
