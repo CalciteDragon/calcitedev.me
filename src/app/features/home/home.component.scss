@@ -2,8 +2,14 @@
   display: block;
 }
 
-// Solid dark background for Phase 4.
-// BackgroundSceneComponent (Phase 5) will be layered behind this content.
-.home {
+// Solid dark background — BackgroundSceneComponent (Phase 5) layered behind.
+.main-page {
   background-color: var(--bg-primary);
+
+  &__section {
+    scroll-margin-top: var(--navbar-height);
+    // min-height ensures each section fills the viewport for reliable scroll detection.
+    // Relax per-section in Phase 7/9 once content-driven heights are in place.
+    min-height: 100svh;
+  }
 }
