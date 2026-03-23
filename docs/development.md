@@ -149,7 +149,7 @@ Phase 0: Scaffold & Global Styles
 **Dependencies:** Phase 1 (layout/routing), Phase 2 (card, CTA button), Phase 3 (data)
 
 **Tasks:**
-- [ ] `HeroComponent`:
+- [x] `HeroComponent`:
   - Pixel-art avatar placeholder (left side desktop, top on mobile)
   - "HEY, I'M" pre-heading (spaced out, small)
   - "TYLER HAWTHORN" (large, gradient text via `background-clip: text`)
@@ -157,12 +157,14 @@ Phase 0: Scaffold & Global Styles
   - "Code · Create · Innovate" tagline
   - "Full Stack Developer & Game Enthusiast" subtitle
   - "View My Work" CTA button (scrolls to feature cards or navigates to projects)
-- [ ] `FeatureCardsComponent`:
+- [x] `FeatureCardsComponent`:
   - Three `CardComponent` instances: About Me (cyan glow), Latest Projects (blue glow), My Skills (purple glow)
   - Each has a placeholder pixel icon, short text, and a CTA ("Learn More", "See Projects", "View Skills")
   - Cards link to their respective routes
-- [ ] `HomeComponent` — orchestrates Hero + FeatureCards, solid dark background (canvas comes next)
-- [ ] Scroll-reveal animation on the feature cards section
+- [x] `HomeComponent` — orchestrates Hero + FeatureCards, solid dark background (canvas comes next)
+- [x] Scroll-reveal animation on the feature cards section
+
+**Built:** `HeroComponent` (presentational, `bio` signal input), `FeatureCardsComponent` (static card config, `Router.navigate`), `HomeComponent` updated (smart container, reads `bioData`). `appScrollReveal` applied to feature cards section from HomeComponent template. Canvas background deferred to Phase 5.
 
 **Deliverable:** Landing page looks close to the design mockup (minus the animated background). Feature cards navigate to the correct routes.
 
