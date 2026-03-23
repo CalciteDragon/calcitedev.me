@@ -11,22 +11,12 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/home/home.component').then(m => m.HomeComponent),
       },
-      {
-        path: 'about',
-        loadComponent: () =>
-          import('./features/about/about.component').then(m => m.AboutComponent),
-      },
-      {
-        path: 'projects',
-        loadComponent: () =>
-          import('./features/projects/projects.component').then(m => m.ProjectsComponent),
-      },
-      {
-        path: 'contact',
-        loadComponent: () =>
-          import('./features/contact/contact.component').then(m => m.ContactComponent),
-      },
-      // { path: 'projects/:slug', loadComponent: ... } — added in Phase 6 with ProjectDetailComponent
+      // Section paths redirect to home — all content is on the single page
+      { path: 'about', redirectTo: '' },
+      { path: 'projects', redirectTo: '' },
+      { path: 'contact', redirectTo: '' },
+      // Future detail page — scaffolded in Phase 6
+      // { path: 'projects/:slug', loadComponent: () => import('./features/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent) },
       { path: '**', redirectTo: '' },
     ],
   },
