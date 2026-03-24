@@ -69,11 +69,14 @@
 }
 
 .navbar__link {
+  background: none;
+  border: none;
+  font: inherit;
+  cursor: pointer;
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 0.875rem; // text-sm
   font-weight: 500;
   color: var(--text-secondary);
-  text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: $space-1 0;
@@ -200,12 +203,17 @@
 }
 
 .navbar__drawer-link {
+  background: none;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   display: block;
   font-family: 'Space Grotesk', system-ui, sans-serif;
   font-size: 1.25rem; // text-lg
   font-weight: 500;
   color: var(--text-secondary);
-  text-decoration: none;
   padding: $space-2 0;
   border-bottom: 1px solid rgba($bg-border, 0.5);
   transition: color $transition-base, text-shadow $transition-base;

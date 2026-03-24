@@ -23,10 +23,10 @@ export class HeroComponent {
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
 
-  scrollToFeatureCards(): void {
+  scrollToWork(): void {
     if (!isPlatformBrowser(this.platformId)) return;
     this.document
-      .getElementById('feature-cards')
+      .getElementById('projects')
       ?.scrollIntoView({ behavior: 'smooth' });
   }
 }

@@ -1,4 +1,22 @@
-<main class="home" aria-label="Home page">
-  <app-hero [bio]="bio" />
-  <app-feature-cards appScrollReveal />
-</main>
+<div class="main-page">
+  <section id="home" class="main-page__section" aria-label="Home">
+    <app-hero [bio]="bio" />
+    <app-feature-cards appScrollReveal />
+  </section>
+
+  <section id="projects" class="main-page__section" aria-label="Projects">
+    <app-projects-section />
+  </section>
+
+  <section id="about" class="main-page__section" aria-label="About">
+    <app-about-section />
+  </section>
+
+  <section id="skills" class="main-page__section" aria-label="Skills">
+    <app-skills-section />
+  </section>
+
+  <section id="contact" class="main-page__section" aria-label="Contact">
+    <app-contact-section />
+  </section>
+</div>

@@ -82,17 +82,17 @@ Phase 0: Scaffold & Global Styles
 - [x] `NavbarComponent`:
   - Fixed position, semi-transparent `#0B0F1A` background, `backdrop-filter: blur(12px)`
   - Logo/brand text on the left (placeholder pixel icon)
-  - Nav links: About, Projects, Contact
+  - Nav links: Projects, About, Skills, Contact — rendered as `<button>` elements that scroll to the matching section (not `<a>` router links); active state driven by `ScrollService.activeSection` signal
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer
 - [x] `FooterComponent`:
   - Centered social icon links (GitHub, Discord, LinkedIn) — inline SVGs
   - Copyright line
   - Icons glow on hover (GitHub=cyan, Twitter=blue, LinkedIn=purple)
-- [x] `app.routes.ts` — all routes defined with lazy-loaded `loadComponent`, wildcard redirect
-- [x] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works
+- [x] `app.routes.ts` — home route lazy-loads `HomeComponent`; old `/about`, `/projects`, `/contact` paths redirect to `/`; wildcard redirect to `/`
+- [x] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works — stubs for About, Projects, Contact later removed in single-page refactor
 
-**Deliverable:** Can navigate between all pages. Navbar and footer render on every route.
+**Deliverable:** App shell renders. Navbar and footer appear on every route.
 
 ---
 
@@ -156,17 +156,18 @@ Phase 0: Scaffold & Global Styles
   - "AKA CALCITE" (gold/orange styled)
   - "Code · Create · Innovate" tagline
   - "Full Stack Developer & Game Enthusiast" subtitle
-  - "View My Work" CTA button (scrolls to feature cards or navigates to projects)
+  - "View My Work" CTA button (scrolls to the Projects section)
 - [x] `FeatureCardsComponent`:
   - Three `CardComponent` instances: About Me (cyan glow), Latest Projects (blue glow), My Skills (purple glow)
   - Each has a placeholder pixel icon, short text, and a CTA ("Learn More", "See Projects", "View Skills")
-  - Cards link to their respective routes
-- [x] `HomeComponent` — orchestrates Hero + FeatureCards, solid dark background (canvas comes next)
+  - Cards scroll to their respective sections (not router links)
+- [x] `HomeComponent` — smart container; orchestrates Hero + FeatureCards + all scroll sections; solid dark background (canvas comes next)
 - [x] Scroll-reveal animation on the feature cards section
+- [x] Single-page refactor: `ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent` created at `features/home/sections/`; old route stubs removed; `ScrollService` added for active section tracking; navbar updated to scroll buttons
 
-**Built:** `HeroComponent` (presentational, `bio` signal input), `FeatureCardsComponent` (static card config, `Router.navigate`), `HomeComponent` updated (smart container, reads `bioData`). `appScrollReveal` applied to feature cards section from HomeComponent template. Canvas background deferred to Phase 5.
+**Built:** `HeroComponent` (presentational, `bio` signal input), `FeatureCardsComponent` (static card config, smooth scroll), `HomeComponent` (smart container, reads `bioData`, hosts all sections). `appScrollReveal` applied to feature cards section from HomeComponent template. Canvas background deferred to Phase 5.
 
-**Deliverable:** Landing page looks close to the design mockup (minus the animated background). Feature cards navigate to the correct routes.
+**Deliverable:** Full single-page scroll layout. Hero and feature cards visible; all five sections present and scrollable.
 
 ---
 
@@ -192,9 +193,9 @@ Phase 0: Scaffold & Global Styles
 
 ---
 
-## Phase 6: Content Pages
+## Phase 6: Content Sections
 
-**Goal:** About, Projects, and Contact pages — fully functional with real content structure.
+**Goal:** About, Projects, Skills, and Contact sections — fully functional with real content structure. All sections live inside `HomeComponent` at `features/home/sections/`.
 
 **Dependencies:** Phase 1 (layout), Phase 2 (shared components), Phase 3 (data)
 
@@ -202,24 +203,27 @@ Phase 0: Scaffold & Global Styles
 
 **Tasks:**
 
-### About Page
+### About Section (`features/home/sections/about-section/`)
 - [ ] Short bio section (placeholder text, Tyler fills in later)
+- [ ] Scroll-reveal animation
+
+### Skills Section (`features/home/sections/skills-section/`)
 - [ ] `SkillsGridComponent` — skills grouped by the 8 categories, displayed as a grid of `SkillChipComponent` groups
 - [ ] Each category has a heading and a cluster of chips
 - [ ] Scroll-reveal animation on skill groups
 
-### Projects Page
+### Projects Section (`features/home/sections/projects-section/`)
 - [ ] `ProjectListComponent` — responsive grid of `ProjectCardComponent`
 - [ ] Filter bar: filter by tech tag or category (signals-based, no RxJS needed)
-- [ ] `ProjectDetailComponent` — route `/projects/:slug`, displays full project info (long description, tech tags, links, larger image placeholder)
 - [ ] Placeholder project thumbnails are easy-swap (just change `imageUrl` in data file)
+- [ ] `ProjectDetailComponent` — route `/projects/:slug` at `features/projects/project-detail/`, displays full project info (long description, tech tags, links, larger image placeholder)
 
-### Contact Page
+### Contact Section (`features/home/sections/contact-section/`)
 - [ ] Email link (styled as a prominent CTA or card)
 - [ ] `SocialLinksComponent` reuse — GitHub, Twitter/X, LinkedIn with glow hover
 - [ ] Clean, minimal layout — no form
 
-**Deliverable:** All four pages are content-complete with placeholder data. Full navigation works end to end.
+**Deliverable:** All five scroll sections are content-complete with placeholder data. Full in-page navigation works end to end.
 
 ---
 
@@ -382,7 +386,7 @@ These phases can be worked on simultaneously:
 ## Scope Notes
 
 **In scope for v1:**
-- 4 pages (Home, About, Projects, Contact)
+- 1 scrollable page with 5 sections (Home hero, Projects, About, Skills, Contact)
 - Animated canvas background on hero
 - Neon glow design system
 - Placeholder-driven development (easy asset swap)
