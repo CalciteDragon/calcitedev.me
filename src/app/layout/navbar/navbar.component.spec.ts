@@ -1,0 +1,98 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { NavbarComponent } from './navbar.component';
+import { ScrollService } from '../../core/services/scroll.service';
+
+describe('NavbarComponent', () => {
+  let fixture: ComponentFixture<NavbarComponent>;
+  let component: NavbarComponent;
+  let compiled: HTMLElement;
+  let mockScrollService: { activeSection: ReturnType<typeof signal<string>>; scrollToSection: ReturnType<typeof vi.fn> };
+
+  beforeEach(async () => {
+    mockScrollService = {
+      activeSection: signal('home'),
+      scrollToSection: vi.fn(),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [NavbarComponent],
+      providers: [
+        provideRouter([]),
+        { provide: ScrollService, useValue: mockScrollService },
+      ],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(NavbarComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    compiled = fixture.nativeElement;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should render brand link to /', () => {
+    const brand = compiled.querySelector('a.navbar__brand') as HTMLAnchorElement;
+    expect(brand).toBeTruthy();
+    expect(brand.getAttribute('href')).toBe('/');
+  });
+
+  it('should render 4 nav buttons in order: Projects, About, Skills, Contact', () => {
+    const buttons = Array.from(
+      compiled.querySelectorAll('.navbar__links .navbar__link'),
+    ) as HTMLButtonElement[];
+    expect(buttons).toHaveLength(4);
+    expect(buttons[0].textContent?.trim()).toBe('Projects');
+    expect(buttons[1].textContent?.trim()).toBe('About');
+    expect(buttons[2].textContent?.trim()).toBe('Skills');
+    expect(buttons[3].textContent?.trim()).toBe('Contact');
+  });
+
+  it('should call navigateToSection when a nav button is clicked', () => {
+    const navigateSpy = vi.spyOn(component as any, 'navigateToSection');
+    const buttons = Array.from(
+      compiled.querySelectorAll('.navbar__links .navbar__link'),
+    ) as HTMLButtonElement[];
+
+    buttons[0].click();
+    fixture.detectChanges();
+
+    expect(navigateSpy).toHaveBeenCalledWith('projects');
+  });
+
+  it('should apply --active class to the button matching scrollService.activeSection()', () => {
+    mockScrollService.activeSection.set('about');
+    fixture.detectChanges();
+
+    const buttons = Array.from(
+      compiled.querySelectorAll('.navbar__links .navbar__link'),
+    ) as HTMLButtonElement[];
+
+    const aboutButton = buttons.find(b => b.textContent?.trim() === 'About');
+    const projectsButton = buttons.find(b => b.textContent?.trim() === 'Projects');
+
+    expect(aboutButton?.classList.contains('navbar__link--active')).toBe(true);
+    expect(projectsButton?.classList.contains('navbar__link--active')).toBe(false);
+  });
+
+  it('should open/close menu on hamburger click', () => {
+    const hamburger = compiled.querySelector('.navbar__hamburger') as HTMLButtonElement;
+
+    expect(component.isMenuOpen()).toBe(false);
+
+    hamburger.click();
+    fixture.detectChanges();
+    expect(component.isMenuOpen()).toBe(true);
+
+    hamburger.click();
+    fixture.detectChanges();
+    expect(component.isMenuOpen()).toBe(false);
+  });
+});

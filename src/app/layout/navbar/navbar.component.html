@@ -8,13 +8,16 @@
     <!-- Desktop links (hidden on mobile) -->
     <ul class="navbar__links">
       <li>
-        <a class="navbar__link" routerLink="/about" routerLinkActive="navbar__link--active">About</a>
+        <button class="navbar__link" [class.navbar__link--active]="scrollService.activeSection() === 'projects'" (click)="navigateToSection('projects')">Projects</button>
       </li>
       <li>
-        <a class="navbar__link" routerLink="/projects" routerLinkActive="navbar__link--active">Projects</a>
+        <button class="navbar__link" [class.navbar__link--active]="scrollService.activeSection() === 'about'" (click)="navigateToSection('about')">About</button>
       </li>
       <li>
-        <a class="navbar__link" routerLink="/contact" routerLinkActive="navbar__link--active">Contact</a>
+        <button class="navbar__link" [class.navbar__link--active]="scrollService.activeSection() === 'skills'" (click)="navigateToSection('skills')">Skills</button>
+      </li>
+      <li>
+        <button class="navbar__link" [class.navbar__link--active]="scrollService.activeSection() === 'contact'" (click)="navigateToSection('contact')">Contact</button>
       </li>
     </ul>
 
@@ -43,14 +46,9 @@
 <!-- Mobile drawer -->
 <div class="navbar__drawer" [class.navbar__drawer--open]="isMenuOpen()">
   <ul class="navbar__drawer-links">
-    <li>
-      <a class="navbar__drawer-link" routerLink="/about" routerLinkActive="navbar__drawer-link--active" (click)="closeMenu()">About</a>
-    </li>
-    <li>
-      <a class="navbar__drawer-link" routerLink="/projects" routerLinkActive="navbar__drawer-link--active" (click)="closeMenu()">Projects</a>
-    </li>
-    <li>
-      <a class="navbar__drawer-link" routerLink="/contact" routerLinkActive="navbar__drawer-link--active" (click)="closeMenu()">Contact</a>
-    </li>
+    <li><button class="navbar__drawer-link" [class.navbar__drawer-link--active]="scrollService.activeSection() === 'projects'" (click)="navigateToSection('projects')">Projects</button></li>
+    <li><button class="navbar__drawer-link" [class.navbar__drawer-link--active]="scrollService.activeSection() === 'about'" (click)="navigateToSection('about')">About</button></li>
+    <li><button class="navbar__drawer-link" [class.navbar__drawer-link--active]="scrollService.activeSection() === 'skills'" (click)="navigateToSection('skills')">Skills</button></li>
+    <li><button class="navbar__drawer-link" [class.navbar__drawer-link--active]="scrollService.activeSection() === 'contact'" (click)="navigateToSection('contact')">Contact</button></li>
   </ul>
 </div>
