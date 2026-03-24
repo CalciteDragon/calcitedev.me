@@ -7,6 +7,7 @@ export class ScrollService {
   private readonly document = inject(DOCUMENT);
   private readonly platformId = inject(PLATFORM_ID);
   private observer: IntersectionObserver | null = null;
+  private sectionIds: string[] = [];
 
   readonly activeSection = signal<string>('home');
 
@@ -17,18 +18,11 @@ export class ScrollService {
 
   initSectionObserver(sectionIds: string[]): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    this.destroySectionObserver(); // Disconnect any previous observer before creating a new one
+    this.destroySectionObserver();
+    this.sectionIds = [...sectionIds];
     this.observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const id = entry.target.id;
-            this.activeSection.set(id);
-            history.replaceState(null, '', id === 'home' ? '/' : `/#${id}`);
-          }
-        }
-      },
-      { rootMargin: '-10% 0px -85% 0px' },
+      () => this.updateActiveSection(),
+      { rootMargin: '0px 0px -50% 0px' },
     );
     for (const id of sectionIds) {
       const el = this.document.getElementById(id);
@@ -36,8 +30,33 @@ export class ScrollService {
     }
   }
 
+  private updateActiveSection(): void {
+    const midpoint = this.document.documentElement.clientHeight / 2;
+    let activeId: string | null = null;
+    let closestDistance = Infinity;
+
+    for (const id of this.sectionIds) {
+      const el = this.document.getElementById(id);
+      if (!el) continue;
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= midpoint) {
+        const distance = midpoint - rect.top;
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          activeId = id;
+        }
+      }
+    }
+
+    if (activeId !== null) {
+      this.activeSection.set(activeId);
+      history.replaceState(null, '', activeId === 'home' ? '/' : `/#${activeId}`);
+    }
+  }
+
   destroySectionObserver(): void {
     this.observer?.disconnect();
     this.observer = null;
+    this.sectionIds = [];
   }
 }
