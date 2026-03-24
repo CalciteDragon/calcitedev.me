@@ -45,7 +45,9 @@ Currently scrolls to `#feature-cards`. Feature cards are immediately below the h
 
 With a simple threshold, sections at the top or bottom of the page can behave unexpectedly (e.g., the contact section may never be "50% visible" on a large monitor).
 
-**Decision:** Use `rootMargin: '-10% 0px -85% 0px'` — a section becomes active when its top edge enters the top 15% of the viewport. This gives a stable, predictable trigger point. The last section (Contact) gets active when any part of it is in the upper portion of the viewport — this may need tuning in Phase 9 for tall screens.
+**Decision (as implemented):** `rootMargin: '0px 0px -50% 0px'` — the observer fires when a section enters or exits the top 50% of the viewport. The callback ignores the `entries` parameter entirely and instead calls `updateActiveSection()`, which reads `getBoundingClientRect()` on all observed sections and activates whichever section's top is closest to (but above) the viewport midpoint.
+
+The original `-10% 0px -85% 0px` approach was superseded because a narrow trigger zone causes a stale-state bug: tall sections (100svh) can be *continuously intersecting* the zone, so they never transition to `isIntersecting: false` and back to `true` when the user scrolls upward past them. The re-evaluation algorithm fixes this — any intersection change triggers a full positional re-check of all sections.
 
 ---
 
@@ -196,7 +198,7 @@ src/app/features/contact/contact.component.scss
 **Design notes:**
 - `activeSection` defaults to `'home'`
 - `scrollToSection` uses `getElementById(id)?.scrollIntoView({ behavior: 'smooth' })` — CSS `scroll-margin-top` on each section handles the navbar offset
-- `initSectionObserver(ids: string[])` creates an `IntersectionObserver` with `rootMargin: '-10% 0px -85% 0px'`. When a section's top edge enters the trigger zone, it becomes active and `history.replaceState(null, '', '/#' + id)` updates the URL silently
+- `initSectionObserver(ids: string[])` creates an `IntersectionObserver` with `rootMargin: '0px 0px -50% 0px'`. On any intersection change it calls `updateActiveSection()`, which reads `getBoundingClientRect()` on all sections and sets the one closest to (but above) the viewport midpoint as active. URL is updated via `history.replaceState`
 - `destroySectionObserver()` disconnects the observer — called from `HomeComponent`'s `ngOnDestroy`
 - Entire service is SSR-safe via `isPlatformBrowser`
 
