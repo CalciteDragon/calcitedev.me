@@ -46,6 +46,17 @@ All planning and design docs live in `/docs`. **These are living documents.** Up
 
 - **UI Implementer** (`.claude/skills/ui-implementer/SKILL.md`): Use when Tyler provides a design reference (Figma link, screenshot, mockup) and wants pixel-perfect implementation. Triggers on design URLs, screenshot paths, or "implement this UI" intent. Handles validation loops with design fidelity scoring. Note: the skill's default references React/Tailwind — adapt prompts to Angular/SCSS for this project.
 
+## Playwright (Visual Validation)
+
+A Playwright MCP plugin is available for visually building and validating UI features. Use it proactively when working on UI:
+
+- **Navigate** to `http://localhost:4200` (requires `npm start` to be running)
+- **Take screenshots** to visually verify layout, styling, and canvas rendering after changes
+- **Use snapshots** to inspect the accessibility tree and get element refs for interaction
+- **Interact** — click buttons, scroll, fill forms, resize viewport to test responsive behavior
+
+Workflow: make a code change → hot reload → screenshot → verify visually. This catches issues (broken layout, missing glow, canvas not rendering) that unit tests can't see. Use it especially for canvas-based components like `BackgroundSceneComponent` where visual output can't be asserted programmatically.
+
 ## Tech Stack Quick Reference
 
 - Angular 21 (standalone components, signals, OnPush change detection)

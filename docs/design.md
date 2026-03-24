@@ -176,14 +176,16 @@ The page is a single-page scroll: Home (hero + feature cards) → Projects → A
 
 ### Background Scene (Canvas)
 
-| Element           | Description                                           |
-| ----------------- | ----------------------------------------------------- |
-| Star field        | Sparse pixel stars, twinkling subtly                  |
-| Cyber mountains   | Low-poly wireframe silhouettes, faint neon outlines   |
-| UFO               | Small floating sprite, soft glow beam, slow bob       |
-| Rocket            | Pixel rocket launching, stylized smoke particles      |
-| Parallax          | Mountains and elements shift on scroll                |
-| Particles         | Minimal floating pixel particles (very subtle)        |
+| Element           | Description                                                                                          |
+| ----------------- | ---------------------------------------------------------------------------------------------------- |
+| Star field        | 130 stars (65 reduced), radius 0.4–2.5px, opacity 0.2–0.8, concentrated in upper 85% of canvas. Large stars get cross-sparkle arms. Per-star parallax (0.01–0.04). |
+| Cyber mountains   | 3 layers (far/mid/front) — indigo, cyan, purple. Valley bias: peaks tall at screen edges, low in center. Ridgelines exit off the sides via slope extrapolation. Opaque dark fill occludes stars behind the range. `ctx.shadowBlur` neon glow bloom on ridgeline. Renders site-wide (not hero-only). |
+| Atmosphere        | Subtle cyan-to-indigo linear gradient haze toward the lower canvas — simulates light scatter.        |
+| Horizon glow      | Neon bloom band (cyan → purple) drawn above mountains to simulate atmospheric ridge scatter.         |
+| UFO               | Small floating sprite, soft glow beam, slow bob animation. Hero-only (hidden when scrollY ≥ heroHeight). |
+| Rocket            | Pixel rocket with animated flame gradient (amber → pink → purple). Hero-only.                       |
+| Parallax          | Mountains shift on scroll; clamped at `heroHeight` so they settle rather than drift off-screen.     |
+| Particles         | Minimal upward-drifting pixel particles (very subtle, 20 default / 8 reduced).                      |
 
 ### Pixel-Art Avatar
 

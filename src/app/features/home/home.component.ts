@@ -7,6 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { BackgroundSceneComponent } from './background-scene/background-scene.component';
 import { HeroComponent } from './hero/hero.component';
 import { FeatureCardsComponent } from './feature-cards/feature-cards.component';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
@@ -22,6 +23,7 @@ import { bioData } from '../../data/bio.data';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    BackgroundSceneComponent,
     HeroComponent,
     FeatureCardsComponent,
     ScrollRevealDirective,
