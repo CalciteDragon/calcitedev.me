@@ -48,8 +48,10 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    cancelAnimationFrame(this.rafId);
-    clearTimeout(this.resizeTimeout);
+    if (isPlatformBrowser(this.platformId)) {
+      cancelAnimationFrame(this.rafId);
+      clearTimeout(this.resizeTimeout);
+    }
     this.resizeObserver?.disconnect();
     this.renderer?.destroy();
   }

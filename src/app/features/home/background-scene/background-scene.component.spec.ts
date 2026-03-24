@@ -45,6 +45,15 @@ describe('BackgroundSceneComponent', () => {
       expect(cancelAnimationFrame).toHaveBeenCalled();
     });
 
+    it('calls renderer.destroy() on destroy', async () => {
+      const { SceneRenderer } = await import('./scene-renderer');
+      const destroySpy = vi.spyOn(SceneRenderer.prototype, 'destroy');
+      const f = TestBed.createComponent(BackgroundSceneComponent);
+      f.detectChanges();
+      f.destroy();
+      expect(destroySpy).toHaveBeenCalled();
+    });
+
     it('disconnects the ResizeObserver on destroy', () => {
       const disconnectSpy = vi.fn();
       vi.stubGlobal(
