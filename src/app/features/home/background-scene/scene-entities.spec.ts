@@ -89,6 +89,16 @@ describe('createMountainLayers', () => {
       }
     }
   });
+
+  it('interior peak vertices have nx between 0 and 1 exclusive', () => {
+    for (const layer of createMountainLayers()) {
+      const peaks = layer.vertices.slice(1, -1);
+      for (const v of peaks) {
+        expect(v.nx).toBeGreaterThan(0);
+        expect(v.nx).toBeLessThan(1);
+      }
+    }
+  });
 });
 
 describe('createParticles', () => {
@@ -106,6 +116,13 @@ describe('createParticles', () => {
     for (const p of createParticles(20, 800, 600)) {
       expect(p.x).toBeGreaterThanOrEqual(0);
       expect(p.x).toBeLessThanOrEqual(800);
+    }
+  });
+
+  it('places particles within canvas y bounds', () => {
+    for (const p of createParticles(20, 800, 600)) {
+      expect(p.y).toBeGreaterThanOrEqual(0);
+      expect(p.y).toBeLessThanOrEqual(600);
     }
   });
 });
