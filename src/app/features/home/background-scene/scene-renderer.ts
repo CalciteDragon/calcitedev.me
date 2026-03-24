@@ -80,19 +80,24 @@ export class SceneRenderer {
 
     this.ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
 
-    // Stars and particles render on every section
+    // Atmospheric depth behind all elements
+    this.drawAtmosphere();
+
+    // Subtle neon bloom along the mountain ridge
+    this.drawHorizonGlow();
+
+    // Stars and particles render site-wide
     this.drawStars(timestamp, scrollY);
     this.drawParticles(deltaTime);
 
-    // Hero-specific elements only while the hero section is in view
+    // Mountains are permanent environment — always render
+    this.drawMountains(scrollY);
+
+    // UFO and rocket are hero-specific — only visible while in the hero section
     const heroVisible = scrollY < heroHeight;
-    if (heroVisible) {
-      // Mountains render on all complexity levels — only UFO and rocket are skipped on mobile
-      this.drawMountains(scrollY);
-      if (!this.config.reducedComplexity) {
-        if (this.ufo) this.drawUFO(deltaTime);
-        if (this.rocket) this.drawRocket(deltaTime);
-      }
+    if (heroVisible && !this.config.reducedComplexity) {
+      if (this.ufo) this.drawUFO(deltaTime);
+      if (this.rocket) this.drawRocket(deltaTime);
     }
   }
 
@@ -107,6 +112,20 @@ export class SceneRenderer {
 
   // ─── Private Draw Methods ──────────────────────────────────────────────────
 
+  /**
+   * Subtle atmospheric depth gradient — warm cyan-to-indigo haze builds toward
+   * the horizon, giving the sky a sense of light scatter before the mountains.
+   */
+  private drawAtmosphere(): void {
+    const grad = this.ctx.createLinearGradient(0, this.cssHeight * 0.42, 0, this.cssHeight);
+    grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+    grad.addColorStop(0.35, 'rgba(56, 189, 248, 0.04)');
+    grad.addColorStop(0.65, 'rgba(99, 102, 241, 0.035)');
+    grad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    this.ctx.fillStyle = grad;
+    this.ctx.fillRect(0, this.cssHeight * 0.42, this.cssWidth, this.cssHeight * 0.58);
+  }
+
   private drawStars(timestamp: number, scrollY: number): void {
     for (const star of this.stars) {
       // Apply per-star parallax — deeper stars (smaller factor) drift less
@@ -114,35 +133,118 @@ export class SceneRenderer {
       // Skip stars that have drifted entirely off-screen
       if (drawnY < -star.radius || drawnY > this.cssHeight + star.radius) continue;
 
-      const twinkle = 0.4 + 0.6 * Math.sin(star.twinklePhase + timestamp * star.twinkleSpeed);
+      // Stronger base brightness (0.5–1.0 range vs previous 0.4–1.0)
+      const twinkle = 0.5 + 0.5 * Math.sin(star.twinklePhase + timestamp * star.twinkleSpeed);
+      const alpha = twinkle * star.opacity;
+
+      // Draw the star circle
       this.ctx.beginPath();
       this.ctx.arc(star.x, drawnY, star.radius, 0, Math.PI * 2);
-      this.ctx.fillStyle = `rgba(229, 231, 235, ${(twinkle * star.opacity).toFixed(3)})`;
+      this.ctx.fillStyle = `rgba(220, 235, 255, ${alpha.toFixed(3)})`;
       this.ctx.fill();
+
+      // Larger stars get subtle cross-sparkle arms for that pixel-art celestial look
+      if (star.radius > 1.8) {
+        const arm = star.radius * 2.5;
+        this.ctx.strokeStyle = `rgba(185, 220, 255, ${(alpha * 0.4).toFixed(3)})`;
+        this.ctx.lineWidth = 0.5;
+        this.ctx.beginPath();
+        this.ctx.moveTo(star.x - arm, drawnY);
+        this.ctx.lineTo(star.x + arm, drawnY);
+        this.ctx.moveTo(star.x, drawnY - arm);
+        this.ctx.lineTo(star.x, drawnY + arm);
+        this.ctx.stroke();
+      }
     }
   }
 
+  /**
+   * Draw mountain silhouettes. Parallax is clamped to heroHeight so mountains
+   * "settle" into their final position once the hero section is scrolled past —
+   * preventing them from drifting off the bottom of the canvas.
+   */
+  /**
+   * Draw mountain silhouettes. Parallax is clamped to heroHeight so mountains
+   * "settle" into their final position once the hero section is scrolled past.
+   *
+   * Each layer stores only its peak vertices. The renderer extends the geometry
+   * off-screen horizontally so the ridgeline "exits" through the side edges
+   * rather than converging at the bottom corners.
+   */
   private drawMountains(scrollY: number): void {
-    for (const layer of this.mountains) {
-      const offsetY = scrollY * layer.parallaxFactor;
-      const w = this.cssWidth;
-      const h = this.cssHeight;
+    const w = this.cssWidth;
+    const h = this.cssHeight;
+    const sideBleed = w * 0.18; // how far the ridge extends past each edge
+    const floorY = h * 2;       // off-screen floor used only to close the fill
 
+    for (const layer of this.mountains) {
+      const peaks = layer.vertices;
+      if (peaks.length === 0) continue;
+
+      const offsetY = scrollY * layer.parallaxFactor * -1;
+
+      // Extrapolate the off-screen edge heights from the outer peak slopes so
+      // the ridgeline continues rising as it exits the viewport rather than
+      // extending as a flat horizontal line.
+      let leftEdgeY: number;
+      let rightEdgeY: number;
+      if (peaks.length >= 2) {
+        const p0 = peaks[0], p1 = peaks[1];
+        const slopeL = (p1.ny - p0.ny) / (p1.nx - p0.nx);
+        leftEdgeY = (p0.ny + slopeL * (-sideBleed / w - p0.nx)) * h + offsetY;
+
+        const pLast = peaks[peaks.length - 1], pPrev = peaks[peaks.length - 2];
+        const slopeR = (pLast.ny - pPrev.ny) / (pLast.nx - pPrev.nx);
+        rightEdgeY = (pLast.ny + slopeR * ((w + sideBleed) / w - pLast.nx)) * h + offsetY;
+      } else {
+        leftEdgeY = peaks[0].ny * h + offsetY;
+        rightEdgeY = peaks[peaks.length - 1].ny * h + offsetY;
+      }
+
+      // ── Fill ───────────────────────────────────────────────────────────────
       this.ctx.beginPath();
-      const first = layer.vertices[0];
-      this.ctx.moveTo(first.nx * w, first.ny * h + offsetY);
-      for (let i = 1; i < layer.vertices.length; i++) {
-        const v = layer.vertices[i];
+      this.ctx.moveTo(-sideBleed, leftEdgeY);
+      for (const v of peaks) {
         this.ctx.lineTo(v.nx * w, v.ny * h + offsetY);
       }
+      this.ctx.lineTo(w + sideBleed, rightEdgeY);
+      this.ctx.lineTo(w + sideBleed, floorY);
+      this.ctx.lineTo(-sideBleed, floorY);
       this.ctx.closePath();
-
-      this.ctx.strokeStyle = layer.strokeColor;
-      this.ctx.lineWidth = 1.5;
-      this.ctx.stroke();
       this.ctx.fillStyle = layer.fillColor;
       this.ctx.fill();
+
+      // ── Stroke (ridge only) ────────────────────────────────────────────────
+      this.ctx.save();
+      this.ctx.shadowColor = layer.glowColor;
+      this.ctx.shadowBlur = layer.glowBlur;
+      this.ctx.strokeStyle = layer.strokeColor;
+      this.ctx.lineWidth = 1.5;
+      this.ctx.beginPath();
+      this.ctx.moveTo(-sideBleed, leftEdgeY);
+      for (const v of peaks) {
+        this.ctx.lineTo(v.nx * w, v.ny * h + offsetY);
+      }
+      this.ctx.lineTo(w + sideBleed, rightEdgeY);
+      this.ctx.stroke();
+      this.ctx.restore();
     }
+  }
+
+  /**
+   * Subtle horizontal neon bloom drawn atop the mountain silhouettes to
+   * simulate atmospheric light scatter along the ridge line.
+   */
+  private drawHorizonGlow(): void {
+    const bandTop = this.cssHeight * 0.3;
+    const bandBot = this.cssHeight * 1.0;
+    const grad = this.ctx.createLinearGradient(0, bandTop, 0, bandBot);
+    grad.addColorStop(0, 'rgba(56, 189, 248, 0.00)');
+    grad.addColorStop(0.35, 'rgba(56, 189, 248, 0.1)');
+    grad.addColorStop(0.65, 'rgba(168, 85, 247, 0.075)');
+    grad.addColorStop(1, 'rgba(168, 85, 247, 0.01)');
+    this.ctx.fillStyle = grad;
+    this.ctx.fillRect(0, bandTop, this.cssWidth, bandBot - bandTop);
   }
 
   private drawParticles(deltaTime: number): void {

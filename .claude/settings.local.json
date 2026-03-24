@@ -5,7 +5,8 @@
       "Bash(ng build:*)",
       "Bash(git:*)",
       "mcp__plugin_playwright_playwright__browser_navigate",
-      "mcp__plugin_playwright_playwright__browser_take_screenshot"
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "mcp__plugin_playwright_playwright__browser_evaluate"
     ]
   },
   "outputStyle": "Explanatory"

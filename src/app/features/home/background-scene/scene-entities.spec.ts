@@ -31,17 +31,17 @@ describe('createStars', () => {
     }
   });
 
-  it('assigns each star a radius between 0.5 and 2', () => {
+  it('assigns each star a radius between 0.4 and 2.5', () => {
     for (const star of createStars(30, 100, 100)) {
-      expect(star.radius).toBeGreaterThanOrEqual(0.5);
-      expect(star.radius).toBeLessThanOrEqual(2);
+      expect(star.radius).toBeGreaterThanOrEqual(0.4);
+      expect(star.radius).toBeLessThanOrEqual(2.5);
     }
   });
 
-  it('assigns each star an initial opacity between 0.15 and 0.40', () => {
+  it('assigns each star an initial opacity between 0.2 and 0.8', () => {
     for (const star of createStars(30, 100, 100)) {
-      expect(star.opacity).toBeGreaterThanOrEqual(0.15);
-      expect(star.opacity).toBeLessThanOrEqual(0.40);
+      expect(star.opacity).toBeGreaterThanOrEqual(0.2);
+      expect(star.opacity).toBeLessThanOrEqual(0.8);
     }
   });
 
@@ -54,46 +54,35 @@ describe('createStars', () => {
 });
 
 describe('createMountainLayers', () => {
-  it('returns exactly 2 layers', () => {
-    expect(createMountainLayers()).toHaveLength(2);
+  it('returns exactly 3 layers', () => {
+    expect(createMountainLayers()).toHaveLength(3);
   });
 
-  it('back layer has a smaller parallaxFactor than the front layer', () => {
-    const [back, front] = createMountainLayers();
-    expect(back.parallaxFactor).toBeLessThan(front.parallaxFactor);
-  });
-
-  it('each layer starts at the left edge and ends at the right edge at the bottom', () => {
-    for (const layer of createMountainLayers()) {
-      const first = layer.vertices.at(0)!;
-      const last = layer.vertices.at(-1)!;
-      expect(first.nx).toBe(0);
-      expect(first.ny).toBe(1);
-      expect(last.nx).toBe(1);
-      expect(last.ny).toBe(1);
+  it('parallaxFactors increase from back to front (depth ordering)', () => {
+    const layers = createMountainLayers();
+    for (let i = 1; i < layers.length; i++) {
+      expect(layers[i].parallaxFactor).toBeGreaterThan(layers[i - 1].parallaxFactor);
     }
   });
 
-  it('each layer has at least 4 vertices (left-edge, peaks, right-edge)', () => {
+  it('each layer has at least 4 peak vertices', () => {
     for (const layer of createMountainLayers()) {
       expect(layer.vertices.length).toBeGreaterThanOrEqual(4);
     }
   });
 
-  it('interior peak vertices have ny between 0 and 1 exclusive', () => {
+  it('all peak vertices have ny between 0 and 1 exclusive', () => {
     for (const layer of createMountainLayers()) {
-      const peaks = layer.vertices.slice(1, -1);
-      for (const v of peaks) {
+      for (const v of layer.vertices) {
         expect(v.ny).toBeGreaterThan(0);
         expect(v.ny).toBeLessThan(1);
       }
     }
   });
 
-  it('interior peak vertices have nx between 0 and 1 exclusive', () => {
+  it('all peak vertices have nx between 0 and 1 exclusive', () => {
     for (const layer of createMountainLayers()) {
-      const peaks = layer.vertices.slice(1, -1);
-      for (const v of peaks) {
+      for (const v of layer.vertices) {
         expect(v.nx).toBeGreaterThan(0);
         expect(v.nx).toBeLessThan(1);
       }
