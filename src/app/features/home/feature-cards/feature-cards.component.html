@@ -14,7 +14,7 @@
           <p class="feature-card__desc">{{ card.description }}</p>
           <app-cta-button
             [glowColor]="card.glowColor"
-            (ctaClick)="navigate(card.route)"
+            (ctaClick)="scrollToSection(card.sectionId)"
           >
             {{ card.ctaLabel }}
           </app-cta-button>

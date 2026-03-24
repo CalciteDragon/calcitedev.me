@@ -1,16 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
-import { Router } from '@angular/router';
+import { ScrollService } from '../../../core/services/scroll.service';
 import { FeatureCardsComponent } from './feature-cards.component';
 
 describe('FeatureCardsComponent', () => {
   let fixture: ComponentFixture<FeatureCardsComponent>;
   let compiled: HTMLElement;
+  let scrollService: { scrollToSection: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
+    scrollService = { scrollToSection: vi.fn() };
+
     await TestBed.configureTestingModule({
       imports: [FeatureCardsComponent],
-      providers: [provideRouter([])],
+      providers: [{ provide: ScrollService, useValue: scrollService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(FeatureCardsComponent);
@@ -49,24 +51,25 @@ describe('FeatureCardsComponent', () => {
     expect(compiled.querySelectorAll('.feature-card__icon').length).toBe(3);
   });
 
-  it('should navigate to /about when About Me CTA is clicked', () => {
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigate');
-
+  it('should scroll to about section when About Me CTA is clicked', () => {
     const buttons = compiled.querySelectorAll('button');
     (buttons[0] as HTMLButtonElement).click();
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/about']);
+    expect(scrollService.scrollToSection).toHaveBeenCalledWith('about');
   });
 
-  it('should navigate to /projects when Latest Projects CTA is clicked', () => {
-    const router = TestBed.inject(Router);
-    const navigateSpy = vi.spyOn(router, 'navigate');
-
+  it('should scroll to projects section when Latest Projects CTA is clicked', () => {
     const buttons = compiled.querySelectorAll('button');
     (buttons[1] as HTMLButtonElement).click();
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/projects']);
+    expect(scrollService.scrollToSection).toHaveBeenCalledWith('projects');
+  });
+
+  it('should scroll to skills section when My Skills CTA is clicked', () => {
+    const buttons = compiled.querySelectorAll('button');
+    (buttons[2] as HTMLButtonElement).click();
+
+    expect(scrollService.scrollToSection).toHaveBeenCalledWith('skills');
   });
 
   afterEach(() => {

@@ -62,7 +62,7 @@ describe('HeroComponent', () => {
     expect(img.src).toContain('avatar-placeholder.svg');
   });
 
-  it('should scroll to feature-cards when CTA is clicked', () => {
+  it('should scroll to projects section when CTA is clicked', () => {
     const doc = TestBed.inject(DOCUMENT);
     const mockElement = { scrollIntoView: vi.fn() };
     vi.spyOn(doc, 'getElementById').mockReturnValue(
@@ -72,7 +72,7 @@ describe('HeroComponent', () => {
     const button = compiled.querySelector('button') as HTMLButtonElement;
     button.click();
 
-    expect(doc.getElementById).toHaveBeenCalledWith('feature-cards');
+    expect(doc.getElementById).toHaveBeenCalledWith('projects');
     expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
       behavior: 'smooth',
     });
