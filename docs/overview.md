@@ -26,22 +26,36 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** — a dark, 
 | Domain         | calcitedev.me                      |
 | Interactivity  | Canvas for background scenes      |
 
-## Core Pages
+## Core Sections
 
-### 1. Home (Landing)
+The site is a single-page scroll layout. All content lives on one route (`/`), divided into five sections.
+
+### 1. Home (Hero)
 
 The hero experience. Features:
 - **Pixel-art avatar** of Tyler sitting with a laptop (optional idle animation — typing, blinking)
 - **Large gradient heading:** "HEY, I'M" → "TYLER HAWTHORN" with "AKA CALCITE" subheading
-- **CTA button:** "View My Work" with neon border glow
+- **CTA button:** "View My Work" with neon border glow (scrolls to Projects section)
 - **Animated background scene:** star field, cyber wireframe mountains with parallax, floating UFO with glow beam, pixel rocket launch with smoke particles
 - **Three feature cards** below the hero: About Me, Latest Projects, My Skills — each with neon-accented borders and pixel-style icons
 
 **Purpose:** Hook the visitor instantly with personality, visual flair, and clear navigation.
 
-### 2. About
+### 2. Projects
 
-Background, story, and interests. A short bio that conveys personality, plus a skills grid organized by category. No timeline for now (can be added later). The pixel-art and cyberpunk accents carry through subtly.
+A showcase of work. Each project gets a card with thumbnail/preview, title, short description, tech tags, and links (live demo, GitHub). Filterable by technology or category. Cards use the neon-glow hover style consistent with the rest of the site.
+
+**Purpose:** Demonstrate what Tyler has built and his technical range.
+
+### 3. About
+
+Background, story, and interests. A short bio that conveys personality. The pixel-art and cyberpunk accents carry through subtly. No timeline for now (can be added later).
+
+**Purpose:** Give context on who Tyler is beyond the code.
+
+### 4. Skills
+
+A skills grid organized by category. No timeline for now (can be added later).
 
 **Skills Categories:**
 - Languages: TypeScript, JavaScript, Java
@@ -53,15 +67,9 @@ Background, story, and interests. A short bio that conveys personality, plus a s
 - Git & Version Control: Git, GitHub, Branching Strategies, Code Reviews
 - Architecture & Concepts: Full-Stack Development, RESTful APIs, Client-Server Architecture, Responsive Design
 
-**Purpose:** Give context on who Tyler is beyond the code.
+**Purpose:** Show technical breadth at a glance.
 
-### 3. Projects
-
-A showcase of work. Each project gets a card with thumbnail/preview, title, short description, tech tags, and links (live demo, GitHub). Filterable by technology or category. Cards use the neon-glow hover style consistent with the rest of the site.
-
-**Purpose:** Demonstrate what Tyler has built and his technical range.
-
-### 4. Contact
+### 5. Contact
 
 A clean way to reach out. Email link and social links (GitHub, Twitter/X, LinkedIn) with glowing icon hover effects. No contact form — just direct links. Minimal and focused.
 

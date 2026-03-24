@@ -9,7 +9,7 @@ src/
 │   │   ├── services/
 │   │   │   ├── theme.service.ts         # Dark/light toggle (future)
 │   │   │   ├── meta.service.ts          # SEO/meta tag management
-│   │   │   └── scroll.service.ts        # Scroll tracking & smooth scroll
+│   │   │   └── scroll.service.ts        # Active section tracking via IntersectionObserver
 │   │   └── guards/
 │   │
 │   ├── layout/                  # App shell — always visible
@@ -46,23 +46,14 @@ src/
 │   │   │   ├── home.component.scss
 │   │   │   ├── hero/                    # Hero section (avatar, heading, CTA)
 │   │   │   ├── background-scene/        # Canvas — stars, mountains, UFO, rocket
-│   │   │   └── feature-cards/           # Three intro cards (About, Projects, Skills)
-│   │   ├── about/
-│   │   │   ├── about.component.ts
-│   │   │   ├── about.component.html
-│   │   │   ├── about.component.scss
-│   │   │   ├── skills-grid/
-│   │   │   └── timeline/                # Optional experience timeline
-│   │   ├── projects/
-│   │   │   ├── projects.component.ts
-│   │   │   ├── projects.component.html
-│   │   │   ├── projects.component.scss
-│   │   │   ├── project-list/
-│   │   │   └── project-detail/
-│   │   └── contact/
-│   │       ├── contact.component.ts
-│   │       ├── contact.component.html
-│   │       └── contact.component.scss
+│   │   │   ├── feature-cards/           # Three intro cards (About, Projects, Skills)
+│   │   │   └── sections/                # Full-page scroll sections inside HomeComponent
+│   │   │       ├── projects-section/    # Projects scroll section
+│   │   │       ├── about-section/       # About scroll section
+│   │   │       ├── skills-section/      # Skills scroll section
+│   │   │       └── contact-section/     # Contact scroll section
+│   │   └── projects/
+│   │       └── project-detail/          # Phase 6: /projects/:slug detail view
 │   │
 │   ├── models/                  # TypeScript interfaces & types
 │   │   ├── project.model.ts
@@ -101,6 +92,8 @@ src/
 
 ## Routing
 
+The app is a single-page scroll site. All content lives on the home route; old routes redirect to `/`.
+
 ```typescript
 // app.routes.ts
 export const routes: Routes = [
@@ -109,17 +102,18 @@ export const routes: Routes = [
     component: LayoutComponent,
     children: [
       { path: '', loadComponent: () => import('./features/home/home.component') },
-      { path: 'about', loadComponent: () => import('./features/about/about.component') },
-      { path: 'projects', loadComponent: () => import('./features/projects/projects.component') },
-      { path: 'projects/:slug', loadComponent: () => import('./features/projects/project-detail/project-detail.component') },
-      { path: 'contact', loadComponent: () => import('./features/contact/contact.component') },
+      // Old routes redirect to home — sections are scrolled to, not routed
+      { path: 'about', redirectTo: '', pathMatch: 'full' },
+      { path: 'projects', redirectTo: '', pathMatch: 'full' },
+      { path: 'contact', redirectTo: '', pathMatch: 'full' },
+      // { path: 'projects/:slug', loadComponent: () => import('./features/projects/project-detail/project-detail.component') }, // Phase 6
       { path: '**', redirectTo: '' }
     ]
   }
 ];
 ```
 
-All feature routes are **lazy-loaded** via `loadComponent` for optimal bundle splitting.
+`HomeComponent` is the only lazy-loaded route. The section components (`ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent`) are direct children of `HomeComponent`, not routes.
 
 ## Component Architecture
 
@@ -136,21 +130,17 @@ All feature routes are **lazy-loaded** via `loadComponent` for optimal bundle sp
 
 ```
 LayoutComponent
-├── NavbarComponent                  (fixed, glassmorphism, pixel icons)
+├── NavbarComponent                    (fixed, glassmorphism, pixel icons; scroll buttons for section nav)
 ├── <router-outlet>
-│   └── HomeComponent                (smart — orchestrates hero section)
-│       ├── BackgroundSceneComponent  (canvas — star field, mountains, UFO, rocket)
-│       ├── HeroComponent             (avatar, heading, tagline, CTA)
-│       └── FeatureCardsComponent     (3 intro cards → uses CardComponent)
-│   └── AboutComponent
-│       ├── SkillsGridComponent
-│       └── TimelineComponent
-│   └── ProjectsComponent
-│       ├── ProjectListComponent      (uses ProjectCardComponent)
-│       └── ProjectDetailComponent
-│   └── ContactComponent
-│       └── SocialLinksComponent
-└── FooterComponent                  (social icons, copyright)
+│   └── HomeComponent                  (smart container — owns all scroll sections)
+│       ├── BackgroundSceneComponent   (canvas — star field, mountains, UFO, rocket)
+│       ├── HeroComponent              (avatar, heading, tagline, CTA)
+│       ├── FeatureCardsComponent      (3 intro cards → uses CardComponent)
+│       ├── ProjectsSectionComponent   (#projects scroll section)
+│       ├── AboutSectionComponent      (#about scroll section)
+│       ├── SkillsSectionComponent     (#skills scroll section)
+│       └── ContactSectionComponent    (#contact scroll section)
+└── FooterComponent                    (social icons, copyright)
 ```
 
 ### Signals & Reactivity
@@ -162,14 +152,22 @@ Use Angular **signals** for component state and **computed signals** for derived
 ```
 Static data files (data/)
         ↓
-Feature component (smart) reads data
+HomeComponent (smart container) reads data
         ↓
-Passes to shared components via @Input
+Passes to section components and shared components via @Input
         ↓
-Shared components render UI
+Section/shared components render UI
 ```
 
-No backend. No API calls for content. Everything compiled into the bundle from static TS files.
+Section components (`ProjectsSectionComponent`, `AboutSectionComponent`, etc.) are presentational — they receive data from `HomeComponent` and render their slice of the page. No backend. No API calls for content. Everything compiled into the bundle from static TS files.
+
+### Services
+
+| Service | Location | Responsibility |
+| --- | --- | --- |
+| `ScrollService` | `core/services/scroll.service.ts` | Tracks active scroll section via `IntersectionObserver`; exposes `activeSection` as a signal; SSR-safe (guards browser APIs with `isPlatformBrowser`) |
+| `MetaService` | `core/services/meta.service.ts` | SEO/meta tag management |
+| `ThemeService` | `core/services/theme.service.ts` | Dark/light toggle (future) |
 
 ## SSR Strategy
 

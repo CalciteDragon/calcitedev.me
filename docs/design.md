@@ -168,6 +168,12 @@ Hero name uses the accent gradient as `background-clip: text`:
 └─────────────────────────────────────────────────┘
 ```
 
+**"View My Work" CTA** scrolls the page to the Projects section (`#projects`).
+
+### Layout Note
+
+The page is a single-page scroll: Home (hero + feature cards) → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport.
+
 ### Background Scene (Canvas)
 
 | Element           | Description                                           |
@@ -191,7 +197,7 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 - Fixed to top, semi-transparent `#0B0F1A` with `backdrop-filter: blur(12px)`
 - Small pixel-style icons on the left (branding)
-- Nav links: About, Projects, Skills, Contact
+- Nav links (left-to-right): Projects, About, Skills, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
 - Hover: glow + color shift, underline animation or pixel highlight
 - Mobile: hamburger → slide-in drawer
 
