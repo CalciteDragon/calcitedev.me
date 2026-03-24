@@ -178,16 +178,19 @@ Phase 0: Scaffold & Global Styles
 **Dependencies:** Phase 4 (home page structure to layer behind)
 
 **Tasks:**
-- [ ] `BackgroundSceneComponent` — full-viewport `<canvas>` element positioned behind hero content
-- [ ] `isPlatformBrowser` guard — skip canvas init during SSR/prerender
-- [ ] **Star field:** sparse pixel-style stars, subtle twinkle animation, random placement
-- [ ] **Cyber mountains:** low-poly wireframe silhouettes along the horizon, faint neon outlines (blue/purple)
-- [ ] **Parallax:** mountains and elements shift based on scroll position
-- [ ] **UFO sprite:** placeholder graphic, slow floating bob animation, soft glow beam downward
-- [ ] **Rocket sprite:** placeholder graphic, launch animation with stylized smoke particles
-- [ ] **Floating particles:** minimal pixel particles drifting (very subtle)
-- [ ] **Faint scanline/grid overlay:** CSS pseudo-element on the page background (very low opacity)
-- [ ] Performance: use `requestAnimationFrame`, throttle on hidden tab, reduce on mobile
+- [x] `BackgroundSceneComponent` — full-viewport `<canvas>` element positioned behind hero content
+- [x] `isPlatformBrowser` guard — skip canvas init during SSR/prerender
+- [x] **Star field:** sparse pixel-style stars, subtle twinkle animation, random placement
+- [x] **Cyber mountains:** low-poly wireframe silhouettes along the horizon, faint neon outlines (blue/purple)
+- [x] **Parallax:** mountains and elements shift based on scroll position
+- [x] **UFO sprite:** placeholder graphic, slow floating bob animation, soft glow beam downward
+- [x] **Rocket sprite:** placeholder graphic, launch animation with stylized smoke particles
+- [x] **Floating particles:** minimal pixel particles drifting (very subtle)
+- [x] **Faint scanline/grid overlay:** CSS pseudo-element on the page background (very low opacity)
+- [x] Performance: use `requestAnimationFrame`, reduce on mobile
+- [ ] Performance: throttle on hidden tab (deferred to Phase 9 — canvas: skip rendering when `document.hidden`)
+
+**Built:** `SceneRenderer` (plain TS — stars with per-star parallax, mountains, UFO, rocket, particles; DPR-aware `resize()`; `heroHeight`-gated hero elements), `BackgroundSceneComponent` (`position: fixed; z-index: -1` — covers full viewport; SSR guard; rAF loop; `document.documentElement` ResizeObserver; `window.scrollY` + `#home` offsetHeight read each frame; mobile `matchMedia` detection). Stars render site-wide with subtle parallax (0.01–0.04 factor). Hero elements (mountains/UFO/rocket) render only when `scrollY < heroHeight`. `body { background-color: transparent }` in `styles.scss` lets canvas show through all sections. Scanline overlay as CSS `::after` pseudo-element. Entity factory functions in `scene-entities.ts` (pure TS, fully unit-tested). Note: move to `LayoutComponent` in Phase 6 when `/projects/:slug` route is added.
 
 **Deliverable:** Hero section has a fully animated cyberpunk background. Looks alive and layered.
 
