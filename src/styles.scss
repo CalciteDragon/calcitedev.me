@@ -67,7 +67,10 @@ html {
 }
 
 body {
-  background-color: var(--bg-primary);
+  // transparent — html { background-color } propagates to the viewport canvas
+  // and provides the dark base. body must be transparent so the fixed
+  // BackgroundSceneComponent canvas (z-index: -1) shows through all sections.
+  background-color: transparent;
 }
 
 // ======================

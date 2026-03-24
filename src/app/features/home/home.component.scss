@@ -2,14 +2,15 @@
   display: block;
 }
 
-// Solid dark background — BackgroundSceneComponent (Phase 5) layered behind.
 .main-page {
-  background-color: var(--bg-primary);
+  // Transparent — fixed BackgroundSceneComponent canvas shows through all sections.
+  // Dark base color comes from html { background-color: var(--bg-primary) } in styles.scss.
+  background-color: transparent;
 
   &__section {
     scroll-margin-top: var(--navbar-height);
-    // min-height ensures each section fills the viewport for reliable scroll detection.
-    // Relax per-section in Phase 7/9 once content-driven heights are in place.
     min-height: 100svh;
+    // No position: relative needed — BackgroundSceneComponent is position: fixed,
+    // not position: absolute. No z-index layering needed — canvas is z-index: -1.
   }
 }
