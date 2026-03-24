@@ -34,6 +34,14 @@ describe('HomeComponent', () => {
       }),
     );
 
+    vi.stubGlobal(
+      'ResizeObserver',
+      vi.fn(function () { return { observe: vi.fn(), disconnect: vi.fn() }; }),
+    );
+    vi.stubGlobal('requestAnimationFrame', vi.fn().mockReturnValue(1));
+    vi.stubGlobal('cancelAnimationFrame', vi.fn());
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
+
     await TestBed.configureTestingModule({
       imports: [HomeComponent],
       providers: [
@@ -87,5 +95,10 @@ describe('HomeComponent', () => {
   it('should call ScrollService.destroySectionObserver in ngOnDestroy', () => {
     fixture.destroy();
     expect(mockScrollService.destroySectionObserver).toHaveBeenCalled();
+  });
+
+  it('should render the background scene component inside the #home section', () => {
+    const homeSection = compiled.querySelector('#home');
+    expect(homeSection?.querySelector('app-background-scene')).toBeTruthy();
   });
 });
