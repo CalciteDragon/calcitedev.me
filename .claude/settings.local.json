@@ -3,7 +3,9 @@
     "allow": [
       "Bash(git commit:*)",
       "Bash(ng build:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot"
     ]
   },
   "outputStyle": "Explanatory"
