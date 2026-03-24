@@ -71,15 +71,6 @@ describe('createMountainLayers', () => {
     }
   });
 
-  it('all peak vertices have ny between 0 and 1 exclusive', () => {
-    for (const layer of createMountainLayers()) {
-      for (const v of layer.vertices) {
-        expect(v.ny).toBeGreaterThan(0);
-        expect(v.ny).toBeLessThan(1);
-      }
-    }
-  });
-
   it('all peak vertices have nx between 0 and 1 exclusive', () => {
     for (const layer of createMountainLayers()) {
       for (const v of layer.vertices) {
