@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { NavbarComponent } from './navbar.component';
 import { ScrollService } from '../../core/services/scroll.service';
 
@@ -23,6 +23,10 @@ describe('NavbarComponent', () => {
         { provide: ScrollService, useValue: mockScrollService },
       ],
     }).compileComponents();
+
+    // Override Router.url to return '/' so navigateToSection treats it as home
+    const router = TestBed.inject(Router);
+    Object.defineProperty(router, 'url', { get: () => '/', configurable: true });
 
     fixture = TestBed.createComponent(NavbarComponent);
     component = fixture.componentInstance;
@@ -55,8 +59,7 @@ describe('NavbarComponent', () => {
     expect(buttons[3].textContent?.trim()).toBe('Contact');
   });
 
-  it('should call navigateToSection when a nav button is clicked', () => {
-    const navigateSpy = vi.spyOn(component as any, 'navigateToSection');
+  it('should scroll to section when a nav button is clicked on home page', () => {
     const buttons = Array.from(
       compiled.querySelectorAll('.navbar__links .navbar__link'),
     ) as HTMLButtonElement[];
@@ -64,7 +67,7 @@ describe('NavbarComponent', () => {
     buttons[0].click();
     fixture.detectChanges();
 
-    expect(navigateSpy).toHaveBeenCalledWith('projects');
+    expect(mockScrollService.scrollToSection).toHaveBeenCalledWith('projects');
   });
 
   it('should apply --active class to the button matching scrollService.activeSection()', () => {

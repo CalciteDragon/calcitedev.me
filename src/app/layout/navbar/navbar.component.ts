@@ -25,7 +25,8 @@ export class NavbarComponent {
   }
 
   protected navigateToSection(id: string): void {
-    if (this.router.url === '/' || this.router.url.startsWith('/#')) {
+    const urlPath = this.router.url.split(/[?#]/)[0];
+    if (urlPath === '' || urlPath === '/') {
       this.scrollService.scrollToSection(id);
     } else {
       this.router.navigate([''], { fragment: id });
