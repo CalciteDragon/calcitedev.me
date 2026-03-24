@@ -23,7 +23,7 @@ export class SceneRenderer {
   private ufo: UFO | null = null;
   private rocket: Rocket | null = null;
   private particles: SceneParticle[] = [];
-  private lastTimestamp = 0;
+  private lastTimestamp = -1;
   private destroyed = false;
 
   constructor(canvas: HTMLCanvasElement, config: SceneConfig) {
@@ -50,7 +50,7 @@ export class SceneRenderer {
       this.ufo = null;
       this.rocket = null;
     }
-    this.lastTimestamp = 0;
+    this.lastTimestamp = -1;
   }
 
   /**
@@ -75,7 +75,7 @@ export class SceneRenderer {
   drawFrame(timestamp: number, scrollY: number, heroHeight: number): void {
     if (this.destroyed || this.cssWidth === 0) return;
 
-    const deltaTime = this.lastTimestamp === 0 ? 16 : timestamp - this.lastTimestamp;
+    const deltaTime = this.lastTimestamp === -1 ? 16 : timestamp - this.lastTimestamp;
     this.lastTimestamp = timestamp;
 
     this.ctx.clearRect(0, 0, this.cssWidth, this.cssHeight);
@@ -87,6 +87,7 @@ export class SceneRenderer {
     // Hero-specific elements only while the hero section is in view
     const heroVisible = scrollY < heroHeight;
     if (heroVisible) {
+      // Mountains render on all complexity levels — only UFO and rocket are skipped on mobile
       this.drawMountains(scrollY);
       if (!this.config.reducedComplexity) {
         if (this.ufo) this.drawUFO(deltaTime);
