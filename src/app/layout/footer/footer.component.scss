@@ -1,8 +1,12 @@
 @use 'variables' as *;
 @use 'mixins' as *;
 
+:host {
+  display: block;
+}
+
 .footer {
-  border-top: 1px solid rgba($bg-border, 0.5);
+  border-top: 1px solid rgba($bg-border, 0.4);
   padding: $space-6 0;
 }
 
@@ -14,43 +18,8 @@
   gap: $space-3;
 }
 
-.footer__social {
-  display: flex;
-  align-items: center;
-  gap: $space-4;
-}
-
-.footer__social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text-secondary);
-  transition: color $transition-base, filter $transition-base;
-
-  svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
-  }
-
-  &--github:hover {
-    color: var(--accent-cyan);
-    filter: drop-shadow(0 0 8px rgba($accent-cyan, 0.4));
-  }
-
-  &--discord:hover {
-    color: var(--accent-blue);
-    filter: drop-shadow(0 0 8px rgba($accent-blue, 0.4));
-  }
-
-  &--linkedin:hover {
-    color: var(--accent-purple);
-    filter: drop-shadow(0 0 8px rgba($accent-purple, 0.4));
-  }
-}
-
 .footer__copyright {
-  font-size: 0.875rem; // text-sm
+  font-size: 0.875rem;
   color: var(--text-secondary);
   text-align: center;
 }
