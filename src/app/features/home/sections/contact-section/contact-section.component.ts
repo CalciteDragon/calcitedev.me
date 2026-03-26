@@ -10,5 +10,5 @@ import { SocialLink } from '../../../../models/social-link.model';
 })
 export class ContactSectionComponent {
   readonly email = input.required<string>();
-  readonly socialLinks = input.required<SocialLink[]>();
+  readonly socialLinks = input.required<readonly SocialLink[]>();
 }

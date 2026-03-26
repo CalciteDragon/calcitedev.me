@@ -9,5 +9,5 @@ import { SkillGroup } from '../../../../models/skill.model';
   styleUrl: './skills-section.component.scss',
 })
 export class SkillsSectionComponent {
-  readonly skillGroups = input.required<SkillGroup[]>();
+  readonly skillGroups = input.required<readonly SkillGroup[]>();
 }

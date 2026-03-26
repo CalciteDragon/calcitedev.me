@@ -9,5 +9,5 @@ import { Project } from '../../../../models/project.model';
   styleUrl: './projects-section.component.scss',
 })
 export class ProjectsSectionComponent {
-  readonly projects = input.required<Project[]>();
+  readonly projects = input.required<readonly Project[]>();
 }
