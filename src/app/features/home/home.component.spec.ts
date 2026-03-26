@@ -96,9 +96,4 @@ describe('HomeComponent', () => {
     fixture.destroy();
     expect(mockScrollService.destroySectionObserver).toHaveBeenCalled();
   });
-
-  it('should render the background scene component inside the #home section', () => {
-    const homeSection = compiled.querySelector('#home');
-    expect(homeSection?.querySelector('app-background-scene')).toBeTruthy();
-  });
 });

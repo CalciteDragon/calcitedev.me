@@ -202,7 +202,7 @@ Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizo
 
 ---
 
-## Phase 6: Content Sections
+## Phase 6: Content Sections ✅ COMPLETE
 
 **Goal:** About, Projects, Skills, and Contact sections — fully functional with real content structure. All sections live inside `HomeComponent` at `features/home/sections/`.
 
@@ -213,26 +213,28 @@ Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizo
 **Tasks:**
 
 ### About Section (`features/home/sections/about-section/`)
-- [ ] Short bio section (placeholder text, Tyler fills in later)
-- [ ] Scroll-reveal animation
+- [x] Short bio section (placeholder text, Tyler fills in later)
+- [x] Scroll-reveal animation
 
 ### Skills Section (`features/home/sections/skills-section/`)
-- [ ] `SkillsGridComponent` — skills grouped by the 8 categories, displayed as a grid of `SkillChipComponent` groups
-- [ ] Each category has a heading and a cluster of chips
-- [ ] Scroll-reveal animation on skill groups
+- [x] `SkillsGridComponent` — skills grouped by the 8 categories, displayed as a grid of `SkillChipComponent` groups
+- [x] Each category has a heading and a cluster of chips
+- [x] Scroll-reveal animation on skill groups
 
 ### Projects Section (`features/home/sections/projects-section/`)
-- [ ] `ProjectListComponent` — responsive grid of `ProjectCardComponent`
-- [ ] Filter bar: filter by tech tag or category (signals-based, no RxJS needed)
-- [ ] Placeholder project thumbnails are easy-swap (just change `imageUrl` in data file)
-- [ ] `ProjectDetailComponent` — route `/projects/:slug` at `features/projects/project-detail/`, displays full project info (long description, tech tags, links, larger image placeholder)
+- [x] `ProjectListComponent` — responsive grid of `ProjectCardComponent`
+- [x] Filter bar: filter by tech tag or category (signals-based, no RxJS needed)
+- [x] Placeholder project thumbnails are easy-swap (just change `imageUrl` in data file)
+- [x] `ProjectDetailComponent` — route `/projects/:slug` at `features/projects/project-detail/`, displays full project info (long description, tech tags, links, larger image placeholder)
 
 ### Contact Section (`features/home/sections/contact-section/`)
-- [ ] Email link (styled as a prominent CTA or card)
-- [ ] `SocialLinksComponent` reuse — GitHub, Twitter/X, LinkedIn with glow hover
-- [ ] Clean, minimal layout — no form
+- [x] Email link (styled as a prominent CTA or card)
+- [x] `SocialLinksComponent` reuse — GitHub, Twitter/X, LinkedIn with glow hover
+- [x] Clean, minimal layout — no form
 
-**Deliverable:** All five scroll sections are content-complete with placeholder data. Full in-page navigation works end to end.
+**Built:** `BackgroundSceneComponent` moved to `LayoutComponent` (persists across all routes). `HomeComponent` wired as smart container — reads `projectsData`, `skillsData`, `socialLinksData`, `bioData` and passes down via signal inputs. `AboutSectionComponent` (shortBio + extendedBio with `white-space: pre-line`). `ContactSectionComponent` (email CTA with neon-bordered pill, `SocialLinksComponent`). `SkillsSectionComponent` + `SkillsGridComponent` sub-component (auto-fill grid, accent-colored category labels). `ProjectsSectionComponent` + `ProjectListComponent` sub-component (signal-based filter: `activeFilter`, `allTags`, `filteredProjects` computed, filter pill bar). `ProjectCardComponent` extended with optional `liveUrl`/`githubUrl` inputs. `ProjectDetailComponent` at `features/projects/project-detail/` using `toSignal(route.paramMap)` + `computed()` for slug resolution. `app.routes.ts` updated with `projects/:slug` lazy route (before wildcard). `app.routes.server.ts` uses `getPrerenderParams` to enumerate all 5 project slugs. Global CSS: added `--section-padding-v`, `--section-padding-h`, and `--accent-*-rgb` tokens to `:root`. `SocialLinksComponent` unified to use canonical `SocialLink` type. Production build pre-renders 8 static routes. 99/99 unit tests passing.
+
+**Deliverable:** All five scroll sections are content-complete with placeholder data. Full in-page navigation works end to end. `/projects/:slug` route live with 5 pre-rendered project detail pages.
 
 ---
 

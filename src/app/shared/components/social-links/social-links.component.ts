@@ -1,10 +1,5 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-
-export interface SocialLinkItem {
-  platform: string;
-  url: string;
-  label: string;
-}
+import { SocialLink } from '../../../models/social-link.model';
 
 @Component({
   selector: 'app-social-links',
@@ -14,7 +9,7 @@ export interface SocialLinkItem {
   styleUrl: './social-links.component.scss',
 })
 export class SocialLinksComponent {
-  readonly links = input.required<SocialLinkItem[]>();
+  readonly links = input.required<readonly SocialLink[]>();
 
   protected readonly iconPaths: Record<string, string> = {
     github:

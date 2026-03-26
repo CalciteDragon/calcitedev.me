@@ -1,1 +1,20 @@
-<p class="section-stub">Projects — coming in Phase 6</p>
+<section class="projects-section">
+  <app-section-header title="Projects" />
+
+  <div class="projects-section__filter-bar" appScrollReveal>
+    <button
+      class="filter-pill"
+      [class.filter-pill--active]="activeFilter() === null"
+      (click)="setFilter(null)"
+    >All</button>
+    @for (tag of allTags(); track tag) {
+      <button
+        class="filter-pill"
+        [class.filter-pill--active]="activeFilter() === tag"
+        (click)="setFilter(tag)"
+      >{{ tag }}</button>
+    }
+  </div>
+
+  <app-project-list [projects]="filteredProjects()" appScrollReveal />
+</section>

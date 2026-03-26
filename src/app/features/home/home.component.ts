@@ -7,7 +7,6 @@ import {
   inject,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { BackgroundSceneComponent } from './background-scene/background-scene.component';
 import { HeroComponent } from './hero/hero.component';
 import { FeatureCardsComponent } from './feature-cards/feature-cards.component';
 import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
@@ -17,13 +16,15 @@ import { SkillsSectionComponent } from './sections/skills-section/skills-section
 import { ContactSectionComponent } from './sections/contact-section/contact-section.component';
 import { ScrollService } from '../../core/services/scroll.service';
 import { bioData } from '../../data/bio.data';
+import { projectsData } from '../../data/projects.data';
+import { skillsData } from '../../data/skills.data';
+import { socialLinksData } from '../../data/social-links.data';
 
 @Component({
   selector: 'app-home',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    BackgroundSceneComponent,
     HeroComponent,
     FeatureCardsComponent,
     ScrollRevealDirective,
@@ -37,6 +38,9 @@ import { bioData } from '../../data/bio.data';
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
   readonly bio = bioData;
+  readonly projects = projectsData;
+  readonly skills = skillsData;
+  readonly socialLinks = socialLinksData;
   private readonly scrollService = inject(ScrollService);
   private readonly platformId = inject(PLATFORM_ID);
 

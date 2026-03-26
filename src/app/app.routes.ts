@@ -13,10 +13,14 @@ export const routes: Routes = [
       },
       // Section paths redirect to home — all content is on the single page
       { path: 'about', redirectTo: '' },
-      { path: 'projects', redirectTo: '' },
+      // NOTE: 'projects' redirect is REMOVED — conflicts with projects/:slug
       { path: 'contact', redirectTo: '' },
-      // Future detail page — scaffolded in Phase 6
-      // { path: 'projects/:slug', loadComponent: () => import('./features/projects/project-detail/project-detail.component').then(m => m.ProjectDetailComponent) },
+      {
+        path: 'projects/:slug',
+        loadComponent: () =>
+          import('./features/projects/project-detail/project-detail.component')
+            .then(m => m.ProjectDetailComponent),
+      },
       { path: '**', redirectTo: '' },
     ],
   },

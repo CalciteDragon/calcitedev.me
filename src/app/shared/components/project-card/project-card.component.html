@@ -14,5 +14,19 @@
         }
       </div>
     }
+    @if (liveUrl() || githubUrl()) {
+      <div class="project-card__links">
+        @if (liveUrl()) {
+          <a [href]="liveUrl()" target="_blank" rel="noopener noreferrer" class="project-card__link">
+            Live Demo
+          </a>
+        }
+        @if (githubUrl()) {
+          <a [href]="githubUrl()" target="_blank" rel="noopener noreferrer" class="project-card__link">
+            GitHub
+          </a>
+        }
+      </div>
+    }
   </div>
 </app-card>
