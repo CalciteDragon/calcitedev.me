@@ -4,6 +4,8 @@ import { SectionHeaderComponent } from '../../../../shared/components/section-he
 import { ScrollRevealDirective } from '../../../../shared/directives/scroll-reveal.directive';
 import { ProjectListComponent } from './project-list/project-list.component';
 
+const POPULAR_TAG_MIN_COUNT = 2;
+
 @Component({
   selector: 'app-projects-section',
   standalone: true,
@@ -20,6 +22,18 @@ export class ProjectsSectionComponent {
   readonly allTags = computed(() =>
     [...new Set(this.projects().flatMap(p => p.tags))]
   );
+
+  readonly popularTags = computed(() => {
+    const counts = new Map<string, number>();
+    for (const project of this.projects()) {
+      for (const tag of project.tags) {
+        counts.set(tag, (counts.get(tag) ?? 0) + 1);
+      }
+    }
+    return [...counts.entries()]
+      .filter(([, count]) => count >= POPULAR_TAG_MIN_COUNT)
+      .map(([tag]) => tag);
+  });
 
   readonly filteredProjects = computed(() => {
     const filter = this.activeFilter();

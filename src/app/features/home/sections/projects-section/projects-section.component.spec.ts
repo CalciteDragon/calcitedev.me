@@ -45,4 +45,15 @@ describe('ProjectsSectionComponent', () => {
     // No duplicates
     expect(tags.length).toBe(new Set(tags).size);
   });
+
+  it('returns only tags appearing in 2 or more projects', () => {
+    // mockProjects: a=['Angular','TypeScript'], b=['React','TypeScript'], c=['Angular','Node.js']
+    // Angular: a,c → 2 ✓   TypeScript: a,b → 2 ✓
+    // React: b → 1 ✗        Node.js: c → 1 ✗
+    const tags = ref.instance.popularTags();
+    expect(tags).toContain('Angular');
+    expect(tags).toContain('TypeScript');
+    expect(tags).not.toContain('React');
+    expect(tags).not.toContain('Node.js');
+  });
 });
