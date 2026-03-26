@@ -1,0 +1,12 @@
+<div class="skills-grid">
+  @for (group of skillGroups(); track group.category) {
+    <div class="skills-grid__group" appScrollReveal>
+      <h3 class="skills-grid__category" [style.color]="'var(--accent-' + group.color + ')'">{{ group.category }}</h3>
+      <div class="skills-grid__chips">
+        @for (skill of group.skills; track skill.name) {
+          <app-skill-chip [name]="skill.name" [color]="group.color" />
+        }
+      </div>
+    </div>
+  }
+</div>
