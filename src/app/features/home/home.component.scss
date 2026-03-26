@@ -3,14 +3,16 @@
 }
 
 .main-page {
-  // Transparent — fixed BackgroundSceneComponent canvas shows through all sections.
-  // Dark base color comes from html { background-color: var(--bg-primary) } in styles.scss.
   background-color: transparent;
 
   &__section {
     scroll-margin-top: var(--navbar-height);
-    min-height: 100svh;
-    // No position: relative needed — BackgroundSceneComponent is position: fixed,
-    // not position: absolute. No z-index layering needed — canvas is z-index: -1.
+    // Content sections size to their content + internal padding.
+    // No min-height — avoids empty-space voids when content is sparse.
+
+    &--full {
+      // Hero section fills the viewport so the canvas background scene shows fully.
+      min-height: 100svh;
+    }
   }
 }
