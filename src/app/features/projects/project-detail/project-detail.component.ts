@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
 } from '@angular/core';
 import { RouterLink, ActivatedRoute } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Title } from '@angular/platform-browser';
 import { TechTagComponent } from '../../../shared/components/tech-tag/tech-tag.component';
 import { projectsData } from '../../../data/projects.data';
 import { Project } from '../../../models/project.model';
@@ -20,6 +22,7 @@ import { Project } from '../../../models/project.model';
 })
 export class ProjectDetailComponent {
   private readonly route = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
 
   // Use toSignal on paramMap (not snapshot) so the component re-resolves
   // correctly if Angular ever reuses the instance across slug navigations.
@@ -39,4 +42,11 @@ export class ProjectDetailComponent {
     const withoutSharedTags = others.filter(p => !p.tags.some(t => currentTags.has(t)));
     return [...withSharedTags, ...withoutSharedTags].slice(0, 3);
   });
+
+  constructor() {
+    effect(() => {
+      const p = this.project();
+      this.titleService.setTitle(p ? `${p.title} — Calcite` : 'Portfolio — Calcite');
+    });
+  }
 }
