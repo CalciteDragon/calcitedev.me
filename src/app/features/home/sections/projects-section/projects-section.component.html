@@ -1,20 +1,22 @@
 <section class="projects-section">
   <app-section-header title="Projects" />
 
-  <div class="projects-section__filter-bar" appScrollReveal>
-    <button
-      class="filter-pill"
-      [class.filter-pill--active]="activeFilter() === null"
-      (click)="setFilter(null)"
-    >All</button>
-    @for (tag of allTags(); track tag) {
+  <div class="projects-section__content">
+    <div class="projects-section__filter-bar" appScrollReveal>
       <button
         class="filter-pill"
-        [class.filter-pill--active]="activeFilter() === tag"
-        (click)="setFilter(tag)"
-      >{{ tag }}</button>
-    }
-  </div>
+        [class.filter-pill--active]="activeFilter() === null"
+        (click)="setFilter(null)"
+      >All</button>
+      @for (tag of popularTags(); track tag) {
+        <button
+          class="filter-pill"
+          [class.filter-pill--active]="activeFilter() === tag"
+          (click)="setFilter(tag)"
+        >{{ tag }}</button>
+      }
+    </div>
 
-  <app-project-list [projects]="filteredProjects()" appScrollReveal />
+    <app-project-list [projects]="filteredProjects()" appScrollReveal />
+  </div>
 </section>
