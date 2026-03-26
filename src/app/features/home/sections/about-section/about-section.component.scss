@@ -1,15 +1,23 @@
-@use 'variables';
+@use 'variables' as *;
 
 :host {
   display: block;
 }
 
 .about-section {
-  padding: var(--section-padding-v) var(--section-padding-h, 1.5rem);
+  padding: var(--section-padding-v) var(--section-padding-h);
 
   &__content {
     max-width: 800px;
     margin: 0 auto;
+  }
+
+  &__card {
+    background: var(--bg-surface);
+    border: 1px solid rgba(var(--accent-cyan-rgb), 0.2);
+    border-radius: $radius-lg;
+    box-shadow: var(--glow-cyan);
+    padding: $space-6;
   }
 
   &__bio {
@@ -17,7 +25,12 @@
     font-size: 1.125rem;
     line-height: 1.6;
     color: var(--text-primary);
-    margin-bottom: 1.5rem;
+  }
+
+  &__divider {
+    border: none;
+    border-top: 1px solid var(--bg-border);
+    margin: $space-4 0;
   }
 
   &__extended {
