@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap } from '@angular/router';
 import { of } from 'rxjs';
+import { Title } from '@angular/platform-browser';
 import { ProjectDetailComponent } from './project-detail.component';
 import { projectsData } from '../../../data/projects.data';
 
@@ -54,5 +55,17 @@ describe('ProjectDetailComponent', () => {
   it('returns empty array for null project', () => {
     const component = createComponent('nonexistent');
     expect(component.relatedProjects()).toEqual([]);
+  });
+
+  it('sets document title to project name when project exists', () => {
+    const component = createComponent('pixel-quest');
+    const title = TestBed.inject(Title);
+    expect(title.getTitle()).toBe('Pixel Quest — Calcite');
+  });
+
+  it('sets fallback title when project does not exist', () => {
+    const component = createComponent('nonexistent');
+    const title = TestBed.inject(Title);
+    expect(title.getTitle()).toBe('Portfolio — Calcite');
   });
 });

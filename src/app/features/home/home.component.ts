@@ -7,6 +7,7 @@ import {
   inject,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { Title } from '@angular/platform-browser';
 import { HeroComponent } from './hero/hero.component';
 import { ProjectsSectionComponent } from './sections/projects-section/projects-section.component';
 import { AboutSectionComponent } from './sections/about-section/about-section.component';
@@ -39,8 +40,10 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
   readonly socialLinks = socialLinksData;
   private readonly scrollService = inject(ScrollService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly titleService = inject(Title);
 
   ngAfterViewInit(): void {
+    this.titleService.setTitle('Tyler Hawthorn — Calcite | Full Stack Developer');
     this.scrollService.initSectionObserver(['home', 'projects', 'about', 'skills', 'contact']);
     if (isPlatformBrowser(this.platformId)) {
       const hash = window.location.hash.replace('#', '');
