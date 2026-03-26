@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Bio } from '../../../../models/bio.model';
 
 @Component({
   selector: 'app-about-section',
@@ -7,4 +8,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   templateUrl: './about-section.component.html',
   styleUrl: './about-section.component.scss',
 })
-export class AboutSectionComponent {}
+export class AboutSectionComponent {
+  readonly bio = input.required<Bio>();
+}

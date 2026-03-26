@@ -16,6 +16,9 @@ import { SkillsSectionComponent } from './sections/skills-section/skills-section
 import { ContactSectionComponent } from './sections/contact-section/contact-section.component';
 import { ScrollService } from '../../core/services/scroll.service';
 import { bioData } from '../../data/bio.data';
+import { projectsData } from '../../data/projects.data';
+import { skillsData } from '../../data/skills.data';
+import { socialLinksData } from '../../data/social-links.data';
 
 @Component({
   selector: 'app-home',
@@ -35,6 +38,9 @@ import { bioData } from '../../data/bio.data';
 })
 export class HomeComponent implements AfterViewInit, OnDestroy {
   readonly bio = bioData;
+  readonly projects = projectsData;
+  readonly skills = skillsData;
+  readonly socialLinks = socialLinksData;
   private readonly scrollService = inject(ScrollService);
   private readonly platformId = inject(PLATFORM_ID);
 

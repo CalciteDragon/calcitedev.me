@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { Project } from '../../../../models/project.model';
 
 @Component({
   selector: 'app-projects-section',
@@ -7,4 +8,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   templateUrl: './projects-section.component.html',
   styleUrl: './projects-section.component.scss',
 })
-export class ProjectsSectionComponent {}
+export class ProjectsSectionComponent {
+  readonly projects = input.required<Project[]>();
+}

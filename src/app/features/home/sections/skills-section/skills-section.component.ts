@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { SkillGroup } from '../../../../models/skill.model';
 
 @Component({
   selector: 'app-skills-section',
@@ -7,4 +8,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   templateUrl: './skills-section.component.html',
   styleUrl: './skills-section.component.scss',
 })
-export class SkillsSectionComponent {}
+export class SkillsSectionComponent {
+  readonly skillGroups = input.required<SkillGroup[]>();
+}

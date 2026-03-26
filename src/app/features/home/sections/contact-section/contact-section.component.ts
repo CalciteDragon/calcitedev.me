@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { SocialLink } from '../../../../models/social-link.model';
 
 @Component({
   selector: 'app-contact-section',
@@ -7,4 +8,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
   templateUrl: './contact-section.component.html',
   styleUrl: './contact-section.component.scss',
 })
-export class ContactSectionComponent {}
+export class ContactSectionComponent {
+  readonly email = input.required<string>();
+  readonly socialLinks = input.required<SocialLink[]>();
+}
