@@ -12,5 +12,5 @@ import { ScrollRevealDirective } from '../../../../../shared/directives/scroll-r
   styleUrl: './skills-grid.component.scss',
 })
 export class SkillsGridComponent {
-  readonly skillGroups = input.required<SkillGroup[]>();
+  readonly skillGroups = input.required<readonly SkillGroup[]>();
 }

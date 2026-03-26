@@ -6,4 +6,9 @@
 
 .skills-section {
   padding: var(--section-padding-v) var(--section-padding-h, 1.5rem);
+
+  &__content {
+    max-width: 800px;
+    margin: 0 auto;
+  }
 }
