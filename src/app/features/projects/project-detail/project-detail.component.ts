@@ -21,6 +21,8 @@ import { Project } from '../../../models/project.model';
 export class ProjectDetailComponent {
   private readonly route = inject(ActivatedRoute);
 
+  // Use toSignal on paramMap (not snapshot) so the component re-resolves
+  // correctly if Angular ever reuses the instance across slug navigations.
   private readonly params = toSignal(this.route.paramMap);
 
   readonly project = computed(() => {
