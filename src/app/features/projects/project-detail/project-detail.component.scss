@@ -1,27 +1,57 @@
 @use 'variables' as *;
 @use 'glow' as *;
 
+// ======================
+// Page Wrapper
+// ======================
+
 .project-detail {
   max-width: 900px;
   margin: 0 auto;
   padding: var(--section-padding-v) var(--section-padding-h);
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
 }
 
 // ======================
-// Back Link
+// Back Link (pill button)
 // ======================
 
 .project-detail__back {
-  display: inline-block;
-  margin-bottom: $space-4;
+  display: inline-flex;
+  align-items: center;
+  gap: $space-1;
+  padding: 8px 20px;
+  border-radius: $radius-full;
+  border: 1px solid var(--bg-border);
+  background: var(--bg-surface);
   color: var(--text-secondary);
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color $transition-fast;
+  font-size: 0.875rem;
+  font-weight: 500;
+  align-self: flex-start;
+  transition: color $transition-fast, border-color $transition-fast, box-shadow $transition-fast;
 
   &:hover {
     color: var(--accent-cyan);
+    border-color: rgba(var(--accent-cyan-rgb), 0.4);
+    box-shadow: var(--glow-cyan);
   }
+}
+
+// ======================
+// Main Content Card
+// ======================
+
+.project-detail__card {
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-border);
+  border-radius: $radius-lg;
+  padding: $space-6;
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
 }
 
 // ======================
@@ -30,10 +60,9 @@
 
 .project-detail__image {
   width: 100%;
-  border-radius: 12px;
+  border-radius: $radius-md;
   border: 1px solid var(--bg-border);
   box-shadow: var(--glow-cyan);
-  margin-bottom: $space-4;
   display: block;
 }
 
@@ -45,7 +74,6 @@
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
   line-height: 1.1;
-  margin-bottom: $space-3;
   @include gradient-text;
 }
 
@@ -57,7 +85,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: $space-1;
-  margin-bottom: $space-3;
 }
 
 // ======================
@@ -68,7 +95,6 @@
   color: var(--text-secondary);
   font-size: 1.05rem;
   line-height: 1.75;
-  margin-bottom: $space-4;
   max-width: 72ch;
 }
 
@@ -121,11 +147,69 @@
 }
 
 // ======================
+// Related Projects
+// ======================
+
+.project-detail__related {
+  display: flex;
+  flex-direction: column;
+  gap: $space-3;
+}
+
+.project-detail__related-heading {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.project-detail__related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(240px, 100%), 1fr));
+  gap: $space-3;
+}
+
+.project-detail__related-card {
+  display: flex;
+  flex-direction: column;
+  gap: $space-1;
+  padding: $space-3;
+  border-radius: $radius-md;
+  border: 1px solid var(--bg-border);
+  background: var(--bg-surface);
+  text-decoration: none;
+  transition:
+    border-color $transition-fast,
+    box-shadow $transition-fast;
+
+  &:hover {
+    border-color: rgba(var(--accent-cyan-rgb), 0.4);
+    box-shadow: var(--glow-cyan);
+  }
+}
+
+.project-detail__related-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.project-detail__related-desc {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ======================
 // Not Found
 // ======================
 
 .project-detail__not-found {
   color: var(--text-secondary);
   font-size: 1.1rem;
-  margin-top: $space-4;
 }

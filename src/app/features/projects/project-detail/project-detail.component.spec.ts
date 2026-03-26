@@ -34,4 +34,25 @@ describe('ProjectDetailComponent', () => {
     const component = createComponent('nonexistent');
     expect(component.project()).toBeNull();
   });
+
+  it('returns up to 3 related projects excluding the current one', () => {
+    const component = createComponent('pixel-quest');
+    const related = component.relatedProjects();
+    expect(related.length).toBeLessThanOrEqual(3);
+    expect(related.every(p => p.slug !== 'pixel-quest')).toBe(true);
+  });
+
+  it('prioritises projects sharing tags with the current one', () => {
+    // pixel-quest has tags: TypeScript, Canvas API, Game Dev, Pixel Art
+    // starmapper also has TypeScript and Canvas API → should appear in related
+    const component = createComponent('pixel-quest');
+    const related = component.relatedProjects();
+    const slugs = related.map(p => p.slug);
+    expect(slugs).toContain('starmapper');
+  });
+
+  it('returns empty array for null project', () => {
+    const component = createComponent('nonexistent');
+    expect(component.relatedProjects()).toEqual([]);
+  });
 });
