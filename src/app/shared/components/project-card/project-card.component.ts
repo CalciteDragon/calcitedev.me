@@ -20,5 +20,7 @@ export class ProjectCardComponent {
   readonly imageUrl = input<string>('');
   readonly tags = input<string[]>([]);
   readonly glowColor = input<GlowColor>('cyan');
+  readonly liveUrl = input<string>();
+  readonly githubUrl = input<string>();
   readonly cardClick = output<void>();
 }

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
-import { SocialLink } from '../../../../models/social-link.model';
+import { SocialLink } from '../../../models/social-link.model';
 
 @Component({
   selector: 'app-social-links',

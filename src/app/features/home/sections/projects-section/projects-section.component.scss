@@ -1,3 +1,34 @@
+@use 'variables' as *;
+
 :host {
   display: block;
+}
+
+.projects-section {
+  padding: var(--section-padding-v) var(--section-padding-h);
+}
+
+.projects-section__filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.filter-pill {
+  padding: 6px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--bg-border);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 200ms ease-out;
+
+  &--active,
+  &:hover {
+    border-color: rgba(var(--accent-cyan-rgb), 0.5);
+    color: var(--accent-cyan);
+    box-shadow: var(--glow-cyan);
+  }
 }
