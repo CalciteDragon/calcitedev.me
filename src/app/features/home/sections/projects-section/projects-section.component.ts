@@ -19,10 +19,6 @@ export class ProjectsSectionComponent {
 
   readonly activeFilter = signal<string | null>(null);
 
-  readonly allTags = computed(() =>
-    [...new Set(this.projects().flatMap(p => p.tags))]
-  );
-
   readonly popularTags = computed(() => {
     const counts = new Map<string, number>();
     for (const project of this.projects()) {

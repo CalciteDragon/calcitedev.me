@@ -36,16 +36,6 @@ describe('ProjectsSectionComponent', () => {
     expect(ref.instance.filteredProjects()).toHaveLength(3);
   });
 
-  it('derives unique tags from all projects', () => {
-    const tags = ref.instance.allTags();
-    expect(tags).toContain('Angular');
-    expect(tags).toContain('React');
-    expect(tags).toContain('TypeScript');
-    expect(tags).toContain('Node.js');
-    // No duplicates
-    expect(tags.length).toBe(new Set(tags).size);
-  });
-
   it('returns only tags appearing in 2 or more projects', () => {
     // mockProjects: a=['Angular','TypeScript'], b=['React','TypeScript'], c=['Angular','Node.js']
     // Angular: a,c → 2 ✓   TypeScript: a,b → 2 ✓
