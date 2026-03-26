@@ -1,0 +1,30 @@
+<div class="project-detail">
+  <a routerLink="/" fragment="projects" class="project-detail__back">
+    ← Back to Projects
+  </a>
+
+  @if (project(); as p) {
+    <img [src]="p.imageUrl" [alt]="p.title" class="project-detail__image" />
+    <h1 class="project-detail__title">{{ p.title }}</h1>
+    <div class="project-detail__tags">
+      @for (tag of p.tags; track tag) {
+        <app-tech-tag [name]="tag" />
+      }
+    </div>
+    <p class="project-detail__description">{{ p.longDescription }}</p>
+    <div class="project-detail__links">
+      @if (p.liveUrl) {
+        <a [href]="p.liveUrl" target="_blank" rel="noopener noreferrer" class="project-detail__link project-detail__link--live">
+          Live Demo
+        </a>
+      }
+      @if (p.githubUrl) {
+        <a [href]="p.githubUrl" target="_blank" rel="noopener noreferrer" class="project-detail__link project-detail__link--github">
+          GitHub
+        </a>
+      }
+    </div>
+  } @else {
+    <p class="project-detail__not-found">Project not found.</p>
+  }
+</div>

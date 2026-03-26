@@ -1,0 +1,131 @@
+@use 'variables' as *;
+@use 'glow' as *;
+
+.project-detail {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--section-padding-v) var(--section-padding-h);
+}
+
+// ======================
+// Back Link
+// ======================
+
+.project-detail__back {
+  display: inline-block;
+  margin-bottom: $space-4;
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color $transition-fast;
+
+  &:hover {
+    color: var(--accent-cyan);
+  }
+}
+
+// ======================
+// Hero Image
+// ======================
+
+.project-detail__image {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--bg-border);
+  box-shadow: var(--glow-cyan);
+  margin-bottom: $space-4;
+  display: block;
+}
+
+// ======================
+// Title
+// ======================
+
+.project-detail__title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.1;
+  margin-bottom: $space-3;
+  @include gradient-text;
+}
+
+// ======================
+// Tags
+// ======================
+
+.project-detail__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-1;
+  margin-bottom: $space-3;
+}
+
+// ======================
+// Description
+// ======================
+
+.project-detail__description {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  line-height: 1.75;
+  margin-bottom: $space-4;
+  max-width: 72ch;
+}
+
+// ======================
+// Links
+// ======================
+
+.project-detail__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-2;
+}
+
+.project-detail__link {
+  display: inline-block;
+  padding: 0.625rem 1.5rem;
+  border-radius: $radius-full;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition:
+    box-shadow $transition-fast,
+    border-color $transition-fast,
+    color $transition-fast;
+
+  &--live {
+    color: var(--accent-cyan);
+    border: 1px solid rgba(var(--accent-cyan-rgb), 0.4);
+    box-shadow: var(--glow-cyan);
+
+    &:hover {
+      border-color: var(--accent-cyan);
+      box-shadow:
+        0 0 20px rgba(var(--accent-cyan-rgb), 0.5),
+        0 0 40px rgba(var(--accent-cyan-rgb), 0.2);
+    }
+  }
+
+  &--github {
+    color: var(--text-primary);
+    border: 1px solid var(--bg-border);
+
+    &:hover {
+      color: var(--accent-cyan);
+      border-color: rgba(var(--accent-cyan-rgb), 0.4);
+      box-shadow: var(--glow-cyan);
+    }
+  }
+}
+
+// ======================
+// Not Found
+// ======================
+
+.project-detail__not-found {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-top: $space-4;
+}
