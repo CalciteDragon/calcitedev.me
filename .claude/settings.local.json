@@ -13,5 +13,6 @@
       "mcp__plugin_playwright_playwright__browser_snapshot"
     ]
   },
-  "outputStyle": "Explanatory"
+  "outputStyle": "Explanatory",
+  "spinnerTipsEnabled": true
 }

@@ -155,7 +155,7 @@ export class SceneRenderer {
    * simulate atmospheric light scatter along the ridge line.
    */
   private drawHorizonGlow(): void {
-    const bandTop = this.cssHeight * 0.3;
+    const bandTop = this.cssHeight * 0.2;
     const bandBot = this.cssHeight * 1.0;
     const grad = this.ctx.createLinearGradient(0, bandTop, 0, bandBot);
     grad.addColorStop(0, 'rgba(56, 189, 248, 0.00)');

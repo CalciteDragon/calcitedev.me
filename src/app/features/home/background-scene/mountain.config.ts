@@ -24,7 +24,7 @@ export interface MountainConfig {
 }
 
 export const DEFAULT_MOUNTAIN_CONFIG: MountainConfig = {
-  zoom: 1.40,
+  zoom: 1.00,
   tilt: 0.25,
   peakSeparation: 0.50,
   verticalStretch: 1.40,

@@ -43,24 +43,6 @@ export class MountainRenderer {
 
     ctx.clearRect(0, 0, W, H);
 
-    // Background
-    const bg = ctx.createLinearGradient(0, 0, 0, H);
-    bg.addColorStop(0, '#020408');
-    bg.addColorStop(0.5, '#04060f');
-    bg.addColorStop(1, '#060810');
-    ctx.fillStyle = bg;
-    ctx.fillRect(0, 0, W, H);
-
-    // Horizon glow
-    const eyeY = 1.1 - this.config.camY * 0.42;
-    const horizonY = H * 0.42 + eyeY * H * 0.18;
-    const hg = ctx.createRadialGradient(W / 2, horizonY, 0, W / 2, horizonY, W * 0.7);
-    hg.addColorStop(0, 'rgba(0,180,150,0.09)');
-    hg.addColorStop(0.5, 'rgba(60,0,120,0.04)');
-    hg.addColorStop(1, 'rgba(0,0,0,0)');
-    ctx.fillStyle = hg;
-    ctx.fillRect(0, 0, W, H);
-
     // Project grid points
     const xHalf = this.config.horizontalWidth;
     const pts: ({ x: number; y: number; d: number } | null)[][] = [];
@@ -137,15 +119,8 @@ export class MountainRenderer {
       }
     }
 
-    // Fog overlay
-    const fogOverlay = ctx.createLinearGradient(0, 0, 0, H);
-    fogOverlay.addColorStop(0, 'rgba(2,4,8,0.0)');
-    fogOverlay.addColorStop(0.38, 'rgba(4,6,16,0.0)');
-    fogOverlay.addColorStop(0.62, `rgba(4,6,16,${(0.45 * this.config.fogIntensity).toFixed(2)})`);
-    fogOverlay.addColorStop(1, 'rgba(4,6,16,0.0)');
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = fogOverlay;
-    ctx.fillRect(0, 0, W, H);
+    // Foreground atmosphere — rendered in front of all mountain geometry
+    this.drawForegroundAtmosphere();
 
     // Scanlines
     for (let y = 0; y < H; y += 4) {
@@ -251,6 +226,34 @@ export class MountainRenderer {
     const g = Math.round(this.lerp(10 + heightT * 8, 14, depthT));
     const b = Math.round(this.lerp(18 + heightT * 10 + sideT * 5, 24, depthT));
     return `rgb(${r},${g},${b})`;
+  }
+
+  // ─── Atmosphere ────────────────────────────────────────────────────────────
+
+  /**
+   * Foreground haze pooling at ground level — a rising mist plus a centered
+   * radial bloom, matching the horizon palette (cyan → indigo → purple).
+   */
+  private drawForegroundAtmosphere(): void {
+    const { ctx, W, H } = this;
+    ctx.globalAlpha = 1;
+
+    // Rising ground mist — pools at the bottom, fades up toward mid-screen
+    const mist = ctx.createLinearGradient(0, H * 0.5, 0, H);
+    mist.addColorStop(0,    'rgba(56, 189, 248, 0)');
+    mist.addColorStop(0.45, 'rgba(99, 102, 241, 0.06)');
+    mist.addColorStop(0.8,  'rgba(168, 85, 247, 0.10)');
+    mist.addColorStop(1,    'rgba(168, 85, 247, 0.15)');
+    ctx.fillStyle = mist;
+    ctx.fillRect(0, 0, W, H);
+
+    // Centered radial bloom anchored just below the canvas bottom
+    const bloom = ctx.createRadialGradient(W * 0.5, H * 1.1, 0, W * 0.5, H * 1.1, W * 0.55);
+    bloom.addColorStop(0,   'rgba(56, 189, 248, 0.10)');
+    bloom.addColorStop(0.4, 'rgba(99, 102, 241, 0.07)');
+    bloom.addColorStop(1,   'rgba(99, 102, 241, 0)');
+    ctx.fillStyle = bloom;
+    ctx.fillRect(0, 0, W, H);
   }
 
   // ─── Drawing ───────────────────────────────────────────────────────────────
