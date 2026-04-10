@@ -190,13 +190,15 @@ Phase 0: Scaffold & Global Styles
 - [x] Performance: use `requestAnimationFrame`, reduce on mobile
 - [ ] Performance: throttle on hidden tab (deferred to Phase 9 — canvas: skip rendering when `document.hidden`)
 
-**Built:** `SceneRenderer` (plain TS — stars with per-star parallax, mountains, UFO, rocket, particles; DPR-aware `resize()`; `heroHeight`-gated hero elements), `BackgroundSceneComponent` (`position: fixed; z-index: -1` — covers full viewport; SSR guard; rAF loop; `document.documentElement` ResizeObserver; `window.scrollY` + `#home` offsetHeight read each frame; mobile `matchMedia` detection). `body { background-color: transparent }` in `styles.scss` lets canvas show through all sections. Scanline overlay as CSS `::after` pseudo-element. Entity factory functions in `scene-entities.ts` (pure TS, fully unit-tested). Note: move to `LayoutComponent` in Phase 6 when `/projects/:slug` route is added.
+**Built:** Two-canvas architecture inside `BackgroundSceneComponent` — **mountain canvas** (DOM-order first, bottom layer) owned by `MountainRenderer`; **scene canvas** (DOM-order second, top layer, transparent background) owned by `SceneRenderer`. Both canvases are `position: absolute; inset: 0` within the `position: fixed` host. `body { background-color: transparent }` lets canvases show through all sections. CSS `::after` scanline overlay covers both canvases as a viewport-wide CRT effect.
 
-Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles` → `drawMountains` → UFO/rocket (hero-only).
+**MountainRenderer** (`mountain-renderer.ts`, `mountain.config.ts`): 3D perspective-projected FBM terrain. Draws dark background fill, radial horizon glow, terrain grid (back-to-front with fill + wire passes + per-face fog), depth fog overlay, and in-canvas scanlines. `setConfig()` rebuilds the terrain grid only when structural params change (not on camY-only updates). `camY = scrollY / 1200` drives scroll parallax — camera pans through the valley over a 1200px scroll range.
 
-**Mountains** render permanently (not hero-gated). 3 layers: far (indigo, parallax 0.10), mid (cyan, 0.17), front (purple, 0.30). Valley bias parabola (`3*(nx−0.5)²`) makes edge peaks tall and center peaks short, forming a valley silhouette. No corner anchors — vertices are peaks only; renderer constructs fill polygon (extends `sideBleed=18%` off each edge, closes via off-screen floor) and a separate open-path ridge stroke with `ctx.shadowBlur` neon bloom. Edge heights slope-extrapolated from the outermost two peaks so ridgelines continue rising as they exit the viewport.
+**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles` → UFO/rocket (hero-only).
 
 **Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced. UFO and rocket remain hero-only (`scrollY < heroHeight`).
+
+Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Phase 9 performance work.
 
 **Deliverable:** Hero section has a fully animated cyberpunk background. Looks alive and layered.
 

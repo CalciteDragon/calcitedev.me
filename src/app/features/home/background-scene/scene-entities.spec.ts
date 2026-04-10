@@ -1,6 +1,5 @@
 import {
   createStars,
-  createMountainLayers,
   createUFO,
   createRocket,
   createParticles,
@@ -49,34 +48,6 @@ describe('createStars', () => {
     for (const star of createStars(30, 100, 100)) {
       expect(star.parallaxFactor).toBeGreaterThanOrEqual(0.01);
       expect(star.parallaxFactor).toBeLessThanOrEqual(0.04);
-    }
-  });
-});
-
-describe('createMountainLayers', () => {
-  it('returns exactly 3 layers', () => {
-    expect(createMountainLayers()).toHaveLength(3);
-  });
-
-  it('parallaxFactors increase from back to front (depth ordering)', () => {
-    const layers = createMountainLayers();
-    for (let i = 1; i < layers.length; i++) {
-      expect(layers[i].parallaxFactor).toBeGreaterThan(layers[i - 1].parallaxFactor);
-    }
-  });
-
-  it('each layer has at least 4 peak vertices', () => {
-    for (const layer of createMountainLayers()) {
-      expect(layer.vertices.length).toBeGreaterThanOrEqual(4);
-    }
-  });
-
-  it('all peak vertices have nx between 0 and 1 exclusive', () => {
-    for (const layer of createMountainLayers()) {
-      for (const v of layer.vertices) {
-        expect(v.nx).toBeGreaterThan(0);
-        expect(v.nx).toBeLessThan(1);
-      }
     }
   });
 });
