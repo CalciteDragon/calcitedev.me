@@ -78,6 +78,45 @@ describe('BackgroundSceneComponent', () => {
     });
   });
 
+  describe('scroll-skip optimization', () => {
+    afterEach(() => vi.restoreAllMocks());
+
+    it('skips mountain draw when scrollY has not changed between frames', async () => {
+      let rafCallback: ((ts: number) => void) | null = null;
+      vi.stubGlobal('ResizeObserver', vi.fn(function () { return { observe: vi.fn(), disconnect: vi.fn() }; }));
+      vi.stubGlobal('requestAnimationFrame', vi.fn((cb: (ts: number) => void) => {
+        rafCallback = cb;
+        return 1;
+      }));
+      vi.stubGlobal('cancelAnimationFrame', vi.fn());
+      vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
+
+      const { MountainRenderer } = await import('./mountain-renderer');
+      const drawSpy = vi.spyOn(MountainRenderer.prototype, 'draw').mockImplementation(() => {});
+
+      Object.defineProperty(window, 'scrollY', { value: 100, writable: true, configurable: true });
+
+      await TestBed.configureTestingModule({
+        imports: [BackgroundSceneComponent],
+      }).compileComponents();
+      const f = TestBed.createComponent(BackgroundSceneComponent);
+      f.detectChanges();
+
+      // First frame: scrollY=100, lastScrollY=-1 → mountain draws
+      rafCallback!(0);
+      expect(drawSpy).toHaveBeenCalledTimes(1);
+
+      // Second frame: scrollY unchanged → mountain draw skipped
+      rafCallback!(16);
+      expect(drawSpy).toHaveBeenCalledTimes(1);
+
+      // Third frame: scrollY changes → mountain draws again
+      Object.defineProperty(window, 'scrollY', { value: 300, writable: true, configurable: true });
+      rafCallback!(32);
+      expect(drawSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('mobile (reduced complexity) environment', () => {
     let fixture: ComponentFixture<BackgroundSceneComponent>;
     let rendererResizeSpy: ReturnType<typeof vi.spyOn>;

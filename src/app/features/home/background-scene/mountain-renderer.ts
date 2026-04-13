@@ -122,12 +122,6 @@ export class MountainRenderer {
     // Foreground atmosphere — rendered in front of all mountain geometry
     this.drawForegroundAtmosphere();
 
-    // Scanlines
-    for (let y = 0; y < H; y += 4) {
-      ctx.fillStyle = 'rgba(0,0,0,0.03)';
-      ctx.globalAlpha = 1;
-      ctx.fillRect(0, y, W, 1);
-    }
     ctx.globalAlpha = 1;
   }
 

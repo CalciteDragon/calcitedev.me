@@ -33,6 +33,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   private rafId = 0;
   private resizeObserver: ResizeObserver | null = null;
   private resizeTimeout = 0;
+  private lastScrollY = -1;
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -67,11 +68,17 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
 
   private startLoop(): void {
     const loop = (timestamp: number): void => {
+      const scrollY = window.scrollY;
       const heroHeight = this.getHeroHeight();
-      const camY = window.scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset;
-      this.mountainRenderer?.setConfig({ ...DEFAULT_MOUNTAIN_CONFIG, camY });
-      this.mountainRenderer?.draw();
-      this.renderer?.drawFrame(timestamp, window.scrollY, heroHeight);
+
+      if (scrollY !== this.lastScrollY) {
+        this.lastScrollY = scrollY;
+        const camY = scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset;
+        this.mountainRenderer?.setConfig({ ...DEFAULT_MOUNTAIN_CONFIG, camY });
+        this.mountainRenderer?.draw();
+      }
+
+      this.renderer?.drawFrame(timestamp, scrollY, heroHeight);
       this.rafId = requestAnimationFrame(loop);
     };
     this.rafId = requestAnimationFrame(loop);
