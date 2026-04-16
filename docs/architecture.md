@@ -45,7 +45,7 @@ src/
 │   │   │   ├── home.component.html
 │   │   │   ├── home.component.scss
 │   │   │   ├── hero/                    # Hero section (avatar, heading, CTA)
-│   │   │   ├── background-scene/        # Canvas — stars, mountains, UFO, rocket
+│   │   │   ├── background-scene/        # Two-canvas layer — mountain terrain (bottom) + scene overlay (top)
 │   │   │   ├── feature-cards/           # Three intro cards (About, Projects, Skills)
 │   │   │   └── sections/                # Full-page scroll sections inside HomeComponent
 │   │   │       ├── projects-section/    # Projects scroll section
@@ -133,7 +133,7 @@ LayoutComponent
 ├── NavbarComponent                    (fixed, glassmorphism, pixel icons; scroll buttons for section nav)
 ├── <router-outlet>
 │   └── HomeComponent                  (smart container — owns all scroll sections)
-│       ├── BackgroundSceneComponent   (canvas — star field, mountains, UFO, rocket)
+│       ├── BackgroundSceneComponent   (two-canvas: mountain canvas (MountainRenderer, bottom) + scene canvas (SceneRenderer, top — stars, atmosphere, UFO, rocket))
 │       ├── HeroComponent              (avatar, heading, tagline, CTA)
 │       ├── FeatureCardsComponent      (3 intro cards → uses CardComponent)
 │       ├── ProjectsSectionComponent   (#projects scroll section)

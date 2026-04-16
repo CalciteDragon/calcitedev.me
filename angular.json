@@ -61,6 +61,7 @@
             "stylePreprocessorOptions": {
               "includePaths": ["src/styles"]
             },
+            "webWorkerTsConfig": "tsconfig.worker.json",
             "server": "src/main.server.ts",
             "outputMode": "static",
             "ssr": {
