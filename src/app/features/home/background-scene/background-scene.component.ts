@@ -12,7 +12,7 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { SceneRenderer } from './scene-renderer';
 import { defaultConfig } from './scene-entities';
-import { MountainRenderer } from './mountain-renderer';
+import { MountainWorkerBridge } from './mountain-worker-bridge';
 import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
 
 @Component({
@@ -29,7 +29,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   private readonly mountainCanvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('mountainCanvas');
 
   private renderer: SceneRenderer | null = null;
-  private mountainRenderer: MountainRenderer | null = null;
+  private mountainWorker: MountainWorkerBridge | null = null;
   private rafId = 0;
   private resizeObserver: ResizeObserver | null = null;
   private resizeTimeout = 0;
@@ -39,16 +39,19 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const canvas = this.canvasRef().nativeElement;
-    const mountainCanvas = this.mountainCanvasRef().nativeElement;
     const isReduced = window.matchMedia('(max-width: 767px)').matches;
 
     this.renderer = new SceneRenderer(canvas, defaultConfig(isReduced));
     // Canvas is position: fixed — size from viewport, not container
     this.renderer.resize(window.innerWidth, window.innerHeight);
 
-    this.mountainRenderer = new MountainRenderer(mountainCanvas);
-    this.mountainRenderer.setConfig(DEFAULT_MOUNTAIN_CONFIG);
-    this.mountainRenderer.resize(window.innerWidth, window.innerHeight);
+    // Transfer mountain canvas to OffscreenCanvas worker — main thread does zero draw work
+    this.mountainWorker = new MountainWorkerBridge();
+    this.mountainWorker.init(
+      this.mountainCanvasRef().nativeElement,
+      window.innerWidth,
+      window.innerHeight,
+    );
 
     // Observe <html> element as a viewport-resize proxy for fixed elements
     this.resizeObserver = new ResizeObserver(() => this.scheduleResize());
@@ -64,6 +67,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     }
     this.resizeObserver?.disconnect();
     this.renderer?.destroy();
+    this.mountainWorker?.destroy();
   }
 
   private startLoop(): void {
@@ -74,8 +78,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
       if (scrollY !== this.lastScrollY) {
         this.lastScrollY = scrollY;
         const camY = scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset;
-        this.mountainRenderer?.setConfig({ ...DEFAULT_MOUNTAIN_CONFIG, camY });
-        this.mountainRenderer?.draw();
+        this.mountainWorker?.setCamY(camY); // fire-and-forget postMessage — no draw call here
       }
 
       this.renderer?.drawFrame(timestamp, scrollY, heroHeight);
@@ -101,9 +104,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
       if (this.renderer) {
         this.renderer.resize(window.innerWidth, window.innerHeight);
       }
-      if (this.mountainRenderer) {
-        this.mountainRenderer.resize(window.innerWidth, window.innerHeight);
-      }
+      this.mountainWorker?.resize(window.innerWidth, window.innerHeight);
     }, 100);
   }
 }

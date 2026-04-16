@@ -8,11 +8,11 @@
  * Must be listed in angular.json → architect.test.options.setupFiles.
  */
 
-function makeCtx(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
-  const gradientStub = {
-    addColorStop: () => {},
-  } as unknown as CanvasGradient;
+function makeGradientStub(): CanvasGradient {
+  return { addColorStop: () => {} } as unknown as CanvasGradient;
+}
 
+function makeCtx(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
   const ctx: Partial<CanvasRenderingContext2D> = {
     canvas,
     clearRect: () => {},
@@ -30,14 +30,25 @@ function makeCtx(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
     restore: () => {},
     translate: () => {},
     setTransform: () => {},
-    createLinearGradient: () => gradientStub,
+    createLinearGradient: () => makeGradientStub(),
+    createRadialGradient: () => makeGradientStub(),
     fillStyle: '',
     strokeStyle: '',
     lineWidth: 1,
+    globalAlpha: 1,
   };
 
   return ctx as CanvasRenderingContext2D;
 }
+
+// transferControlToOffscreen — used by MountainWorkerBridge; jsdom doesn't implement it.
+Object.defineProperty(HTMLCanvasElement.prototype, 'transferControlToOffscreen', {
+  configurable: true,
+  writable: true,
+  value() {
+    return {} as OffscreenCanvas;
+  },
+});
 
 // Install mock on prototype before any test file is loaded.
 // Individual tests can override via vi.spyOn(canvas, 'getContext').mockReturnValue(null).
