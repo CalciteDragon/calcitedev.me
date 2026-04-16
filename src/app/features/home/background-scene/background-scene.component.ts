@@ -4,6 +4,7 @@ import {
   Component,
   DOCUMENT,
   ElementRef,
+  NgZone,
   OnDestroy,
   PLATFORM_ID,
   inject,
@@ -25,6 +26,7 @@ import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
 export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
+  private readonly ngZone = inject(NgZone);
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private readonly mountainCanvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('mountainCanvas');
 
@@ -57,7 +59,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     this.resizeObserver = new ResizeObserver(() => this.scheduleResize());
     this.resizeObserver.observe(this.document.documentElement);
 
-    this.startLoop();
+    this.ngZone.runOutsideAngular(() => this.startLoop());
   }
 
   ngOnDestroy(): void {
