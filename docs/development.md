@@ -150,13 +150,15 @@ Phase 0: Scaffold & Global Styles
 
 **Tasks:**
 - [x] `HeroComponent`:
-  - Pixel-art avatar placeholder (left side desktop, top on mobile)
-  - "HEY, I'M" pre-heading (spaced out, small)
-  - "TYLER HAWTHORN" (large, gradient text via `background-clip: text`)
-  - "AKA CALCITE" (gold/orange styled)
-  - "Code · Create · Innovate" tagline
-  - "Full Stack Developer & Game Enthusiast" subtitle
-  - "View My Work" CTA button (scrolls to the Projects section)
+  - Pixel-art avatar placeholder (left side desktop, top on mobile), floating `avatar-float` animation
+  - Sci-fi glowing platform below avatar (CSS `::before`/`::after` 3D depth effect)
+  - "TYLER HAWTHORN" / "AKA CALCITE" / subtitle — all use cyan→pink `background-attachment: fixed` gradient via `background-clip: text`
+  - HTML/CSS UFO (`hero__ufo`) with `ufo-float` keyframe + scroll-driven parallax (drifts 140vh over 200vh scroll)
+  - CSS tractor beam (`hero__ufo-beam`) — gradient cone beneath the disc
+  - Scroll indicator — 3 staggered pink chevrons that fade out at 150px scroll
+  - ~~"HEY, I'M" pre-heading~~ — removed in layout-and-design-tweaks
+  - ~~"Code · Create · Innovate" tagline~~ — removed in layout-and-design-tweaks
+  - ~~"View My Work" CTA button~~ — removed in layout-and-design-tweaks
 - [x] `FeatureCardsComponent`:
   - Three `CardComponent` instances: About Me (cyan glow), Latest Projects (blue glow), My Skills (purple glow)
   - Each has a placeholder pixel icon, short text, and a CTA ("Learn More", "See Projects", "View Skills")
@@ -166,6 +168,8 @@ Phase 0: Scaffold & Global Styles
 - [x] Single-page refactor: `ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent` created at `features/home/sections/`; old route stubs removed; `ScrollService` added for active section tracking; navbar updated to scroll buttons
 
 **Built:** `HeroComponent` (presentational, `bio` signal input), `FeatureCardsComponent` (static card config, smooth scroll), `HomeComponent` (smart container, reads `bioData`, hosts all sections). `appScrollReveal` applied to feature cards section from HomeComponent template. Canvas background deferred to Phase 5.
+
+**Updated in layout-and-design-tweaks:** `HeroComponent` redesigned — removed pre-heading, tagline, CTA; added platform, CSS UFO + beam, scroll indicator; all text switched to fixed-attachment cyan→pink gradient.
 
 **Deliverable:** Full single-page scroll layout. Hero and feature cards visible; all five sections present and scrollable.
 
@@ -194,9 +198,11 @@ Phase 0: Scaffold & Global Styles
 
 **MountainRenderer** (`mountain-renderer.ts`, `mountain.config.ts`): 3D perspective-projected FBM terrain. Draws dark background fill, radial horizon glow, terrain grid (back-to-front with fill + wire passes + per-face fog), and depth fog overlay. `setConfig()` rebuilds the terrain grid only when structural params change (not on camY-only updates). `camY = scrollY / 1200` drives scroll parallax — camera pans through the valley over a 1200px scroll range. Scanlines are handled entirely by the CSS `::after` pseudo-element on the host (not drawn in canvas). The rAF loop skips `MountainRenderer.draw()` when `scrollY` has not changed since the last frame (`lastScrollY` guard in `BackgroundSceneComponent`). `.mountain-canvas` has `will-change: transform` + `transform: translateZ(0)` to promote it to its own GPU compositor layer.
 
-**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles` → UFO/rocket (hero-only).
+**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles`. `drawFrame(timestamp, scrollY)` — no `heroHeight` param.
 
-**Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced. UFO and rocket remain hero-only (`scrollY < heroHeight`).
+**Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced.
+
+**Updated in layout-and-design-tweaks:** UFO and Rocket removed from `SceneRenderer` entirely — `UFO`/`Rocket` interfaces, `createUFO()`/`createRocket()` factories, `drawUFO()`/`drawRocket()` methods, and the `heroHeight` hero-visibility gate all deleted. The UFO moved to `HeroComponent` as a CSS/HTML element. The rocket is deferred to Phase 8 (Easter Eggs).
 
 Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Phase 9 performance work.
 

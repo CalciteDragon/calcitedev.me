@@ -44,12 +44,6 @@ describe('HeroComponent', () => {
     expect(alias?.textContent).toContain('AKA CALCITE');
   });
 
-  it('should render the tagline', () => {
-    expect(compiled.querySelector('.hero__tagline')?.textContent).toContain(
-      'Code · Create · Innovate',
-    );
-  });
-
   it('should render the title as subtitle', () => {
     expect(compiled.querySelector('.hero__subtitle')?.textContent).toContain(
       'Full Stack Developer',
@@ -60,22 +54,6 @@ describe('HeroComponent', () => {
     const img = compiled.querySelector('.hero__avatar-img') as HTMLImageElement;
     expect(img).toBeTruthy();
     expect(img.src).toContain('avatar-placeholder.svg');
-  });
-
-  it('should scroll to projects section when CTA is clicked', () => {
-    const doc = TestBed.inject(DOCUMENT);
-    const mockElement = { scrollIntoView: vi.fn() };
-    vi.spyOn(doc, 'getElementById').mockReturnValue(
-      mockElement as unknown as HTMLElement,
-    );
-
-    const button = compiled.querySelector('button') as HTMLButtonElement;
-    button.click();
-
-    expect(doc.getElementById).toHaveBeenCalledWith('projects');
-    expect(mockElement.scrollIntoView).toHaveBeenCalledWith({
-      behavior: 'smooth',
-    });
   });
 
   afterEach(() => {

@@ -1,7 +1,5 @@
 import {
   createStars,
-  createUFO,
-  createRocket,
   createParticles,
   defaultConfig,
 } from './scene-entities';
@@ -78,26 +76,3 @@ describe('createParticles', () => {
   });
 });
 
-describe('createUFO', () => {
-  it('returns a UFO with normalized position in 0..1', () => {
-    const ufo = createUFO();
-    expect(ufo.nx).toBeGreaterThanOrEqual(0);
-    expect(ufo.nx).toBeLessThanOrEqual(1);
-    expect(ufo.baseNy).toBeGreaterThanOrEqual(0);
-    expect(ufo.baseNy).toBeLessThanOrEqual(1);
-  });
-
-  it('returns a UFO with a positive bob amplitude', () => {
-    expect(createUFO().bobAmplitude).toBeGreaterThan(0);
-  });
-});
-
-describe('createRocket', () => {
-  it('returns a Rocket with normalized position in 0..1', () => {
-    const rocket = createRocket();
-    expect(rocket.nx).toBeGreaterThanOrEqual(0);
-    expect(rocket.nx).toBeLessThanOrEqual(1);
-    expect(rocket.ny).toBeGreaterThanOrEqual(0);
-    expect(rocket.ny).toBeLessThanOrEqual(1);
-  });
-});

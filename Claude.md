@@ -63,7 +63,7 @@ Workflow: make a code change → hot reload → screenshot → verify visually. 
 - TypeScript (strict mode)
 - SCSS + CSS custom properties (see design.md for full token list)
 - Fonts: Space Grotesk (headings), Inter (body), JetBrains Mono (code), Press Start 2P (pixel accents)
-- Canvas API for background scene (stars, mountains, UFO, rocket)
+- Canvas API for background scene (stars, mountains, particles) — UFO is a CSS/HTML element in HeroComponent
 - Pre-rendered static build on Render
 
 ## Conventions (Quick)
@@ -79,16 +79,15 @@ Workflow: make a code change → hot reload → screenshot → verify visually. 
 
 ## Routing Architecture
 
-All routes are children of `LayoutComponent` (navbar + footer shell). Feature pages are lazy-loaded:
+All routes are children of `LayoutComponent` (navbar + footer shell). The app is a single-page scroll — old sub-paths redirect to `/`:
 
 ```
-/          → HomeComponent
-/about     → AboutComponent
-/projects  → ProjectsComponent
-/contact   → ContactComponent
+/               → HomeComponent (all sections live here)
+/projects/:slug → ProjectDetailComponent (pre-rendered per slug)
+/about, /projects, /contact → redirect to /
 ```
 
-`app.routes.server.ts` contains SSR-specific route config (pre-render triggers). `ProjectDetailComponent` at `/projects/:slug` is planned for Phase 6.
+`app.routes.server.ts` contains SSR-specific route config (pre-render triggers, enumerates all project slugs).
 
 ## SCSS Architecture
 
@@ -108,3 +107,19 @@ Component SCSS uses `@use 'variables'` (not a relative path). Never hard-code he
 1. Check `docs/development.md` for current progress and next phase
 2. Read the relevant docs for context before writing code
 3. After completing work, update docs to reflect changes (mark tasks complete, note new components, revise architecture if needed)
+
+## Doc Update Rules (MANDATORY)
+
+After **any** code change — no matter how small — update the relevant docs before closing the task. This is not optional.
+
+| What changed | Which docs to update |
+|---|---|
+| Component added, removed, or restructured | `architecture.md` (component map, folder structure) |
+| Component visual design changed | `design.md` (hero spec, animation guidelines, type scale, background scene table) |
+| New animation or interaction added | `design.md` (Animation Guidelines section) |
+| Phase tasks completed | `development.md` (check off tasks, add "Built:" summary) |
+| Architecture decision changed | `architecture.md` + `overview.md` if user-facing |
+| Asset paths or asset types changed | `architecture.md` (folder structure) |
+| Tech stack or Angular version changed | `overview.md` + `CLAUDE.md` Tech Stack section |
+
+**Specifically:** if you remove a feature from one place and move it to another (e.g., UFO from canvas to CSS), update every doc that mentioned the old location — don't leave ghost references. Search for the affected term across `/docs` before marking docs done.

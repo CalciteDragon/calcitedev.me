@@ -5,20 +5,35 @@
         src="assets/pixel-art/avatar-placeholder.svg"
         alt="Pixel art avatar of Tyler Hawthorn"
         class="hero__avatar-img"
-        width="220"
-        height="220"
+        width="300"
+        height="300"
       />
+      <div class="hero__platform" aria-hidden="true"></div>
     </div>
 
     <div class="hero__content">
-      <p class="hero__pre-heading">HEY, I'M</p>
       <h1 class="hero__name">{{ bio().name.toUpperCase() }}</h1>
       <p class="hero__alias">AKA {{ bio().alias.toUpperCase() }}</p>
-      <p class="hero__tagline">{{ bio().tagline }}</p>
       <p class="hero__subtitle">{{ bio().title }}</p>
-      <app-cta-button glowColor="cyan" (ctaClick)="scrollToWork()">
-        View My Work
-      </app-cta-button>
     </div>
+  </div>
+
+  <div class="hero__ufo" aria-hidden="true">
+    <div class="hero__ufo-disc">
+      <img
+        src="assets/pixel-art/ufo-placeholder.svg"
+        alt=""
+        class="hero__ufo-img"
+        width="220"
+        height="120"
+      />
+    </div>
+    <div class="hero__ufo-beam"></div>
+  </div>
+
+  <div class="hero__scroll-indicator" aria-hidden="true">
+    <span class="hero__scroll-arrow"></span>
+    <span class="hero__scroll-arrow"></span>
+    <span class="hero__scroll-arrow"></span>
   </div>
 </section>

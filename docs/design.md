@@ -77,15 +77,16 @@ Used for: heading gradients, active states, card border glows, CTA accents.
 
 ### Type Scale
 
-| Element         | Size (desktop) | Weight | Notes                          |
-| --------------- | -------------- | ------ | ------------------------------ |
-| Hero name       | 4rem–5rem      | 700    | Gradient text, largest element |
-| Hero pre-heading| 1rem           | 400    | "HEY, I'M" — spaced out       |
-| H2 (Section)    | 2rem–2.5rem    | 700    | Section headings               |
-| H3 (Card title) | 1.25rem        | 600    | Card headings                  |
-| Body            | 1rem           | 400    | Line height 1.6               |
-| Small / Label   | 0.875rem       | 500    | Tags, captions                 |
-| Pixel text      | 0.75rem–1rem   | 400    | `Press Start 2P`, used sparingly |
+| Element         | Size (desktop)           | Weight | Notes                                              |
+| --------------- | ------------------------ | ------ | -------------------------------------------------- |
+| Hero name       | `clamp(3rem, 8vw, 7rem)` | 700    | Cyan→pink fixed-bg gradient, `background-clip: text` |
+| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Same gradient as name                            |
+| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Same gradient as name                            |
+| H2 (Section)    | 2rem–2.5rem              | 700    | Section headings                                   |
+| H3 (Card title) | 1.25rem                  | 600    | Card headings                                      |
+| Body            | 1rem                     | 400    | Line height 1.6                                    |
+| Small / Label   | 0.875rem                 | 500    | Tags, captions                                     |
+| Pixel text      | 0.75rem–1rem             | 400    | `Press Start 2P`, used sparingly                   |
 
 Use `clamp()` for fluid typography on mobile.
 
@@ -151,15 +152,13 @@ Hero name uses the accent gradient as `background-clip: text`:
 ┌─────────────────────────────────────────────────┐
 │  [Background: star field + mountains + parallax] │
 │                                                   │
-│   🧑‍💻              HEY, I'M                      │
-│  (pixel           TYLER HAWTHORN     🚀          │
-│   avatar)         AKA CALCITE        (rocket)    │
-│                   Code · Create · Innovate        │
-│                   Full Stack Developer &     🛸   │
-│                   Game Enthusiast           (UFO) │
+│   🧑‍💻                                       🛸   │
+│  (pixel avatar)   TYLER HAWTHORN         (UFO — │
+│  [=== platform]   AKA CALCITE             HTML) │
+│                   Full Stack Developer            │
 │                                                   │
-│                  [ View My Work ]                 │
-│                                                   │
+│                     ↓  ↓  ↓  (scroll indicator)  │
+└─────────────────────────────────────────────────┘
 ├─────────────────────────────────────────────────┤
 │  ┌─────────┐  ┌──────────────┐  ┌───────────┐  │
 │  │ About   │  │ Latest       │  │ My Skills │  │
@@ -168,7 +167,14 @@ Hero name uses the accent gradient as `background-clip: text`:
 └─────────────────────────────────────────────────┘
 ```
 
-**"View My Work" CTA** scrolls the page to the Projects section (`#projects`).
+**Current hero elements:**
+- Avatar (left, floating animation) on a glowing sci-fi platform (CSS pseudo-element depth effect)
+- Name, alias, and title — all use a cyan→pink `background-attachment: fixed` gradient applied via `background-clip: text`
+- UFO — HTML `<img>` with CSS float + tilt keyframe + scroll-driven parallax (drifts down 140vh over 200vh scroll)
+- UFO tractor beam — CSS gradient cone beneath the disc
+- Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
+
+**Removed in layout-and-design-tweaks:** "HEY, I'M" pre-heading, "Code · Create · Innovate" tagline, "View My Work" CTA button.
 
 ### Layout Note
 
@@ -182,10 +188,10 @@ The page is a single-page scroll: Home (hero + feature cards) → Projects → A
 | Cyber mountains   | 3 layers (far/mid/front) — indigo, cyan, purple. Valley bias: peaks tall at screen edges, low in center. Ridgelines exit off the sides via slope extrapolation. Opaque dark fill occludes stars behind the range. `ctx.shadowBlur` neon glow bloom on ridgeline. Renders site-wide (not hero-only). |
 | Atmosphere        | Subtle cyan-to-indigo linear gradient haze toward the lower canvas — simulates light scatter.        |
 | Horizon glow      | Neon bloom band (cyan → purple) drawn above mountains to simulate atmospheric ridge scatter.         |
-| UFO               | Small floating sprite, soft glow beam, slow bob animation. Hero-only (hidden when scrollY ≥ heroHeight). |
-| Rocket            | Pixel rocket with animated flame gradient (amber → pink → purple). Hero-only.                       |
-| Parallax          | Mountains shift on scroll; clamped at `heroHeight` so they settle rather than drift off-screen.     |
+| Parallax          | Mountains shift on scroll via `camY = scrollY / 1200` panning.                                      |
 | Particles         | Minimal upward-drifting pixel particles (very subtle, 20 default / 8 reduced).                      |
+
+> **Note:** The UFO and Rocket were removed from the canvas in the layout-and-design-tweaks pass. The UFO is now an HTML/CSS element inside `HeroComponent` (see Hero Section Design below). The rocket is planned for Phase 8 (Easter Eggs) as a controllable element.
 
 ### Pixel-Art Avatar
 
@@ -241,7 +247,17 @@ Three cards below the hero: **About Me**, **Latest Projects**, **My Skills**
 
 - Micro-interactions (hover, click): 150–300ms
 - Scroll reveals: scroll-position-linked (not time-based) — animation progress maps directly to scroll position via `animation-timeline: view()`
-- Background elements (UFO bob, star twinkle): continuous, slow (2–5s loops)
+- Background elements (star twinkle, avatar float): continuous, slow (2–5s loops)
+
+### Hero CSS Animations
+
+| Animation            | Duration | Notes                                                                         |
+| -------------------- | -------- | ----------------------------------------------------------------------------- |
+| `avatar-float`       | 3s       | 8px vertical bob, `ease-in-out infinite`                                      |
+| `ufo-float`          | 7s       | ±14px vertical + ±2° tilt, `ease-in-out infinite`                            |
+| `ufo-parallax`       | scroll   | `animation-timeline: scroll(root)`, range 0–200vh; translates UFO 140vh down |
+| `scroll-pulse`       | 2.5s     | 3 staggered chevrons (0s / 0.35s / 0.7s delay); neon pink glow at 50%        |
+| `scroll-indicator-fade` | scroll | `animation-timeline: scroll(root)`, range 0–150px; fades indicator opacity 1→0 |
 
 ### Easing
 

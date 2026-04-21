@@ -75,7 +75,6 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   private startLoop(): void {
     const loop = (timestamp: number): void => {
       const scrollY = window.scrollY;
-      const heroHeight = this.getHeroHeight();
 
       if (scrollY !== this.lastScrollY) {
         this.lastScrollY = scrollY;
@@ -83,21 +82,10 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
         this.mountainWorker?.setCamY(camY); // fire-and-forget postMessage — no draw call here
       }
 
-      this.renderer?.drawFrame(timestamp, scrollY, heroHeight);
+      this.renderer?.drawFrame(timestamp, scrollY);
       this.rafId = requestAnimationFrame(loop);
     };
     this.rafId = requestAnimationFrame(loop);
-  }
-
-  /**
-   * Returns the pixel height of the #home section — used to gate hero-only
-   * canvas elements. Falls back to window.innerHeight when element isn't found.
-   */
-  private getHeroHeight(): number {
-    return (
-      (this.document.getElementById('home') as HTMLElement | null)?.offsetHeight ??
-      window.innerHeight
-    );
   }
 
   private scheduleResize(): void {

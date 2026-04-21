@@ -17,7 +17,7 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** — a dark, 
 
 | Layer          | Technology                        |
 | -------------- | --------------------------------- |
-| Framework      | Angular 19 (standalone components) |
+| Framework      | Angular 21 (standalone components) |
 | Language       | TypeScript (strict mode)          |
 | Styling        | SCSS + CSS custom properties      |
 | Build          | Angular CLI / esbuild             |
@@ -33,10 +33,11 @@ The site is a single-page scroll layout. All content lives on one route (`/`), d
 ### 1. Home (Hero)
 
 The hero experience. Features:
-- **Pixel-art avatar** of Tyler sitting with a laptop (optional idle animation — typing, blinking)
-- **Large gradient heading:** "HEY, I'M" → "TYLER HAWTHORN" with "AKA CALCITE" subheading
-- **CTA button:** "View My Work" with neon border glow (scrolls to Projects section)
-- **Animated background scene:** star field, cyber wireframe mountains with parallax, floating UFO with glow beam, pixel rocket launch with smoke particles
+- **Pixel-art avatar** of Tyler sitting with a laptop — floating `avatar-float` animation; stands on a glowing sci-fi platform (CSS 3D depth)
+- **Large gradient heading:** "TYLER HAWTHORN" / "AKA CALCITE" / title — all using a cyan→pink fixed-attachment gradient via `background-clip: text`
+- **HTML/CSS UFO** — pixel-art image with float + tilt keyframe and scroll-driven parallax; cyan tractor beam drawn in CSS below
+- **Scroll indicator** — 3 cascading pink chevrons that fade out as the user begins scrolling
+- **Animated canvas background:** star field, cyber wireframe mountains with parallax, floating particles
 - **Three feature cards** below the hero: About Me, Latest Projects, My Skills — each with neon-accented borders and pixel-style icons
 
 **Purpose:** Hook the visitor instantly with personality, visual flair, and clear navigation.

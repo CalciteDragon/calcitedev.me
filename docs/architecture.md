@@ -70,9 +70,12 @@ src/
 │   ├── app.config.ts
 │   └── app.routes.ts
 │
+├── (assets live in /public, not /src/assets)
+│
+public/
 ├── assets/
 │   ├── images/                  # Project screenshots, profile photo
-│   ├── pixel-art/               # Pixel-art sprites (avatar, UFO, rocket, icons)
+│   ├── pixel-art/               # Pixel-art sprites (avatar, UFO, icons) — served at /assets/pixel-art/
 │   ├── icons/                   # SVG icons or icon sprite
 │   └── fonts/                   # Self-hosted web fonts
 │
@@ -133,8 +136,8 @@ LayoutComponent
 ├── NavbarComponent                    (fixed, glassmorphism, pixel icons; scroll buttons for section nav)
 ├── <router-outlet>
 │   └── HomeComponent                  (smart container — owns all scroll sections)
-│       ├── BackgroundSceneComponent   (two-canvas: mountain canvas (MountainRenderer, bottom) + scene canvas (SceneRenderer, top — stars, atmosphere, UFO, rocket))
-│       ├── HeroComponent              (avatar, heading, tagline, CTA)
+│       ├── BackgroundSceneComponent   (two-canvas: mountain canvas (MountainRenderer, bottom) + scene canvas (SceneRenderer, top — stars, atmosphere, particles))
+│       ├── HeroComponent              (avatar + platform, name/alias/subtitle gradient text, CSS UFO, scroll indicator)
 │       ├── FeatureCardsComponent      (3 intro cards → uses CardComponent)
 │       ├── ProjectsSectionComponent   (#projects scroll section)
 │       ├── AboutSectionComponent      (#about scroll section)

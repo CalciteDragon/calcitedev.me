@@ -10,21 +10,6 @@ export interface Star {
   parallaxFactor: number; // 0.01–0.04 — how far star drifts per CSS px of scrollY
 }
 
-export interface UFO {
-  nx: number;           // normalized horizontal position (0–1)
-  baseNy: number;       // normalized vertical base position (0–1)
-  bobPhase: number;     // radians; advances each frame
-  bobSpeed: number;     // radians per ms
-  bobAmplitude: number; // CSS px
-}
-
-export interface Rocket {
-  nx: number;        // normalized horizontal position (0–1)
-  ny: number;        // normalized vertical position (0–1)
-  flamePhase: number;
-  flameSpeed: number; // radians per ms
-}
-
 export interface SceneParticle {
   x: number;       // CSS px
   y: number;       // CSS px
@@ -62,25 +47,6 @@ export function createStars(count: number, cssWidth: number, cssHeight: number):
     twinkleSpeed: 0.0003 + Math.random() * 0.0012,
     parallaxFactor: 0.01 + Math.random() * 0.03,  // subtle depth: 0.01–0.04
   }));
-}
-
-export function createUFO(): UFO {
-  return {
-    nx: 0.75,
-    baseNy: 0.22,
-    bobPhase: 0,
-    bobSpeed: 0.0008,
-    bobAmplitude: 8,
-  };
-}
-
-export function createRocket(): Rocket {
-  return {
-    nx: 0.87,
-    ny: 0.52,
-    flamePhase: 0,
-    flameSpeed: 0.003,
-  };
 }
 
 export function createParticles(
