@@ -40,7 +40,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    animation: avatar-float 3s ease-in-out infinite;
+    animation: avatar-float 6s ease-in-out infinite;
 
     @media (prefers-reduced-motion: reduce) {
       animation: none;
@@ -207,19 +207,60 @@
   }
 
   &__ufo-disc {
-    filter:
-      drop-shadow(0 0 5px rgba(34, 211, 238, 0.5))
-      drop-shadow(0 0 14px rgba(34, 211, 238, 0.25))
-      drop-shadow(0 0 32px rgba(34, 211, 238, 0.1))
-      drop-shadow(0 10px 30px rgba(236, 72, 153, 0.12));
+    position: relative;
+  }
+
+  &__ufo-glow {
+    position: absolute;
+    // Extend 100px beyond the disc on all sides so drop-shadow bleed stays
+    // within the masked area — mask-image only fades what's inside this box.
+    inset: -100px;
+    pointer-events: none;
+
+    img {
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      width: 250px;
+      height: auto;
+      image-rendering: pixelated;
+
+      @include lg {
+        width: 325px;
+      }
+    }
+
+    &--l {
+      // calc(50%) aligns with the disc centre regardless of breakpoint;
+      // the ±60px window is the blend zone where cyan fades to nothing.
+      mask-image: linear-gradient(to right, black, black calc(50% - 60px), transparent calc(50% + 60px));
+      -webkit-mask-image: linear-gradient(to right, black, black calc(50% - 60px), transparent calc(50% + 60px));
+
+      img {
+        filter:
+          drop-shadow(0 0 4px rgba(34, 211, 238, 0.95))
+          drop-shadow(0 0 10px rgba(34, 211, 238, 0.6))
+          drop-shadow(0 0 22px rgba(34, 211, 238, 0.25));
+      }
+    }
+
+    &--r {
+      mask-image: linear-gradient(to right, transparent calc(50% - 60px), black calc(50% + 60px), black);
+      -webkit-mask-image: linear-gradient(to right, transparent calc(50% - 60px), black calc(50% + 60px), black);
+
+      img {
+        filter:
+          drop-shadow(0 0 4px rgba(236, 72, 153, 0.95))
+          drop-shadow(0 0 10px rgba(236, 72, 153, 0.6))
+          drop-shadow(0 0 22px rgba(236, 72, 153, 0.25));
+      }
+    }
   }
 
   &__ufo-img {
     width: 250px;
     height: auto;
     image-rendering: pixelated;
-    mask-image: linear-gradient(to bottom, black 50%, transparent 88%);
-    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 88%);
 
     @include lg {
       width: 325px;
@@ -232,7 +273,8 @@
     z-index: 1;
     width: 250px;
     height: 400px;
-    margin-top: -55px;
+    margin-top: 0px;
+    opacity: 50%;
     background: linear-gradient(
       to bottom,
       rgba(34, 211, 238, 0.28) 0%,
@@ -260,7 +302,7 @@
     @include lg {
       width: 325px;
       height: 550px;
-      margin-top: -60px;
+      margin-top: 0px;
     }
 
     @media (prefers-reduced-motion: reduce) {

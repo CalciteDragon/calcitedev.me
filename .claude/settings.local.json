@@ -15,7 +15,8 @@
       "mcp__plugin_playwright_playwright__browser_tabs",
       "mcp__plugin_playwright_playwright__browser_wait_for",
       "Bash(rm ufo-*.png)",
-      "Bash(rm .playwright-mcp/*.png)"
+      "Bash(rm .playwright-mcp/*.png)",
+      "Bash(npm run *)"
     ]
   },
   "outputStyle": "Explanatory",
