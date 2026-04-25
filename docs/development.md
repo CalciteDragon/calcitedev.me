@@ -106,7 +106,6 @@ Phase 0: Scaffold & Global Styles
 
 **Tasks:**
 - [ ] `CardComponent` — generic neon-bordered card with configurable glow color (cyan/blue/purple/pink). Dark surface background, rounded corners, hover lift + glow intensify
-- [ ] `CtaButtonComponent` — rounded rectangle, neon border glow, hover scale(1.02), click scale(0.98)
 - [ ] `SectionHeaderComponent` — gradient text heading, optional subtitle
 - [ ] `SkillChipComponent` — small pill/badge displaying a skill name, optionally color-coded by category
 - [ ] `TechTagComponent` — tag for project tech stack (could use pixel-style font variant)
@@ -159,15 +158,10 @@ Phase 0: Scaffold & Global Styles
   - ~~"HEY, I'M" pre-heading~~ — removed in layout-and-design-tweaks
   - ~~"Code · Create · Innovate" tagline~~ — removed in layout-and-design-tweaks
   - ~~"View My Work" CTA button~~ — removed in layout-and-design-tweaks
-- [x] `FeatureCardsComponent`:
-  - Three `CardComponent` instances: About Me (cyan glow), Latest Projects (blue glow), My Skills (purple glow)
-  - Each has a placeholder pixel icon, short text, and a CTA ("Learn More", "See Projects", "View Skills")
-  - Cards scroll to their respective sections (not router links)
-- [x] `HomeComponent` — smart container; orchestrates Hero + FeatureCards + all scroll sections; solid dark background (canvas comes next)
-- [x] Scroll-reveal animation on the feature cards section
+- [x] `HomeComponent` — smart container; orchestrates Hero + all scroll sections; solid dark background (canvas comes next)
 - [x] Single-page refactor: `ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent` created at `features/home/sections/`; old route stubs removed; `ScrollService` added for active section tracking; navbar updated to scroll buttons
 
-**Built:** `HeroComponent` (presentational, `bio` signal input), `FeatureCardsComponent` (static card config, smooth scroll), `HomeComponent` (smart container, reads `bioData`, hosts all sections). `appScrollReveal` applied to feature cards section from HomeComponent template. Canvas background deferred to Phase 5.
+**Built:** `HeroComponent` (presentational, `bio` signal input), `HomeComponent` (smart container, reads `bioData`, hosts all sections). Canvas background deferred to Phase 5. `FeatureCardsComponent` was built then removed — it duplicated the navbar and added no value.
 
 **Updated in layout-and-design-tweaks:** `HeroComponent` redesigned — removed pre-heading, tagline, CTA; added platform, CSS UFO + beam, scroll indicator; all text switched to fixed-attachment cyan→pink gradient.
 
@@ -318,7 +312,6 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 ### Responsive
 - [ ] Test and fix all layouts at each breakpoint (xs, sm, md, lg, xl)
 - [ ] Hero: avatar stacks above text on mobile
-- [ ] Feature cards: single column on mobile
 - [ ] Project grid: 1 → 2 → 3 columns as viewport widens
 - [ ] Navbar: hamburger menu works correctly, drawer closes on navigation
 - [ ] Reduce canvas scene complexity on mobile (fewer stars, skip parallax, simpler mountains)

@@ -8,8 +8,6 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HeroComponent } from './hero/hero.component';
-import { FeatureCardsComponent } from './feature-cards/feature-cards.component';
-import { ScrollRevealDirective } from '../../shared/directives/scroll-reveal.directive';
 import { ProjectsSectionComponent } from './sections/projects-section/projects-section.component';
 import { AboutSectionComponent } from './sections/about-section/about-section.component';
 import { SkillsSectionComponent } from './sections/skills-section/skills-section.component';
@@ -26,8 +24,6 @@ import { socialLinksData } from '../../data/social-links.data';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     HeroComponent,
-    FeatureCardsComponent,
-    ScrollRevealDirective,
     ProjectsSectionComponent,
     AboutSectionComponent,
     SkillsSectionComponent,

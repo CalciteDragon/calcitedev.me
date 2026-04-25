@@ -67,10 +67,6 @@ describe('HomeComponent', () => {
     expect(compiled.querySelector('app-hero')).toBeTruthy();
   });
 
-  it('should render the feature cards section', () => {
-    expect(compiled.querySelector('app-feature-cards')).toBeTruthy();
-  });
-
   it('should pass bioData name to the hero', () => {
     const h1 = compiled.querySelector('.hero__name');
     expect(h1?.textContent).toContain('TYLER HAWTHORN');

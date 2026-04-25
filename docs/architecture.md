@@ -30,8 +30,7 @@ src/
 │   │   │   ├── skill-chip/
 │   │   │   ├── section-header/
 │   │   │   ├── social-links/
-│   │   │   ├── tech-tag/
-│   │   │   └── cta-button/              # Neon glow CTA button
+│   │   │   └── tech-tag/
 │   │   ├── directives/
 │   │   │   ├── scroll-reveal.directive.ts   # Animate elements on scroll into view
 │   │   │   └── glow.directive.ts            # Neon glow effect on hover
@@ -44,9 +43,8 @@ src/
 │   │   │   ├── home.component.ts
 │   │   │   ├── home.component.html
 │   │   │   ├── home.component.scss
-│   │   │   ├── hero/                    # Hero section (avatar, heading, CTA)
+│   │   │   ├── hero/                    # Hero section (avatar, heading, UFO, scroll indicator)
 │   │   │   ├── background-scene/        # Two-canvas layer — mountain terrain (bottom) + scene overlay (top)
-│   │   │   ├── feature-cards/           # Three intro cards (About, Projects, Skills)
 │   │   │   └── sections/                # Full-page scroll sections inside HomeComponent
 │   │   │       ├── projects-section/    # Projects scroll section
 │   │   │       ├── about-section/       # About scroll section
@@ -138,7 +136,6 @@ LayoutComponent
 │   └── HomeComponent                  (smart container — owns all scroll sections)
 │       ├── BackgroundSceneComponent   (two-canvas: mountain canvas (MountainRenderer, bottom) + scene canvas (SceneRenderer, top — stars, atmosphere, particles))
 │       ├── HeroComponent              (avatar + platform, name/alias/subtitle gradient text, CSS UFO, scroll indicator)
-│       ├── FeatureCardsComponent      (3 intro cards → uses CardComponent)
 │       ├── ProjectsSectionComponent   (#projects scroll section)
 │       ├── AboutSectionComponent      (#about scroll section)
 │       ├── SkillsSectionComponent     (#skills scroll section)
