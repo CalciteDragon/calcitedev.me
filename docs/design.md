@@ -97,7 +97,6 @@ Use `clamp()` for fluid typography on mobile.
 - **Max content width:** 1200px, centered
 - **Section padding:** 80–120px vertical, 24px horizontal (mobile: 48–64px vertical, 16px)
 - **Card grid:** CSS Grid, responsive (`repeat(auto-fill, minmax(320px, 1fr))`)
-- **Feature cards (hero):** 3-column on desktop, stacked on mobile
 - **Spacing scale:** 8px base — 8, 16, 24, 32, 48, 64, 96
 
 ### Breakpoints
@@ -159,12 +158,6 @@ Hero name uses the accent gradient as `background-clip: text`:
 │                                                   │
 │                     ↓  ↓  ↓  (scroll indicator)  │
 └─────────────────────────────────────────────────┘
-├─────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌──────────────┐  ┌───────────┐  │
-│  │ About   │  │ Latest       │  │ My Skills │  │
-│  │ Me      │  │ Projects     │  │           │  │
-│  └─────────┘  └──────────────┘  └───────────┘  │
-└─────────────────────────────────────────────────┘
 ```
 
 **Current hero elements:**
@@ -174,18 +167,18 @@ Hero name uses the accent gradient as `background-clip: text`:
 - UFO tractor beam — CSS gradient cone beneath the disc
 - Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
 
-**Removed in layout-and-design-tweaks:** "HEY, I'M" pre-heading, "Code · Create · Innovate" tagline, "View My Work" CTA button.
+**Removed in layout-and-design-tweaks:** "HEY, I'M" pre-heading, "Code · Create · Innovate" tagline, "View My Work" CTA button, and the three-card hero navigation strip. The feature cards duplicated the fixed navbar and were intentionally deleted.
 
 ### Layout Note
 
-The page is a single-page scroll: Home (hero + feature cards) → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport.
+The page is a single-page scroll: Home hero → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport.
 
 ### Background Scene (Canvas)
 
 | Element           | Description                                                                                          |
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
 | Star field        | 130 stars (65 reduced), radius 0.4–2.5px, opacity 0.2–0.8, concentrated in upper 85% of canvas. Large stars get cross-sparkle arms. Per-star parallax (0.01–0.04). |
-| Cyber mountains   | 3 layers (far/mid/front) — indigo, cyan, purple. Valley bias: peaks tall at screen edges, low in center. Ridgelines exit off the sides via slope extrapolation. Opaque dark fill occludes stars behind the range. `ctx.shadowBlur` neon glow bloom on ridgeline. Renders site-wide (not hero-only). |
+| Cyber mountains   | Perspective-projected FBM terrain with filled faces, wire passes, per-face fog, and a scroll-driven camera. The mountain canvas is transferred to `MountainRenderer` in a dedicated worker through `MountainWorkerBridge`. It renders site-wide, not only behind the hero. |
 | Atmosphere        | Subtle cyan-to-indigo linear gradient haze toward the lower canvas — simulates light scatter.        |
 | Horizon glow      | Neon bloom band (cyan → purple) drawn above mountains to simulate atmospheric ridge scatter.         |
 | Parallax          | Mountains shift on scroll via `camY = scrollY / 1200` panning.                                      |
@@ -209,15 +202,9 @@ The page is a single-page scroll: Home (hero + feature cards) → Projects → A
 - Hover: glow + color shift, underline animation or pixel highlight
 - Mobile: hamburger → slide-in drawer
 
-### Feature Cards (Hero Section)
+### Removed Hero Feature Cards
 
-Three cards below the hero: **About Me**, **Latest Projects**, **My Skills**
-
-- Dark surface background (`#111827`)
-- Each card has a different neon border glow (cyan, blue, purple)
-- Pixel-style icon inside each card
-- CTA buttons: "Learn More", "See Projects", "View Skills"
-- Hover: `translateY(-4px)` lift + glow intensifies + slight scale
+The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were removed in the layout-and-design-tweaks pass. Do not reintroduce them without a new product decision; fixed navigation and the natural section order now provide that function.
 
 ### Project Cards
 
@@ -227,19 +214,19 @@ Three cards below the hero: **About Me**, **Latest Projects**, **My Skills**
 - Hover: lift + neon border glow
 - Links to live demo and GitHub
 
-### CTA Buttons
+### Buttons and Link CTAs
 
-- Rounded rectangle
-- Neon border glow (accent color)
-- Hover: scale(1.02) + glow intensifies
-- Click: slight compression (scale(0.98))
+- Filter pills, project links, and the contact email CTA use compact rounded neon treatments.
+- Hover states should intensify borders/glow without overwhelming adjacent text.
+- Pressed-state compression and a unified button interaction system remain Phase 7 work.
 
 ### Footer
 
-- Centered social icons: GitHub, Twitter/X, LinkedIn
+- Centered social icons: GitHub, Discord, LinkedIn
 - Icons glow on hover (each with its own accent color)
 - Minimal: copyright line, "Built with Angular" note
 - Not fixed — sits at bottom of content
+- Current footer anchors still use placeholder `href="#"` values and must be wired before launch.
 
 ## Animation Guidelines
 
@@ -278,7 +265,6 @@ Three cards below the hero: **About Me**, **Latest Projects**, **My Skills**
 ### Mobile Adjustments
 
 - Hero: stack avatar above text, full-width
-- Feature cards: single column, stacked
 - Background scene: simplify or disable heavy canvas elements
 - Navbar: hamburger menu with slide-in drawer
 - Reduce glow intensity to save battery on OLED screens

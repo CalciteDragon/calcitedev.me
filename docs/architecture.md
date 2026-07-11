@@ -1,191 +1,153 @@
 # Architecture
 
-## Folder Structure
+## Current Folder Structure
 
-```
+```text
 src/
 ├── app/
-│   ├── core/                    # Singleton services
-│   │   ├── services/
-│   │   │   ├── theme.service.ts         # Dark/light toggle (future)
-│   │   │   ├── meta.service.ts          # SEO/meta tag management
-│   │   │   └── scroll.service.ts        # Active section tracking via IntersectionObserver
-│   │   └── guards/
-│   │
-│   ├── layout/                  # App shell — always visible
-│   │   ├── navbar/
-│   │   │   ├── navbar.component.ts
-│   │   │   ├── navbar.component.html
-│   │   │   └── navbar.component.scss
-│   │   ├── footer/
-│   │   │   ├── footer.component.ts
-│   │   │   ├── footer.component.html
-│   │   │   └── footer.component.scss
-│   │   └── layout.component.ts          # Wraps <navbar> + <router-outlet> + <footer>
-│   │
-│   ├── shared/                  # Reusable, stateless (presentational) components
+│   ├── core/
+│   │   └── services/
+│   │       └── scroll.service.ts       # Active-section tracking, fragments, smooth scroll
+│   ├── layout/
+│   │   ├── navbar/                     # Fixed desktop nav + mobile drawer
+│   │   ├── footer/                     # Footer shell and social presentation
+│   │   └── layout.component.ts         # Navbar + background + router outlet + footer
+│   ├── shared/
 │   │   ├── components/
-│   │   │   ├── card/                    # Generic neon-bordered card
+│   │   │   ├── card/
 │   │   │   ├── project-card/
-│   │   │   ├── skill-chip/
 │   │   │   ├── section-header/
+│   │   │   ├── skill-chip/
 │   │   │   ├── social-links/
 │   │   │   └── tech-tag/
 │   │   ├── directives/
-│   │   │   ├── scroll-reveal.directive.ts   # Animate elements on scroll into view
-│   │   │   └── glow.directive.ts            # Neon glow effect on hover
-│   │   ├── pipes/
-│   │   └── animations/
-│   │       └── shared-animations.ts     # Reusable Angular animation triggers
-│   │
-│   ├── features/                # Route-level feature components (lazy-loaded)
+│   │   │   ├── glow.directive.ts
+│   │   │   └── scroll-reveal.directive.ts
+│   │   └── types/
+│   │       └── glow-color.type.ts
+│   ├── features/
 │   │   ├── home/
-│   │   │   ├── home.component.ts
-│   │   │   ├── home.component.html
-│   │   │   ├── home.component.scss
-│   │   │   ├── hero/                    # Hero section (avatar, heading, UFO, scroll indicator)
-│   │   │   ├── background-scene/        # Two-canvas layer — mountain terrain (bottom) + scene overlay (top)
-│   │   │   └── sections/                # Full-page scroll sections inside HomeComponent
-│   │   │       ├── projects-section/    # Projects scroll section
-│   │   │       ├── about-section/       # About scroll section
-│   │   │       ├── skills-section/      # Skills scroll section
-│   │   │       └── contact-section/     # Contact scroll section
+│   │   │   ├── background-scene/       # Scene renderer, mountain renderer, worker bridge
+│   │   │   ├── hero/                   # Avatar, platform, gradient type, CSS/HTML UFO
+│   │   │   ├── sections/               # Projects, About, Skills, Contact
+│   │   │   └── home.component.*        # Smart single-page container
 │   │   └── projects/
-│   │       └── project-detail/          # Phase 6: /projects/:slug detail view
-│   │
-│   ├── models/                  # TypeScript interfaces & types
-│   │   ├── project.model.ts
-│   │   ├── skill.model.ts
-│   │   └── social-link.model.ts
-│   │
-│   ├── data/                    # Static content as TS constants
-│   │   ├── projects.data.ts
-│   │   ├── skills.data.ts
-│   │   ├── bio.data.ts
-│   │   └── social-links.data.ts
-│   │
-│   ├── app.component.ts
-│   ├── app.config.ts
-│   └── app.routes.ts
-│
-├── (assets live in /public, not /src/assets)
-│
+│   │       └── project-detail/         # /projects/:slug detail route
+│   ├── data/                            # Static portfolio content
+│   ├── models/                          # Project, skill, bio, and social interfaces
+│   ├── app.config.ts                    # Router, hydration, scrolling configuration
+│   ├── app.config.server.ts             # Server-rendering providers
+│   ├── app.routes.ts                    # Browser route tree
+│   └── app.routes.server.ts             # Static prerender routes and project params
+├── styles/                              # Global SCSS partials
+├── test-setup/                          # Canvas mocks for Vitest
+├── main.ts
+├── main.server.ts
+├── server.ts
+└── styles.scss
+
 public/
-├── assets/
-│   ├── images/                  # Project screenshots, profile photo
-│   ├── pixel-art/               # Pixel-art sprites (avatar, UFO, icons) — served at /assets/pixel-art/
-│   ├── icons/                   # SVG icons or icon sprite
-│   └── fonts/                   # Self-hosted web fonts
-│
-├── styles/                      # Global SCSS partials
-│   ├── _variables.scss          # Colors, spacing, breakpoints, glow presets
-│   ├── _mixins.scss             # Reusable SCSS mixins
-│   ├── _typography.scss         # Font faces, type scale
-│   ├── _animations.scss         # Keyframes, transition utilities
-│   ├── _glow.scss               # Neon glow box-shadow presets
-│   ├── _reset.scss              # CSS reset / normalize
-│   └── styles.scss              # Main entry — imports all partials
-│
-└── environments/
-    ├── environment.ts
-    └── environment.prod.ts
+└── assets/
+    └── pixel-art/                       # Current avatar and UFO placeholders
 ```
+
+Assets are served from `public/`, not `src/assets/`. Project records currently point to five files under `public/assets/images/`, but that directory and those thumbnails are missing on the current branch; restoring them is an open asset task.
 
 ## Routing
 
-The app is a single-page scroll site. All content lives on the home route; old routes redirect to `/`.
+All application routes are children of `LayoutComponent`.
 
-```typescript
-// app.routes.ts
-export const routes: Routes = [
-  {
-    path: '',
-    component: LayoutComponent,
-    children: [
-      { path: '', loadComponent: () => import('./features/home/home.component') },
-      // Old routes redirect to home — sections are scrolled to, not routed
-      { path: 'about', redirectTo: '', pathMatch: 'full' },
-      { path: 'projects', redirectTo: '', pathMatch: 'full' },
-      { path: 'contact', redirectTo: '', pathMatch: 'full' },
-      // { path: 'projects/:slug', loadComponent: () => import('./features/projects/project-detail/project-detail.component') }, // Phase 6
-      { path: '**', redirectTo: '' }
-    ]
-  }
-];
-```
+| Path | Behavior |
+| --- | --- |
+| `/` | Lazy-loads `HomeComponent`, containing all five scroll sections |
+| `/projects/:slug` | Lazy-loads `ProjectDetailComponent` |
+| `/about`, `/contact` | Redirect to `/` |
+| Unknown paths | Redirect to `/` |
 
-`HomeComponent` is the only lazy-loaded route. The section components (`ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent`) are direct children of `HomeComponent`, not routes.
+There is no explicit `/projects` redirect because it would conflict with `/projects/:slug`. Homepage project navigation uses the `projects` fragment instead.
+
+`app.routes.server.ts` prerenders the wildcard route plus five explicit project slugs: `pixel-quest`, `devboard`, `neonchat`, `codecraft-api`, and `starmapper`. A production build currently emits eight static routes in total.
 
 ## Component Architecture
 
-### Smart vs. Presentational
-
-| Type            | Location     | Responsibility                                  |
-| --------------- | ------------ | ------------------------------------------------ |
-| Smart (Container) | `features/`  | Owns data, calls services, passes data down      |
-| Presentational  | `shared/`    | Pure display — receives `@Input`, emits `@Output` |
-| Layout          | `layout/`    | Structural shell — navbar, footer, router outlet  |
-| Scene           | `features/home/background-scene/` | Canvas rendering — stars, mountains, UFO, rocket |
-
-### Key Component Map
-
-```
+```text
 LayoutComponent
-├── NavbarComponent                    (fixed, glassmorphism, pixel icons; scroll buttons for section nav)
-├── <router-outlet>
-│   └── HomeComponent                  (smart container — owns all scroll sections)
-│       ├── BackgroundSceneComponent   (two-canvas: mountain canvas (MountainRenderer, bottom) + scene canvas (SceneRenderer, top — stars, atmosphere, particles))
-│       ├── HeroComponent              (avatar + platform, name/alias/subtitle gradient text, CSS UFO, scroll indicator)
-│       ├── ProjectsSectionComponent   (#projects scroll section)
-│       ├── AboutSectionComponent      (#about scroll section)
-│       ├── SkillsSectionComponent     (#skills scroll section)
-│       └── ContactSectionComponent    (#contact scroll section)
-└── FooterComponent                    (social icons, copyright)
+├── NavbarComponent
+├── BackgroundSceneComponent
+│   ├── SceneRenderer (main thread: atmosphere, horizon glow, stars, particles)
+│   └── MountainWorkerBridge
+│       └── mountain.worker.ts
+│           └── MountainRenderer (OffscreenCanvas procedural terrain)
+├── RouterOutlet
+│   ├── HomeComponent
+│   │   ├── HeroComponent
+│   │   ├── ProjectsSectionComponent
+│   │   │   └── ProjectListComponent → ProjectCardComponent
+│   │   ├── AboutSectionComponent
+│   │   ├── SkillsSectionComponent
+│   │   │   └── SkillsGridComponent → SkillChipComponent
+│   │   └── ContactSectionComponent
+│   └── ProjectDetailComponent
+└── FooterComponent
 ```
 
-### Signals & Reactivity
+`HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives. `ProjectDetailComponent` resolves its slug reactively from `ActivatedRoute.paramMap`.
 
-Use Angular **signals** for component state and **computed signals** for derived values. Reserve RxJS for async streams (scroll events, canvas animation loops, etc.).
+The fixed background belongs to `LayoutComponent`, so it remains behind both the homepage and project-detail route. The UFO is an HTML/CSS element in `HeroComponent`; it is not drawn by `SceneRenderer`. The controllable rocket remains future Phase 8 work.
 
-### Data Flow
+## Data Flow
 
+```text
+src/app/data/*.data.ts
+          ↓
+HomeComponent / ProjectDetailComponent
+          ↓
+section components
+          ↓
+shared display components
 ```
-Static data files (data/)
-        ↓
-HomeComponent (smart container) reads data
-        ↓
-Passes to section components and shared components via @Input
-        ↓
-Section/shared components render UI
+
+All portfolio content is compiled from static TypeScript. There is no backend, CMS, database, or runtime content API.
+
+## State and Services
+
+Angular signals hold component state and computed values. RxJS is used where Angular route streams require it.
+
+The only current singleton application service is `ScrollService`. It:
+
+- Smooth-scrolls to homepage sections.
+- Tracks the active section with `IntersectionObserver`.
+- Exposes the current section as a signal for navbar styling.
+- Updates the URL fragment with `history.replaceState`.
+- Guards browser APIs for SSR.
+
+SEO/meta and theme services are not currently implemented. SEO metadata remains planned deployment work; light mode is explicitly deferred.
+
+## Rendering Strategy
+
+The project uses Angular SSR tooling in `outputMode: "static"`. `ng build` renders configured routes at build time and writes the deployable browser output to `dist/portfolio/browser/`; no Node server is required at runtime.
+
+Hydration uses event replay. Browser-only behavior must be guarded with `isPlatformBrowser()`, including Canvas, OffscreenCanvas workers, `IntersectionObserver`, `ResizeObserver`, animation frames, and direct `window` access.
+
+## Background Rendering
+
+`BackgroundSceneComponent` coordinates two fixed canvases:
+
+1. The mountain canvas is transferred to a dedicated worker. `MountainWorkerBridge` posts resize and camera updates; `MountainRenderer` draws perspective-projected FBM terrain on an `OffscreenCanvas`.
+2. The transparent scene canvas remains on the main thread and draws atmosphere, horizon glow, stars, and particles using `SceneRenderer`.
+
+The component runs its animation loop outside Angular’s zone and reduces scene entity counts below 768px. Hidden-tab suspension and high-DPR mountain rendering remain Phase 9 tasks.
+
+## Build and Deployment
+
+```text
+npm run build
+      ↓
+Angular browser/server bundles + static prerender
+      ↓
+dist/portfolio/browser/
+      ↓
+Render static-site publish directory (planned/externally configured)
 ```
 
-Section components (`ProjectsSectionComponent`, `AboutSectionComponent`, etc.) are presentational — they receive data from `HomeComponent` and render their slice of the page. No backend. No API calls for content. Everything compiled into the bundle from static TS files.
-
-### Services
-
-| Service | Location | Responsibility |
-| --- | --- | --- |
-| `ScrollService` | `core/services/scroll.service.ts` | Tracks active scroll section via `IntersectionObserver`; exposes `activeSection` as a signal; SSR-safe (guards browser APIs with `isPlatformBrowser`) |
-| `MetaService` | `core/services/meta.service.ts` | SEO/meta tag management |
-| `ThemeService` | `core/services/theme.service.ts` | Dark/light toggle (future) |
-
-## SSR Strategy
-
-Angular SSR (`@angular/ssr`) for:
-- Faster first contentful paint
-- SEO (crawlers get fully rendered HTML)
-- Open Graph preview support
-
-The `BackgroundSceneComponent` (canvas) must check for `isPlatformBrowser` before rendering — canvas APIs are browser-only.
-
-Render deployment: **pre-rendered static site** (simpler, free-tier friendly). Angular's build-time prerendering generates static HTML for each route.
-
-## Build & Deploy
-
-```
-Angular CLI build (with prerendering) → dist/browser/
-        ↓
-Push to GitHub → Render auto-deploys
-        ↓
-Render serves static files at calcitedev.me
-```
+The repository is configured to produce static output successfully. Render service settings, DNS, HTTPS, and the current external deployment state must be verified outside the repository before marking deployment complete.
