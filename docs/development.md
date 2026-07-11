@@ -13,6 +13,7 @@
 - Phase 7 is partially complete: card hover lift/glow, section scroll reveals, active navbar state, smooth section scrolling, and CSS reduced-motion fallbacks exist.
 - Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, and reduced mobile scene entity counts.
 - Static output is configured and verified: 106 tests pass and a production build prerenders eight routes.
+- The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
 - Known repository gaps: five referenced project thumbnail SVGs are missing; footer social icons still use `href="#"`; the hero stylesheet exceeds the 4 kB warning budget; hidden-tab canvas suspension, mountain DPR scaling, full responsive/accessibility audits, SEO metadata, and external deployment verification remain open.
 - Before new feature work, review the divergent `visual-and-ux-improvements` branch for changes worth porting into the current design branch.
 

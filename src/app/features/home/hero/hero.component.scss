@@ -120,6 +120,8 @@
   }
 
   &__content {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -166,8 +168,9 @@
 
   &__ufo {
     position: absolute;
-    right: 0;
+    right: -$space-6;
     top: 10%;
+    z-index: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -178,7 +181,7 @@
     animation-range: normal, 0 200vh;
 
     @include lg {
-      right: calc(1000px - 50vw);
+      right: calc(780px - 50vw);
       top: 40%;
     }
 

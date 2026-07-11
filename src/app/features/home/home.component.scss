@@ -10,7 +10,8 @@
   &__section {
     scroll-margin-top: var(--navbar-height);
     min-height: 100svh;
-    // No position: relative needed — BackgroundSceneComponent is position: fixed,
-    // not position: absolute. No z-index layering needed — canvas is z-index: -1.
+    // DOM-order stacking keeps the scrolling UFO below every later section.
+    position: relative;
+    z-index: 1;
   }
 }

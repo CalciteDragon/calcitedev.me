@@ -163,7 +163,7 @@ Hero name uses the accent gradient as `background-clip: text`:
 **Current hero elements:**
 - Avatar (left, floating animation) on a glowing sci-fi platform (CSS pseudo-element depth effect)
 - Name, alias, and title — all use a cyan→pink `background-attachment: fixed` gradient applied via `background-clip: text`
-- UFO — HTML `<img>` with CSS float + tilt keyframe + scroll-driven parallax (drifts down 140vh over 200vh scroll)
+- UFO — HTML `<img>` positioned toward the right edge behind the hero copy, with CSS float + tilt keyframe and scroll-driven parallax (drifts down 140vh over 200vh scroll); homepage sections establish DOM-order stacking contexts so all later content, including project cards, renders above it
 - UFO tractor beam — CSS gradient cone beneath the disc
 - Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
 

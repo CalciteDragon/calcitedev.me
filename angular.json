@@ -100,7 +100,9 @@
             },
             "development": {
               "buildTarget": "portfolio:build:development",
-              "hmr": false
+              "liveReload": true,
+              "hmr": false,
+              "poll": 1000
             }
           },
           "defaultConfiguration": "development"
