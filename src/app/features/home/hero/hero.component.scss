@@ -2,9 +2,29 @@
 @use 'mixins' as *;
 @use 'glow' as *;
 
-@mixin hero-gradient {
+// Clip declarations must follow every background shorthand — the shorthand
+// resets background-clip, so each gradient mixin re-applies the text fill.
+@mixin hero-text-fill {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// Mobile base: gradient spans the text element itself so the full
+// cyan→pink range stays vivid on small viewports (viewport-fixed
+// attachment leaves mobile text sitting in the muddy mid-blend, and
+// iOS Safari doesn't support fixed attachment at all).
+@mixin hero-gradient($direction: to bottom) {
+  background: linear-gradient($direction, $accent-cyan 15%, $accent-pink 85%);
+  @include hero-text-fill;
+}
+
+// Desktop enhancement: viewport-fixed gradient — text picks its color
+// from screen position and shifts subtly while scrolling.
+@mixin hero-gradient-fixed {
   background: linear-gradient(to bottom, $accent-cyan 0%, $accent-cyan 30%, $accent-pink 70%, $accent-pink 100%);
   background-attachment: fixed;
+  @include hero-text-fill;
 }
 
 :host {
@@ -139,10 +159,12 @@
     font-weight: 700;
     line-height: 1.05;
     margin: 0;
-    @include hero-gradient;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    // Two-line mobile name reads cyan top line, pink bottom line.
+    @include hero-gradient(to bottom);
+
+    @include lg {
+      @include hero-gradient-fixed;
+    }
   }
 
   &__alias {
@@ -150,20 +172,22 @@
     font-weight: 600;
     letter-spacing: 0.05em;
     margin: 0;
-    @include hero-gradient;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    @include hero-gradient(to right);
+
+    @include lg {
+      @include hero-gradient-fixed;
+    }
   }
 
   &__subtitle {
     font-size: clamp(1rem, 2vw, 1.375rem);
     letter-spacing: 0.03em;
     margin: $space-1 0 0;
-    @include hero-gradient;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    @include hero-gradient(to right);
+
+    @include lg {
+      @include hero-gradient-fixed;
+    }
   }
 
   &__ufo {
