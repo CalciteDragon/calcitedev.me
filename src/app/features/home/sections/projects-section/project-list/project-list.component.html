@@ -2,6 +2,7 @@
   @for (project of projects(); track project.slug) {
     <app-project-card
       [title]="project.title"
+      [slug]="project.slug"
       [description]="project.description"
       [imageUrl]="project.imageUrl"
       [tags]="project.tags"
