@@ -260,10 +260,12 @@ animation-range: entry min(20%, $scroll-reveal-max-delay) entry min(100%, $scrol
 
 | Token | Value | Role |
 | --- | --- | --- |
-| `$scroll-reveal-max-delay` | `80px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
+| `$scroll-reveal-max-delay` | `40px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
 | `$scroll-reveal-max-distance` | `400px` | The reveal is always complete by this far into `entry` |
 
-Because `min(20%, 80px)` resolves to `20%` and `min(100%, 400px)` resolves to `100%` for any subject shorter than 400px, **every subject under 400px keeps its original height-proportional timing** — which already completed as it became fully visible. Only the project grid and the About content are clamped. Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
+The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px (under which 20% of the height is already less than 40px). Every subject on the page sits outside that 200–400px band — the filter bar, skills groups, and contact block are all under 150px; the project grid and About content are both over 400px — so **short subjects keep their original height-proportional timing**, which already completed as they became fully visible, and only the grid and About content are clamped. A subject landing between 200px and 400px would simply begin its fade slightly earlier than before, which is harmless.
+
+Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
 
 ### Easing
 

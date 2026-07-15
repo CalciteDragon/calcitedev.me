@@ -76,5 +76,5 @@ $ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
 // bound it to an absolute scroll distance instead. Subjects shorter than
 // $scroll-reveal-max-distance are unaffected. See `_animations.scss`.
 
-$scroll-reveal-max-delay: 80px;     // cap on the dead zone before the fade starts
+$scroll-reveal-max-delay: 40px;     // cap on the dead zone before the fade starts
 $scroll-reveal-max-distance: 400px; // reveal is always complete by this far into `entry`
