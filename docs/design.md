@@ -235,7 +235,7 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 ### Durations
 
 - Micro-interactions (hover, click): 150–300ms
-- Scroll reveals: scroll-position-linked (not time-based) — animation progress maps directly to scroll position via `animation-timeline: view()`
+- Scroll reveals: scroll-position-linked (not time-based) — animation progress maps directly to scroll position via `animation-timeline: view()`, bounded to a maximum scroll distance (see [Scroll Reveal Range](#scroll-reveal-range))
 - Background elements (star twinkle, avatar float): continuous, slow (2–5s loops)
 
 ### Hero CSS Animations
@@ -247,6 +247,23 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 | `ufo-parallax`       | scroll   | `animation-timeline: scroll(root)`, range 0–200vh; translates UFO 140vh down |
 | `scroll-pulse`       | 2.5s     | 3 staggered chevrons (0s / 0.35s / 0.7s delay); neon pink glow at 50%        |
 | `scroll-indicator-fade` | scroll | `animation-timeline: scroll(root)`, range 0–150px; fades indicator opacity 1→0 |
+
+### Scroll Reveal Range
+
+`.scroll-reveal` (applied by `ScrollRevealDirective`) runs `scroll-reveal-slide` on a `view()` timeline. A `view()` timeline defines its `entry` range as **exactly the subject's own height**, so percentage-only offsets stretch the reveal in proportion to the element — and for any subject taller than the viewport, `entry 100%` (the subject's bottom edge reaching the viewport bottom) can only occur after its top has already scrolled off screen. The project grid is ~970px at desktop and ~2280px at mobile widths, so it never finished revealing while still in view.
+
+The range is therefore capped in absolute scroll distance, using tokens in `_variables.scss`:
+
+```scss
+animation-range: entry min(20%, $scroll-reveal-max-delay) entry min(100%, $scroll-reveal-max-distance);
+```
+
+| Token | Value | Role |
+| --- | --- | --- |
+| `$scroll-reveal-max-delay` | `80px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
+| `$scroll-reveal-max-distance` | `400px` | The reveal is always complete by this far into `entry` |
+
+Because `min(20%, 80px)` resolves to `20%` and `min(100%, 400px)` resolves to `100%` for any subject shorter than 400px, **every subject under 400px keeps its original height-proportional timing** — which already completed as it became fully visible. Only the project grid and the About content are clamped. Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
 
 ### Easing
 
@@ -261,7 +278,7 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 - The canvas rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 - Use `transform` and `opacity` only (GPU-composited)
 - Reduce background complexity on small screens and low-power devices
-- Scroll reveal animations use CSS `animation-timeline: view()` — they are scroll-position-linked and naturally reverse on scroll-up. A `@supports` fallback ensures content is always visible in older browsers.
+- Scroll reveal animations use CSS `animation-timeline: view()` — they are scroll-position-linked and naturally reverse on scroll-up. A `@supports` fallback ensures content is always visible in older browsers. Their range is capped so a subject's reveal pace does not scale with its height; see [Scroll Reveal Range](#scroll-reveal-range).
 
 ## Responsive Strategy
 

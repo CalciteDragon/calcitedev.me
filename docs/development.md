@@ -121,7 +121,7 @@ Phase 0: Scaffold & Global Styles
 - [x] `TechTagComponent` — compact project technology tag
 - [x] `SocialLinksComponent` — typed social-link row with platform-specific presentation
 - [x] `ProjectCardComponent` — project thumbnail, title, description, tags, links, and detail navigation
-- [x] `ScrollRevealDirective` — CSS scroll-driven animation via `animation-timeline: view()`, adds `.scroll-reveal` class when on a browser platform; the CSS handles all animation logic
+- [x] `ScrollRevealDirective` — CSS scroll-driven animation via `animation-timeline: view()`, adds `.scroll-reveal` class when on a browser platform; the CSS handles all animation logic, including the `min()` caps that keep tall subjects from stretching the reveal (see `docs/design.md` → Scroll Reveal Range)
 - [x] `GlowDirective` — configurable neon glow behavior
 
 **Deliverable:** A mini component library. Can be visually tested in isolation on a scratch route or via `ng serve` on the home page.
@@ -261,6 +261,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [ ] **Card tilt:** subtle 3D tilt following mouse position on project cards (vanilla-tilt style via directive)
 - [x] **Button micro-interactions:** motion-safe press compression on filter pills, card/detail links, and the email CTA; glow hover states already existed
 - [x] **Scroll reveals:** applied to the major About, Projects, Skills, and Contact content groups
+  - [x] Reveal range capped to an absolute scroll distance. `view()` measures its `entry` range as the subject's own height, so the ~970px (desktop) / ~2280px (mobile) project grid needed roughly 1200–1800px of scrolling to finish fading and could only complete once its top had left the screen. `min()` caps in `_variables.scss` bound the reveal; subjects under 400px are mathematically unaffected. See `docs/design.md` → Scroll Reveal Range.
 - [x] **Navbar active link indicator:** `ScrollService.activeSection` drives desktop and drawer active states
 - [x] **Smooth scroll:** `ScrollService.scrollToSection()` and router anchor scrolling are configured
 - [x] **Gradient text polish:** viewport-fixed gradient ≥ lg; per-element local gradients below lg (fixes muddy mobile blend and iOS Safari's missing fixed-attachment support)
