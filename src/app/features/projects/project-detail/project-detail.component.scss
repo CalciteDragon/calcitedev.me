@@ -38,6 +38,12 @@
     border-color: rgba(var(--accent-cyan-rgb), 0.4);
     box-shadow: var(--glow-cyan);
   }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      transform: scale(0.97);
+    }
+  }
 }
 
 // ======================
@@ -124,6 +130,12 @@
     box-shadow $transition-fast,
     border-color $transition-fast,
     color $transition-fast;
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      transform: scale(0.97);
+    }
+  }
 
   &--live {
     color: var(--accent-cyan);

@@ -92,4 +92,10 @@
     box-shadow: var(--glow-cyan);
     background: rgba(var(--accent-cyan-rgb), 0.08);
   }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      transform: scale(0.96);
+    }
+  }
 }

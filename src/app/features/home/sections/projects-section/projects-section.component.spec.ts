@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { ProjectsSectionComponent } from './projects-section.component';
 import { Project } from '../../../../models/project.model';
 
@@ -13,7 +14,11 @@ describe('ProjectsSectionComponent', () => {
   let ref: ComponentRef<ProjectsSectionComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ProjectsSectionComponent] });
+    // Project cards render routerLink anchors, so a router must be provided.
+    TestBed.configureTestingModule({
+      imports: [ProjectsSectionComponent],
+      providers: [provideRouter([])],
+    });
     const fixture = TestBed.createComponent(ProjectsSectionComponent);
     ref = fixture.componentRef;
     ref.setInput('projects', mockProjects);

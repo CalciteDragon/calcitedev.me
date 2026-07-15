@@ -83,6 +83,17 @@ body {
 }
 
 // ======================
+// Focus Visibility (a11y)
+// ======================
+// Neon-consistent keyboard focus ring for every focusable element.
+// Components with bespoke focus treatments override this locally.
+
+:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+// ======================
 // Selection Styling
 // ======================
 
