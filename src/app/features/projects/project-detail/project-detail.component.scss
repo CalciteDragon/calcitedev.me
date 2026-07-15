@@ -60,6 +60,10 @@
 
 .project-detail__image {
   width: 100%;
+  // Reserve the 16:9 art box even if the asset fails to load.
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: var(--bg-primary);
   border-radius: $radius-md;
   border: 1px solid var(--bg-border);
   box-shadow: var(--glow-cyan);
