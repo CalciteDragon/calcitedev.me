@@ -181,8 +181,10 @@
     animation-range: normal, 0 200vh;
 
     @include lg {
-      right: calc(780px - 50vw);
-      top: 40%;
+      // High in the empty upper-right sky, clear of the headline at rest.
+      // max() stops the disc drifting too far offscreen on ultrawide viewports.
+      right: max(calc(760px - 50vw), -60px);
+      top: 4%;
     }
 
     @media (prefers-reduced-motion: reduce) {
