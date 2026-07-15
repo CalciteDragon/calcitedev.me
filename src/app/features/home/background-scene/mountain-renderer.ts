@@ -21,6 +21,16 @@ export class MountainRenderer {
   private lineWidthsH!: Float32Array;   // ROWS × COLS
 
   // ─── Phase 1: Gradient cache ────────────────────────────────────────────────
+  private lineWidthsHByRow!: Float32Array;
+
+  // Cached, sampled gradients retain the terrain's color variation while
+  // allowing Canvas2D commands to be batched into one path per row and pass.
+  private faceGradients: CanvasGradient[] = [];
+  private wireGradientsH: CanvasGradient[] = [];
+  private wireGradientsV: CanvasGradient[] = [];
+  private glowGradientsH: CanvasGradient[] = [];
+  private glowGradientsV: CanvasGradient[] = [];
+
   private mistGradient:  CanvasGradient | null = null;
   private bloomGradient: CanvasGradient | null = null;
 
@@ -31,6 +41,7 @@ export class MountainRenderer {
   private ptsScale!: Float32Array;  // (ROWS+1)×(COLS+1) — eyeY scale factor per point
   private ptsNull!:  Uint8Array;    // (ROWS+1)×(COLS+1) — 1 = behind camera
   private ptsDirty = true;
+  private firstVisibleRow = 0;
 
   constructor(private canvas: HTMLCanvasElement | OffscreenCanvas) {
     this.ctx = canvas.getContext('2d') as CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -93,25 +104,32 @@ export class MountainRenderer {
     const eyeY = 1.1 - this.config.camY * 0.42;
 
     // Update all screen Y coords: ~3k multiply-adds on pre-cached Float32Arrays (no divisions)
-    const total = (this.ROWS + 1) * (this.COLS + 1);
-    for (let i = 0; i < total; i++) {
-      if (!this.ptsNull[i]) {
-        this.ptsY[i] = this.ptsYBase[i] + eyeY * this.ptsScale[i];
+    const stride = this.COLS + 1;
+    for (let r = this.firstVisibleRow; r <= this.ROWS; r++) {
+      const rowStart = r * stride;
+      const yOffset = eyeY * this.ptsScale[rowStart];
+      for (let c = 0; c <= this.COLS; c++) {
+        const i = rowStart + c;
+        this.ptsY[i] = this.ptsYBase[i] + yOffset;
       }
     }
 
     ctx.clearRect(0, 0, W, H);
 
     // Draw back to front
-    for (let r = this.ROWS - 1; r >= 0; r--) {
+    for (let r = this.ROWS - 1; r >= this.firstVisibleRow; r--) {
       const fogA = this.fogAlphas[r];
+      const rowStart = r * stride;
+      const nextRowStart = rowStart + stride;
 
       // Fill pass
+      ctx.beginPath();
+      let hasFaces = false;
       for (let c = 0; c < this.COLS; c++) {
-        const i00 =  r      * (this.COLS + 1) + c;
-        const i01 =  r      * (this.COLS + 1) + c + 1;
-        const i10 = (r + 1) * (this.COLS + 1) + c;
-        const i11 = (r + 1) * (this.COLS + 1) + c + 1;
+        const i00 = rowStart + c;
+        const i01 = i00 + 1;
+        const i10 = nextRowStart + c;
+        const i11 = i10 + 1;
         if (this.ptsNull[i00] || this.ptsNull[i01] || this.ptsNull[i10] || this.ptsNull[i11]) continue;
 
         const x00 = this.ptsX[i00], y00 = this.ptsY[i00];
@@ -119,11 +137,14 @@ export class MountainRenderer {
         const x10 = this.ptsX[i10], y10 = this.ptsY[i10];
         const x11 = this.ptsX[i11], y11 = this.ptsY[i11];
 
-        ctx.beginPath();
         ctx.moveTo(x00, y00); ctx.lineTo(x01, y01);
         ctx.lineTo(x11, y11); ctx.lineTo(x10, y10);
         ctx.closePath();
-        ctx.fillStyle = this.faceColors[r][c];
+        hasFaces = true;
+      }
+
+      if (hasFaces) {
+        ctx.fillStyle = this.faceGradients[r];
         ctx.globalAlpha = 1;
         ctx.fill();
 
@@ -136,31 +157,37 @@ export class MountainRenderer {
       }
 
       // Wire pass — horizontal
+      ctx.beginPath();
+      let hasHorizontalWires = false;
       for (let c = 0; c < this.COLS; c++) {
-        const i0 = r * (this.COLS + 1) + c;
-        const i1 = r * (this.COLS + 1) + c + 1;
+        const i0 = rowStart + c;
+        const i1 = i0 + 1;
         if (this.ptsNull[i0] || this.ptsNull[i1]) continue;
-        this.glowLine(
-          this.ptsX[i0], this.ptsY[i0],
-          this.ptsX[i1], this.ptsY[i1],
-          this.wireColorsH[r][c],
-          this.glowColorsH[r][c],
-          this.lineWidthsH[r * this.COLS + c],
+        ctx.moveTo(this.ptsX[i0], this.ptsY[i0]);
+        ctx.lineTo(this.ptsX[i1], this.ptsY[i1]);
+        hasHorizontalWires = true;
+      }
+      if (hasHorizontalWires) {
+        this.strokeCurrentPath(
+          this.wireGradientsH[r],
+          this.glowGradientsH[r],
+          this.lineWidthsHByRow[r],
         );
       }
 
       // Wire pass — vertical
+      ctx.beginPath();
+      let hasVerticalWires = false;
       for (let c = 0; c <= this.COLS; c++) {
-        const i0 =  r      * (this.COLS + 1) + c;
-        const i1 = (r + 1) * (this.COLS + 1) + c;
+        const i0 = rowStart + c;
+        const i1 = nextRowStart + c;
         if (this.ptsNull[i0] || this.ptsNull[i1]) continue;
-        this.glowLine(
-          this.ptsX[i0], this.ptsY[i0],
-          this.ptsX[i1], this.ptsY[i1],
-          this.wireColorsV[r][c],
-          this.glowColorsV[r][c],
-          0.45,
-        );
+        ctx.moveTo(this.ptsX[i0], this.ptsY[i0]);
+        ctx.lineTo(this.ptsX[i1], this.ptsY[i1]);
+        hasVerticalWires = true;
+      }
+      if (hasVerticalWires) {
+        this.strokeCurrentPath(this.wireGradientsV[r], this.glowGradientsV[r], 0.45);
       }
     }
 
@@ -242,6 +269,7 @@ export class MountainRenderer {
     this.glowColorsH = Array.from({ length: ROWS }, () => new Array<string>(COLS));
     this.glowColorsV = Array.from({ length: ROWS }, () => new Array<string>(COLS + 1));
     this.lineWidthsH = new Float32Array(ROWS * COLS);
+    this.lineWidthsHByRow = new Float32Array(ROWS);
 
     for (let r = 0; r < ROWS; r++) {
       const depth  = (r / ROWS) * 6.5 + 0.1;
@@ -250,6 +278,7 @@ export class MountainRenderer {
       this.fogAlphas[r] = fogA;
 
       // Face colors (one per quad)
+      let rowLineWidth = 0;
       for (let c = 0; c < COLS; c++) {
         const avgH = (
           this.grid[r][c] + this.grid[r][c + 1] +
@@ -267,7 +296,9 @@ export class MountainRenderer {
         this.wireColorsH[r][c] = this.wireColor(depth, h, cx01, alpha);
         this.glowColorsH[r][c] = `rgba(0,255,190,${((0.04 + hf * 0.05) * (1 - fogA)).toFixed(3)})`;
         this.lineWidthsH[r * COLS + c] = 0.6 + hf * 0.6;
+        rowLineWidth += this.lineWidthsH[r * COLS + c];
       }
+      this.lineWidthsHByRow[r] = rowLineWidth / COLS;
 
       // Vertical wire colors (left/right edges of each quad column)
       for (let c = 0; c <= COLS; c++) {
@@ -279,6 +310,8 @@ export class MountainRenderer {
         // V-wire lineWidth is constant 0.45 — no array needed; written as literal in draw()
       }
     }
+
+    this.buildRowGradients();
   }
 
   private buildGradients(): void {
@@ -316,6 +349,7 @@ export class MountainRenderer {
     const W056 = this.W * 0.56;
     const H056 = this.H * 0.56;
 
+    this.firstVisibleRow = this.ROWS + 1;
     for (let r = 0; r <= this.ROWS; r++) {
       for (let c = 0; c <= this.COLS; c++) {
         const i  = r * (this.COLS + 1) + c;
@@ -329,6 +363,7 @@ export class MountainRenderer {
           continue;
         }
         this.ptsNull[i]  = 0;
+        if (r < this.firstVisibleRow) this.firstVisibleRow = r;
         const scale      = zoom / dz;
         this.ptsX[i]     = this.W / 2 + wx * scale * W056;
         // sy = H/2 - (wy*vs - eyeY + tilt*dz) * scale * H056
@@ -339,6 +374,46 @@ export class MountainRenderer {
     }
 
     this.ptsDirty = false;
+    this.buildRowGradients();
+  }
+
+  private buildRowGradients(): void {
+    if (this.W === 0 || this.H === 0 || !this.faceColors.length || !this.ptsX) return;
+
+    this.faceGradients = new Array<CanvasGradient>(this.ROWS);
+    this.wireGradientsH = new Array<CanvasGradient>(this.ROWS);
+    this.wireGradientsV = new Array<CanvasGradient>(this.ROWS);
+    this.glowGradientsH = new Array<CanvasGradient>(this.ROWS);
+    this.glowGradientsV = new Array<CanvasGradient>(this.ROWS);
+
+    const stride = this.COLS + 1;
+    for (let r = 0; r < this.ROWS; r++) {
+      const rowStart = r * stride;
+      let x0 = this.ptsX[rowStart];
+      let x1 = this.ptsX[rowStart + this.COLS];
+      if (!Number.isFinite(x0) || !Number.isFinite(x1) || x0 === x1) {
+        x0 = 0;
+        x1 = this.W;
+      }
+
+      this.faceGradients[r] = this.createSampledGradient(this.faceColors[r], x0, x1);
+      this.wireGradientsH[r] = this.createSampledGradient(this.wireColorsH[r], x0, x1);
+      this.wireGradientsV[r] = this.createSampledGradient(this.wireColorsV[r], x0, x1);
+      this.glowGradientsH[r] = this.createSampledGradient(this.glowColorsH[r], x0, x1);
+      this.glowGradientsV[r] = this.createSampledGradient(this.glowColorsV[r], x0, x1);
+    }
+  }
+
+  private createSampledGradient(colors: string[], x0: number, x1: number): CanvasGradient {
+    const gradient = this.ctx.createLinearGradient(x0, 0, x1, 0);
+    const last = colors.length - 1;
+    const step = Math.max(1, Math.ceil(last / 10));
+
+    for (let i = 0; i < last; i += step) {
+      gradient.addColorStop(i / last, colors[i]);
+    }
+    gradient.addColorStop(1, colors[last]);
+    return gradient;
   }
 
   // ─── Colors ────────────────────────────────────────────────────────────────
@@ -378,12 +453,16 @@ export class MountainRenderer {
 
   // ─── Drawing ───────────────────────────────────────────────────────────────
 
-  private glowLine(x0: number, y0: number, x1: number, y1: number, color: string, gcolor: string, w: number): void {
+  private strokeCurrentPath(color: CanvasGradient, glowColor: CanvasGradient, width: number): void {
     const { ctx } = this;
-    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1);
-    ctx.strokeStyle = gcolor; ctx.lineWidth = w + 2.5; ctx.globalAlpha = 0.07; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1);
-    ctx.strokeStyle = color; ctx.lineWidth = w; ctx.globalAlpha = 1; ctx.stroke();
+    ctx.strokeStyle = glowColor;
+    ctx.lineWidth = width + 2.5;
+    ctx.globalAlpha = 0.07;
+    ctx.stroke();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
+    ctx.globalAlpha = 1;
+    ctx.stroke();
   }
 
   // ─── Noise ─────────────────────────────────────────────────────────────────

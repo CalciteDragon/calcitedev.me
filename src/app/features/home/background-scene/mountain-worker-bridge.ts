@@ -8,6 +8,7 @@ import type { MountainConfig } from './mountain.config';
  */
 export class MountainWorkerBridge {
   private readonly worker: Worker;
+  private lastCamY: number | null = null;
 
   constructor() {
     this.worker = new Worker(
@@ -16,10 +17,11 @@ export class MountainWorkerBridge {
     );
   }
 
-  /** Transfer canvas control to the worker and start the render loop. */
-  init(canvas: HTMLCanvasElement, width: number, height: number): void {
+  /** Transfer canvas control and provide the camera for the worker's first draw. */
+  init(canvas: HTMLCanvasElement, width: number, height: number, camY: number): void {
     const offscreen = canvas.transferControlToOffscreen();
-    const msg: MountainWorkerMsg = { type: 'init', canvas: offscreen, width, height };
+    this.lastCamY = camY;
+    const msg: MountainWorkerMsg = { type: 'init', canvas: offscreen, width, height, camY };
     this.worker.postMessage(msg, [offscreen]);
   }
 
@@ -28,11 +30,15 @@ export class MountainWorkerBridge {
   }
 
   setConfig(config: MountainConfig): void {
+    this.lastCamY = config.camY;
     this.worker.postMessage({ type: 'config', config } satisfies MountainWorkerMsg);
   }
 
-  /** Fire-and-forget camY update — < 0.1 ms on the main thread. */
+  /** Fire-and-forget camera update, suppressing values the worker already has. */
   setCamY(value: number): void {
+    if (value === this.lastCamY) return;
+
+    this.lastCamY = value;
     this.worker.postMessage({ type: 'camY', value } satisfies MountainWorkerMsg);
   }
 

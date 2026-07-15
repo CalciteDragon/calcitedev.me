@@ -30,6 +30,33 @@ describe('MountainWorkerBridge', () => {
     );
   });
 
+  it('includes the initial camera position in the init message', () => {
+    const bridge = new MountainWorkerBridge();
+    const canvas = document.createElement('canvas');
+    bridge.init(canvas, 1280, 720, -3);
+
+    expect(postMessageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'init', width: 1280, height: 720, camY: -3 }),
+      expect.any(Array),
+    );
+  });
+
+  it('does not post duplicate camera values', () => {
+    const bridge = new MountainWorkerBridge();
+    bridge.setCamY(0.75);
+    bridge.setCamY(0.75);
+
+    expect(postMessageSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not repost the camera value included during initialization', () => {
+    const bridge = new MountainWorkerBridge();
+    bridge.init(document.createElement('canvas'), 1280, 720, -3);
+    bridge.setCamY(-3);
+
+    expect(postMessageSpy).toHaveBeenCalledTimes(1);
+  });
+
   it('resize() posts a resize message', () => {
     const bridge = new MountainWorkerBridge();
     bridge.resize(1280, 720);

@@ -218,6 +218,26 @@ describe('MountainRenderer', () => {
   // ─── draw() smoke ──────────────────────────────────────────────────────────
 
   describe('draw()', () => {
+    it('batches face fills and wire strokes by row', () => {
+      const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+      vi.spyOn(canvas, 'getContext').mockReturnValue(ctx);
+      const fillSpy = vi.spyOn(ctx, 'fill');
+      const strokeSpy = vi.spyOn(ctx, 'stroke');
+      const beginPathSpy = vi.spyOn(ctx, 'beginPath');
+      const r = new MountainRenderer(canvas);
+      r.setConfig(DEFAULT_MOUNTAIN_CONFIG);
+      r.resize(800, 600);
+      const rr = r as unknown as { ROWS: number };
+
+      r.draw();
+
+      // Per visible row: one terrain fill, at most one fog fill, two wire
+      // orientations with two strokes each, and three path constructions.
+      expect(fillSpy.mock.calls.length).toBeLessThanOrEqual(rr.ROWS * 2 + 2);
+      expect(strokeSpy.mock.calls.length).toBeLessThanOrEqual(rr.ROWS * 4);
+      expect(beginPathSpy.mock.calls.length).toBeLessThanOrEqual(rr.ROWS * 3);
+    });
+
     it('completes without error after setConfig() + resize()', () => {
       const r = new MountainRenderer(canvas);
       r.setConfig(DEFAULT_MOUNTAIN_CONFIG);

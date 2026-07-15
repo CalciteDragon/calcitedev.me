@@ -55,6 +55,18 @@ describe('SceneRenderer', () => {
       expect(() => renderer.drawFrame(16, 0)).not.toThrow();
     });
 
+    it('caches size-dependent gradients instead of recreating them per frame', () => {
+      const ctx = (renderer as unknown as { ctx: CanvasRenderingContext2D }).ctx;
+      const gradientSpy = vi.spyOn(ctx, 'createLinearGradient');
+
+      renderer.init(800, 600);
+      expect(gradientSpy).toHaveBeenCalledTimes(2);
+
+      renderer.drawFrame(0, 0);
+      renderer.drawFrame(16, 100);
+      expect(gradientSpy).toHaveBeenCalledTimes(2);
+    });
+
     it('destroy() does not throw', () => {
       renderer.init(800, 600);
       expect(() => renderer.destroy()).not.toThrow();
