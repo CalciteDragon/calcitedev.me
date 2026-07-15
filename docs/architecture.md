@@ -10,7 +10,7 @@ src/
 │   │       └── scroll.service.ts       # Active-section tracking, fragments, smooth scroll
 │   ├── layout/
 │   │   ├── navbar/                     # Fixed desktop nav + mobile drawer
-│   │   ├── footer/                     # Footer shell and social presentation
+│   │   ├── footer/                     # Minimal footer shell (copyright only)
 │   │   └── layout.component.ts         # Navbar + background + router outlet + footer
 │   ├── shared/
 │   │   ├── components/
@@ -95,7 +95,7 @@ LayoutComponent
 
 `HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives. `ProjectDetailComponent` resolves its slug reactively from `ActivatedRoute.paramMap`.
 
-`ProjectCardComponent` navigates to `/projects/:slug` through a stretched title `routerLink` (an `::after` overlay covering the card); the external Live Demo/GitHub anchors sit above the overlay. `FooterComponent` renders its social icons by reusing `SocialLinksComponent` with `socialLinksData` — the same source the contact section uses. `LayoutComponent` also owns the skip-to-content link, which jumps focus to `<main id="main-content">` manually because plain fragment hrefs resolve against `<base href="/">` and would re-route from detail pages.
+`ProjectCardComponent` navigates to `/projects/:slug` through a stretched title `routerLink` (an `::after` overlay covering the card); the external Live Demo/GitHub anchors sit above the overlay. `FooterComponent` is a presentation-only shell with no inputs or data dependencies: it renders just the copyright line, because `ContactSectionComponent` is the single consumer of `SocialLinksComponent`/`socialLinksData` and the two would otherwise stack duplicate icon rows at scroll-bottom. `LayoutComponent` also owns the skip-to-content link, which jumps focus to `<main id="main-content">` manually because plain fragment hrefs resolve against `<base href="/">` and would re-route from detail pages.
 
 The fixed background belongs to `LayoutComponent`, so it remains behind both the homepage and project-detail route. `BackgroundSceneComponent` owns the motion policy: under `prefers-reduced-motion` it draws a still frame and redraws only on scroll, and it pauses its rAF loop while `document.hidden`. The UFO is an HTML/CSS element in `HeroComponent`; it is not drawn by `SceneRenderer`. The controllable rocket remains future Phase 8 work.
 

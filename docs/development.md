@@ -97,10 +97,8 @@ Phase 0: Scaffold & Global Styles
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer
 - [x] `FooterComponent`:
-  - Centered social icon links (GitHub, Discord, LinkedIn) — inline SVGs
-  - Copyright line
-  - Icons glow on hover (GitHub=cyan, Discord=blue, LinkedIn=purple)
-  - [x] Footer now reuses `SocialLinksComponent` with `socialLinksData` — real URLs, one source of truth (ported from `visual-and-ux-improvements`)
+  - Copyright line, centered — the footer's only content
+  - [x] Social icons removed from the footer: it renders directly under the Contact section at scroll-bottom, so both rendering `SocialLinksComponent` showed two duplicate icon rows on one screen. `ContactSectionComponent` is now the sole consumer of `socialLinksData`, and `FooterComponent` is a data-free shell. (Supersedes the earlier port of `SocialLinksComponent` into the footer from `visual-and-ux-improvements`.)
 - [x] `app.routes.ts` — home and `projects/:slug` lazy-load their components; `/about` and `/contact` redirect to `/`; wildcard redirects to `/`
 - [x] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works — stubs for About, Projects, Contact later removed in single-page refactor
 

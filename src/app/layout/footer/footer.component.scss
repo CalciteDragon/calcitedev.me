@@ -12,10 +12,6 @@
 
 .footer__inner {
   @include content-container;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: $space-3;
 }
 
 .footer__copyright {

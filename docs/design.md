@@ -225,9 +225,9 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 
 ### Footer
 
-- Centered social icons: GitHub, Discord, LinkedIn — rendered by `SocialLinksComponent` from `socialLinksData`, so footer and contact section share one source of truth for URLs and icons
-- Icons glow on hover (each with its own accent color)
-- Minimal: copyright line, "Built with Angular" note
+- Minimal by design: a centered copyright line with the "Built with Angular" note, and nothing else
+- Deliberately carries **no** social icons. The footer sits directly beneath the Contact section at scroll-bottom, so rendering `SocialLinksComponent` in both produced two near-identical icon rows within one screen. The Contact section owns the social row because email + social links are its defined purpose; the footer stays a thin closing rule.
+- Trade-off: `/projects/:slug` therefore shows no social links. Detail pages keep their own project Live Demo/GitHub anchors, and the navbar Contact link returns to the row on `/`.
 - Not fixed — sits at bottom of content
 
 ## Animation Guidelines
