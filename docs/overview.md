@@ -45,7 +45,7 @@ The earlier hero feature-card strip and CTA were intentionally removed because t
 
 A filterable grid of five statically defined projects. Cards show a thumbnail, title, description, tags, and available demo/repository links. Each card links to `/projects/:slug`, and all five detail routes are prerendered.
 
-Current project content and URLs are placeholders. The referenced thumbnail SVG files are currently missing from `public/assets/images/` and need to be restored or replaced.
+Current project content and URLs are placeholders. Each project has a themed placeholder thumbnail SVG under `public/assets/images/`; swapping in real screenshots is a file drop at the same paths.
 
 ### 3. About
 

@@ -79,9 +79,9 @@ Used for: heading gradients, active states, card border glows, CTA accents.
 
 | Element         | Size (desktop)           | Weight | Notes                                              |
 | --------------- | ------------------------ | ------ | -------------------------------------------------- |
-| Hero name       | `clamp(3rem, 8vw, 7rem)` | 700    | Cyan→pink fixed-bg gradient, `background-clip: text` |
-| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Same gradient as name                            |
-| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Same gradient as name                            |
+| Hero name       | `clamp(3rem, 8vw, 7rem)` | 700    | Cyan→pink gradient via `background-clip: text` — viewport-fixed attachment ≥ lg; per-element (vertical) below lg |
+| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Same gradient — per-element horizontal below lg  |
+| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Same gradient — per-element horizontal below lg  |
 | H2 (Section)    | 2rem–2.5rem              | 700    | Section headings                                   |
 | H3 (Card title) | 1.25rem                  | 600    | Card headings                                      |
 | Body            | 1rem                     | 400    | Line height 1.6                                    |
@@ -162,8 +162,8 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 **Current hero elements:**
 - Avatar (left, floating animation) on a glowing sci-fi platform (CSS pseudo-element depth effect)
-- Name, alias, and title — all use a cyan→pink `background-attachment: fixed` gradient applied via `background-clip: text`
-- UFO — HTML `<img>` positioned toward the right edge behind the hero copy, with CSS float + tilt keyframe and scroll-driven parallax (drifts down 140vh over 200vh scroll); homepage sections establish DOM-order stacking contexts so all later content, including project cards, renders above it
+- Name, alias, and title — cyan→pink gradients applied via `background-clip: text`. From the lg breakpoint up the gradient uses `background-attachment: fixed`, so color shifts subtly with scroll; below lg each element carries its own local gradient (vertical on the two-line name, horizontal on alias/subtitle) because fixed attachment muddies mobile text and iOS Safari ignores it
+- UFO — HTML `<img>` parked high in the upper-right sky (`top: 4%` at lg, right-edge bleed capped by `max(calc(760px - 50vw), -60px)`), clear of the headline at scroll 0; CSS float + tilt keyframe plus scroll-driven parallax (drifts down 140vh over 200vh scroll); homepage sections establish DOM-order stacking contexts so all later content, including project cards, renders above it
 - UFO tractor beam — CSS gradient cone beneath the disc
 - Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
 
@@ -171,7 +171,7 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 ### Layout Note
 
-The page is a single-page scroll: Home hero → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport.
+The page is a single-page scroll: Home hero → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
 
 ### Background Scene (Canvas)
 
@@ -209,24 +209,26 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 ### Project Cards
 
 - Dark surface background, rounded corners (12px)
-- Thumbnail/preview at top
+- Thumbnail/preview at top — fixed 200px-high wrapper with a dark fallback background so a missing asset never collapses the card; current art is per-project placeholder SVGs in each project's glow color under `public/assets/images/`
 - Title, description, tech tags below
+- The title is a stretched `routerLink` anchor (an `::after` overlay covers the card), so clicking anywhere on the card opens `/projects/:slug`; Live Demo / GitHub pills sit above the overlay on their own z-index and keep working independently
+- Keyboard: the stretched link shows a cyan focus-visible ring around the whole card
 - Hover: lift + neon border glow
-- Links to live demo and GitHub
 
 ### Buttons and Link CTAs
 
 - Filter pills, project links, and the contact email CTA use compact rounded neon treatments.
 - Hover states should intensify borders/glow without overwhelming adjacent text.
-- Pressed-state compression and a unified button interaction system remain Phase 7 work.
+- Pressed state: motion-safe `scale(0.96–0.98)` compression on filter pills, card links, detail links, and the email CTA.
+- Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; components with bespoke treatments (social icons, stretched card links) override locally.
+- The filter bar collapses to one horizontally scrollable row with a trailing-edge fade mask below the md breakpoint; from md up it wraps normally.
 
 ### Footer
 
-- Centered social icons: GitHub, Discord, LinkedIn
+- Centered social icons: GitHub, Discord, LinkedIn — rendered by `SocialLinksComponent` from `socialLinksData`, so footer and contact section share one source of truth for URLs and icons
 - Icons glow on hover (each with its own accent color)
 - Minimal: copyright line, "Built with Angular" note
 - Not fixed — sits at bottom of content
-- Current footer anchors still use placeholder `href="#"` values and must be wired before launch.
 
 ## Animation Guidelines
 
@@ -255,7 +257,8 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 ### Motion Principles
 
 - Smooth, not overwhelming — prioritize clarity
-- Respect `prefers-reduced-motion` — disable non-essential animations
+- Respect `prefers-reduced-motion` — CSS animations are disabled by media-query fallbacks, and the canvas scene renders a still frame (frozen twinkle/particles) that redraws only on scroll so parallax still tracks the user's own gesture
+- The canvas rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 - Use `transform` and `opacity` only (GPU-composited)
 - Reduce background complexity on small screens and low-power devices
 - Scroll reveal animations use CSS `animation-timeline: view()` — they are scroll-position-linked and naturally reverse on scroll-up. A `@supports` fallback ensures content is always visible in older browsers.

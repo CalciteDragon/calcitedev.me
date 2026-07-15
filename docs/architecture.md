@@ -47,11 +47,13 @@ src/
 └── styles.scss
 
 public/
+├── favicon.svg                          # Pixel-C SVG favicon (favicon.ico kept as fallback)
 └── assets/
+    ├── images/                          # Per-project thumbnail placeholder SVGs (5)
     └── pixel-art/                       # Current avatar and UFO placeholders
 ```
 
-Assets are served from `public/`, not `src/assets/`. Project records currently point to five files under `public/assets/images/`, but that directory and those thumbnails are missing on the current branch; restoring them is an open asset task.
+Assets are served from `public/`, not `src/assets/`. The five project thumbnails referenced by `projects.data.ts` live under `public/assets/images/` as themed placeholder SVGs (one per project, in the project's glow color); swapping in real screenshots is a file drop at the same paths.
 
 ## Routing
 
@@ -93,7 +95,9 @@ LayoutComponent
 
 `HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives. `ProjectDetailComponent` resolves its slug reactively from `ActivatedRoute.paramMap`.
 
-The fixed background belongs to `LayoutComponent`, so it remains behind both the homepage and project-detail route. The UFO is an HTML/CSS element in `HeroComponent`; it is not drawn by `SceneRenderer`. The controllable rocket remains future Phase 8 work.
+`ProjectCardComponent` navigates to `/projects/:slug` through a stretched title `routerLink` (an `::after` overlay covering the card); the external Live Demo/GitHub anchors sit above the overlay. `FooterComponent` renders its social icons by reusing `SocialLinksComponent` with `socialLinksData` — the same source the contact section uses. `LayoutComponent` also owns the skip-to-content link, which jumps focus to `<main id="main-content">` manually because plain fragment hrefs resolve against `<base href="/">` and would re-route from detail pages.
+
+The fixed background belongs to `LayoutComponent`, so it remains behind both the homepage and project-detail route. `BackgroundSceneComponent` owns the motion policy: under `prefers-reduced-motion` it draws a still frame and redraws only on scroll, and it pauses its rAF loop while `document.hidden`. The UFO is an HTML/CSS element in `HeroComponent`; it is not drawn by `SceneRenderer`. The controllable rocket remains future Phase 8 work.
 
 ## Data Flow
 

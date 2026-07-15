@@ -7,15 +7,16 @@
 - **Placeholder-first for assets.** All pixel art, images, and project screenshots use styled placeholders. Tyler creates art in parallel; swapping in is a file drop, not a code change.
 - **Easter eggs are last.** The core site works cleanly without them — they're layered on top, never load-bearing.
 
-## Current Status Audit — July 11, 2026
+## Current Status Audit — July 15, 2026
 
 - Phases 0–6 are functionally implemented, including five prerendered project-detail routes.
-- Phase 7 is partially complete: card hover lift/glow, section scroll reveals, active navbar state, smooth section scrolling, and CSS reduced-motion fallbacks exist.
-- Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, and reduced mobile scene entity counts.
-- Static output is configured and verified: 106 tests pass and a production build prerenders eight routes.
+- The `visual-and-ux-improvements` branch was reviewed and its eight commits cherry-picked into `layout-and-design-tweaks`: content-section min-height removal (hero-only `--full` modifier), footer `SocialLinksComponent` reuse, 3-column grid cap + popular-tag filter pruning, About card panel, project-detail card redesign with related projects, dynamic page titles via the Title service, and two cleanup commits. Its 1,343-line plan document was intentionally not ported — the work it planned is complete and recorded here.
+- The July 2026 polish pass added: five themed project-thumbnail placeholder SVGs (with layout guards so missing images can't collapse cards), hero UFO repositioned clear of the headline, stretched-link card navigation to `/projects/:slug`, mobile-local hero gradients, a global `:focus-visible` ring, skip-to-content link, drawer body-scroll lock with md auto-close, a one-row scrollable mobile filter bar, press-state compression on pill controls, canvas reduced-motion still-frame + hidden-tab rAF pause, static head metadata (title/description/theme-color/OG/Twitter), and a pixel-C SVG favicon.
+- Phase 7 is now mostly complete: card hover lift/glow, section scroll reveals, active navbar state, smooth scrolling, CSS reduced-motion fallbacks, button micro-interactions, gradient rendering across breakpoints, and a canvas reduced-motion policy. Card tilt and route transitions remain open.
+- Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, reduced mobile scene entity counts, skip link, hidden-tab canvas suspension, and baseline SEO metadata.
+- Static output is configured and verified: 111 tests pass and a production build prerenders eight routes.
 - The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
-- Known repository gaps: five referenced project thumbnail SVGs are missing; footer social icons still use `href="#"`; the hero stylesheet exceeds the 4 kB warning budget; hidden-tab canvas suspension, mountain DPR scaling, full responsive/accessibility audits, SEO metadata, and external deployment verification remain open.
-- Before new feature work, review the divergent `visual-and-ux-improvements` branch for changes worth porting into the current design branch.
+- Known repository gaps: the hero stylesheet exceeds the 4 kB warning budget (7.4 kB); mountain DPR scaling, full responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
 
 ---
 
@@ -99,7 +100,7 @@ Phase 0: Scaffold & Global Styles
   - Centered social icon links (GitHub, Discord, LinkedIn) — inline SVGs
   - Copyright line
   - Icons glow on hover (GitHub=cyan, Discord=blue, LinkedIn=purple)
-  - [ ] Replace the current `href="#"` placeholders with canonical social URLs or reuse `SocialLinksComponent`
+  - [x] Footer now reuses `SocialLinksComponent` with `socialLinksData` — real URLs, one source of truth (ported from `visual-and-ux-improvements`)
 - [x] `app.routes.ts` — home and `projects/:slug` lazy-load their components; `/about` and `/contact` redirect to `/`; wildcard redirects to `/`
 - [x] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works — stubs for About, Projects, Contact later removed in single-page refactor
 
@@ -145,7 +146,7 @@ Phase 0: Scaffold & Global Styles
 - [x] `skills.data.ts` — full skills list organized by the 8 categories Tyler provided
 - [x] `bio.data.ts` — placeholder bio text (Tyler fills in real copy later)
 - [x] `social-links.data.ts` — GitHub, Discord, and LinkedIn entries
-- [ ] Restore or replace the five project thumbnail SVGs referenced under `public/assets/images/`; they were removed during the asset-path cleanup but their data paths remain
+- [x] Five themed placeholder SVGs restored under `public/assets/images/` (per-project motif in the project's glow color); swapping in real screenshots stays a file drop at the same paths
 - [x] Current pixel-art placeholders for the avatar and UFO live under `public/assets/pixel-art/`; the rocket and card-icon assets were removed with their corresponding UI
 
 **Deliverable:** `import { projectsData } from './data/projects.data'` works everywhere. Placeholder visuals exist for every slot.
@@ -197,7 +198,7 @@ Phase 0: Scaffold & Global Styles
 - [x] **Floating particles:** minimal pixel particles drifting (very subtle)
 - [x] **Faint scanline/grid overlay:** CSS pseudo-element on the page background (very low opacity)
 - [x] Performance: use `requestAnimationFrame`, reduce on mobile
-- [ ] Performance: throttle on hidden tab (deferred to Phase 9 — canvas: skip rendering when `document.hidden`)
+- [x] Performance: the scene rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 
 **Built:** Two-canvas architecture inside `BackgroundSceneComponent` — **mountain canvas** (DOM-order first, bottom layer) transferred to `MountainRenderer` inside `mountain.worker.ts` through `MountainWorkerBridge`; **scene canvas** (DOM-order second, top layer, transparent background) owned by `SceneRenderer` on the main thread. Both canvases fill the fixed host. `body { background-color: transparent }` lets the canvases show through all sections. A CSS `::after` scanline overlay covers both canvases.
 
@@ -237,7 +238,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 ### Projects Section (`features/home/sections/projects-section/`)
 - [x] `ProjectListComponent` — responsive grid of `ProjectCardComponent`
 - [x] Filter bar: filter by tech tag or category (signals-based, no RxJS needed)
-- [ ] Restore easy-swap project thumbnails at the existing `imageUrl` paths; the data wiring is complete but the five files are missing
+- [x] Easy-swap project thumbnails exist at the `imageUrl` paths (themed placeholder SVGs); card thumbnails and the detail hero image carry layout guards so a missing file can't collapse the layout
 - [x] `ProjectDetailComponent` — route `/projects/:slug` at `features/projects/project-detail/`, displays full project info (long description, tech tags, links, larger image placeholder)
 
 ### Contact Section (`features/home/sections/contact-section/`)
@@ -260,13 +261,13 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 **Tasks:**
 - [x] **Card hover effects:** shared `CardComponent` intensifies its glow and lifts by `translateY(-4px)`
 - [ ] **Card tilt:** subtle 3D tilt following mouse position on project cards (vanilla-tilt style via directive)
-- [ ] **Button micro-interactions:** glow pulse on hover, slight compression on click
+- [x] **Button micro-interactions:** motion-safe press compression on filter pills, card/detail links, and the email CTA; glow hover states already existed
 - [x] **Scroll reveals:** applied to the major About, Projects, Skills, and Contact content groups
 - [x] **Navbar active link indicator:** `ScrollService.activeSection` drives desktop and drawer active states
 - [x] **Smooth scroll:** `ScrollService.scrollToSection()` and router anchor scrolling are configured
-- [ ] **Gradient text polish:** ensure hero gradient renders well across browsers
+- [x] **Gradient text polish:** viewport-fixed gradient ≥ lg; per-element local gradients below lg (fixes muddy mobile blend and iOS Safari's missing fixed-attachment support)
 - [ ] **Page transitions:** subtle fade between routes (Angular router animations)
-- [ ] **`prefers-reduced-motion`:** CSS fallbacks disable shared/hero animations, but the canvas loop still needs a reduced-motion policy
+- [x] **`prefers-reduced-motion`:** CSS fallbacks disable shared/hero animations, and the canvas renders a still frame that redraws only on scroll
 
 **Deliverable:** The site feels polished and responsive to interaction. Every hover, scroll, and click has intentional feedback.
 
@@ -331,8 +332,8 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 ### Accessibility
 - [ ] Semantic HTML throughout (`<nav>`, `<main>`, `<section>`, `<footer>`, `<h1>`–`<h3>`)
 - [ ] ARIA labels on interactive elements (nav links, social links, filters, buttons)
-- [ ] Keyboard navigation: all interactive elements focusable and operable
-- [ ] Skip-to-content link
+- [x] Keyboard navigation: interactive elements are focusable with a global cyan `:focus-visible` ring; project cards expose a stretched title link with a card-wide focus ring (full audit still pending below)
+- [x] Skip-to-content link (manual focus jump in `LayoutComponent` — fragment hrefs would re-route against `<base href>`)
 - [ ] Color contrast: verify all text meets WCAG AA (4.5:1 for body, 3:1 for large text)
 - [ ] Easter egg interactions don't trap focus or break tab order
 
@@ -341,7 +342,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] Lazy-load the Home and Project Detail route chunks via `loadComponent`
 - [x] Lazy-load project-card images with `loading="lazy"`
 - [ ] Optimize font loading: `font-display: swap`, preload critical fonts
-- [ ] Canvas: skip rendering when tab is hidden (`document.hidden`)
+- [x] Canvas: rendering pauses while the tab is hidden (`visibilitychange` cancels/restarts the rAF loop)
 - [ ] Tree-shake unused code, verify bundle size
 
 **Deliverable:** Site scores 90+ on Lighthouse, works on all screen sizes, and is keyboard/screen-reader navigable.
@@ -364,7 +365,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [ ] Connect custom domain `calcitedev.me` in Render dashboard
 - [ ] Configure DNS records (CNAME or A record pointing to Render)
 - [ ] Enable HTTPS (Render provides free TLS via Let's Encrypt)
-- [ ] Add page titles, meta descriptions, and Open Graph data (a dedicated `MetaService` is optional, not currently implemented)
+- [x] Page titles (Title service per route), meta description, theme-color, and Open Graph/Twitter tags in `index.html`; an `og:image` PNG asset remains open (crawlers don't render SVG)
 - [ ] Verify social sharing previews (Twitter Card, LinkedIn, etc.)
 - [ ] Add `robots.txt` and `sitemap.xml`
 
