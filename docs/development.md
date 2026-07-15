@@ -14,7 +14,7 @@
 - The July 2026 polish pass added: five themed project-thumbnail placeholder SVGs (with layout guards so missing images can't collapse cards), hero UFO repositioned clear of the headline, stretched-link card navigation to `/projects/:slug`, mobile-local hero gradients, a global `:focus-visible` ring, skip-to-content link, drawer body-scroll lock with md auto-close, a one-row scrollable mobile filter bar, press-state compression on pill controls, canvas reduced-motion still-frame + hidden-tab rAF pause, static head metadata (title/description/theme-color/OG/Twitter), and a pixel-C SVG favicon.
 - Phase 7 is now mostly complete: card hover lift/glow, section scroll reveals, active navbar state, smooth scrolling, CSS reduced-motion fallbacks, button micro-interactions, gradient rendering across breakpoints, and a canvas reduced-motion policy. Card tilt and route transitions remain open.
 - Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, reduced mobile scene entity counts, skip link, hidden-tab canvas suspension, and baseline SEO metadata.
-- Static output is configured and verified: 111 tests pass and a production build prerenders eight routes.
+- Static output is configured and verified: 116 tests pass and a production build prerenders eight routes.
 - The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
 - Known repository gaps: the hero stylesheet exceeds the 4 kB warning budget (7.4 kB); mountain DPR scaling, full responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
 
@@ -197,12 +197,15 @@ Phase 0: Scaffold & Global Styles
 - [x] **Faint scanline/grid overlay:** CSS pseudo-element on the page background (very low opacity)
 - [x] Performance: use `requestAnimationFrame`, reduce on mobile
 - [x] Performance: the scene rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
+- [x] Performance: passive scroll sampling, duplicate camera-message suppression, and demand-driven worker invalidation remove avoidable frame delay and idle worker callbacks
+- [x] Performance: row-batched terrain faces/wires reduce the default redraw budget from thousands of per-cell paints to at most 84 fills, 168 strokes, and 126 path starts; command-budget coverage guards the batching
+- [x] Performance: cache the main-thread atmosphere and horizon gradients until resize
 
 **Built:** Two-canvas architecture inside `BackgroundSceneComponent` — **mountain canvas** (DOM-order first, bottom layer) transferred to `MountainRenderer` inside `mountain.worker.ts` through `MountainWorkerBridge`; **scene canvas** (DOM-order second, top layer, transparent background) owned by `SceneRenderer` on the main thread. Both canvases fill the fixed host. `body { background-color: transparent }` lets the canvases show through all sections. A CSS `::after` scanline overlay covers both canvases.
 
-**MountainRenderer** (`mountain-renderer.ts`, `mountain.config.ts`): 3D perspective-projected FBM terrain. It draws the terrain grid back-to-front with fill, wire, and fog passes. `setConfig()` rebuilds the terrain only when structural parameters change. `camY = scrollY / 1200 - camYOffset` drives scroll parallax. `BackgroundSceneComponent` sends fire-and-forget camera and resize messages through `MountainWorkerBridge`; the worker owns the drawing loop and only redraws when dirty, leaving the main thread with minimal mountain work.
+**MountainRenderer** (`mountain-renderer.ts`, `mountain.config.ts`): 3D perspective-projected FBM terrain. It draws the terrain grid back-to-front with row-batched fill, wire, and fog passes using cached sampled gradients; behind-camera rows are skipped, and the scroll-dependent projection update reuses one scale calculation per row. `setConfig()` rebuilds the terrain only when structural parameters change. `camY = scrollY / 1200 - camYOffset` drives scroll parallax. `BackgroundSceneComponent` forwards camera changes from a passive scroll listener through `MountainWorkerBridge`; duplicate camera values are suppressed, and the worker coalesces all pending invalidations into one demand-driven animation frame using the latest state.
 
-**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles`. `drawFrame(timestamp, scrollY)` — no `heroHeight` param.
+**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles`. The two viewport-sized gradients are cached and rebuilt only when the renderer is initialized/resized. `drawFrame(timestamp, scrollY)` — no `heroHeight` param.
 
 **Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced.
 
@@ -342,6 +345,8 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] Lazy-load project-card images with `loading="lazy"`
 - [ ] Optimize font loading: `font-display: swap`, preload critical fonts
 - [x] Canvas: rendering pauses while the tab is hidden (`visibilitychange` cancels/restarts the rAF loop)
+- [x] Canvas: mountain scroll redraws use passive camera sampling, demand-driven worker scheduling, and row-batched Canvas2D paths with command-budget tests
+- [x] Canvas: cache main-thread scene gradients outside the frame loop
 - [ ] Tree-shake unused code, verify bundle size
 
 **Deliverable:** Site scores 90+ on Lighthouse, works on all screen sizes, and is keyboard/screen-reader navigable.
