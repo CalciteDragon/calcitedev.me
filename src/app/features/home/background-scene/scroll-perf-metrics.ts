@@ -212,6 +212,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
 
     this.output = document.createElement('output');
     this.output.id = 'canvas-scroll-perf-output';
+    this.output.hidden = true;
     controls.append(run, start, stop, this.output);
     document.body.append(controls);
     this.controls = controls;
