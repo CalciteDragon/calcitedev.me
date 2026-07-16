@@ -15,6 +15,7 @@ import { SceneRenderer } from './scene-renderer';
 import { defaultConfig } from './scene-entities';
 import { MountainWorkerBridge } from './mountain-worker-bridge';
 import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
+import { runCanvasPerfBenchmark } from './canvas-perf-benchmark';
 
 @Component({
   selector: 'app-background-scene',
@@ -40,6 +41,11 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+
+    if (new URLSearchParams(window.location.search).get('canvasPerf') === 'benchmark') {
+      void runCanvasPerfBenchmark(window.innerWidth, window.innerHeight);
+      return;
+    }
 
     const canvas = this.canvasRef().nativeElement;
     const isReduced = window.matchMedia('(max-width: 767px)').matches;
