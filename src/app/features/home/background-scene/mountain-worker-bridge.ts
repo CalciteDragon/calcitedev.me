@@ -1,4 +1,4 @@
-import type { MountainWorkerMsg } from './mountain-worker.protocol';
+import type { MountainWorkerMsg, MountainWorkerPerfSample } from './mountain-worker.protocol';
 import type { MountainConfig } from './mountain.config';
 
 /**
@@ -8,20 +8,35 @@ import type { MountainConfig } from './mountain.config';
  */
 export class MountainWorkerBridge {
   private readonly worker: Worker;
+  private readonly metricsEnabled: boolean;
   private lastCamY: number | null = null;
+  private sequence = 0;
 
-  constructor() {
+  constructor(onPerfSample?: (sample: MountainWorkerPerfSample) => void) {
+    this.metricsEnabled = Boolean(onPerfSample);
     this.worker = new Worker(
       new URL('./mountain.worker', import.meta.url),
       { type: 'module' },
     );
+    if (onPerfSample) {
+      this.worker.addEventListener('message', ({ data }: MessageEvent<MountainWorkerPerfSample>) => {
+        if (data.type === 'perf') onPerfSample(data);
+      });
+    }
   }
 
   /** Transfer canvas control and provide the camera for the worker's first draw. */
   init(canvas: HTMLCanvasElement, width: number, height: number, camY: number): void {
     const offscreen = canvas.transferControlToOffscreen();
     this.lastCamY = camY;
-    const msg: MountainWorkerMsg = { type: 'init', canvas: offscreen, width, height, camY };
+    const msg: MountainWorkerMsg = {
+      type: 'init',
+      canvas: offscreen,
+      width,
+      height,
+      camY,
+      metricsEnabled: this.metricsEnabled,
+    };
     this.worker.postMessage(msg, [offscreen]);
   }
 
@@ -39,10 +54,17 @@ export class MountainWorkerBridge {
     if (value === this.lastCamY) return;
 
     this.lastCamY = value;
-    this.worker.postMessage({ type: 'camY', value } satisfies MountainWorkerMsg);
+    const metrics = this.metricsEnabled
+      ? { sequence: ++this.sequence, sampledAt: absoluteNow() }
+      : {};
+    this.worker.postMessage({ type: 'camY', value, ...metrics } satisfies MountainWorkerMsg);
   }
 
   destroy(): void {
     this.worker.terminate();
   }
+}
+
+function absoluteNow(): number {
+  return performance.timeOrigin + performance.now();
 }

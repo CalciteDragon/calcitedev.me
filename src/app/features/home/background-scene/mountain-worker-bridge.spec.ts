@@ -4,14 +4,19 @@ import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
 describe('MountainWorkerBridge', () => {
   let postMessageSpy: ReturnType<typeof vi.fn>;
   let terminateSpy: ReturnType<typeof vi.fn>;
+  let messageHandler: ((event: MessageEvent) => void) | null;
 
   beforeEach(() => {
     postMessageSpy = vi.fn();
     terminateSpy   = vi.fn();
+    messageHandler = null;
     vi.stubGlobal('Worker', vi.fn(function () {
       return {
         postMessage: postMessageSpy,
         terminate:   terminateSpy,
+        addEventListener: vi.fn((_type: string, handler: (event: MessageEvent) => void) => {
+          messageHandler = handler;
+        }),
       };
     }));
   });
@@ -55,6 +60,37 @@ describe('MountainWorkerBridge', () => {
     bridge.setCamY(-3);
 
     expect(postMessageSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds timing metadata and forwards worker samples when metrics are enabled', () => {
+    const onPerfSample = vi.fn();
+    const bridge = new MountainWorkerBridge(onPerfSample);
+    bridge.init(document.createElement('canvas'), 1280, 720, -3);
+    bridge.setCamY(-2.5);
+
+    expect(postMessageSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ type: 'init', metricsEnabled: true }),
+      expect.any(Array),
+    );
+    expect(postMessageSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        type: 'camY',
+        sequence: 1,
+        sampledAt: expect.any(Number),
+      }),
+    );
+
+    const sample = {
+      type: 'perf' as const,
+      sequence: 1,
+      sampleToFrameStartMs: 0.2,
+      drawDurationMs: 1.2,
+      sampleToFrameEndMs: 1.4,
+    };
+    messageHandler?.({ data: sample } as MessageEvent);
+    expect(onPerfSample).toHaveBeenCalledWith(sample);
   });
 
   it('resize() posts a resize message', () => {

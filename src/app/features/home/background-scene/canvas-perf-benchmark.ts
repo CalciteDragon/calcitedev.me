@@ -1,5 +1,8 @@
 import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
 import { MountainRenderer } from './mountain-renderer';
+import type { MountainWorkerPerfSample } from './mountain-worker.protocol';
+import { SceneRenderer } from './scene-renderer';
+import { defaultConfig } from './scene-entities';
 
 export interface CanvasPerfSummary {
   sampleCount: number;
@@ -10,13 +13,48 @@ export interface CanvasPerfSummary {
   missed60HzFrames: number;
 }
 
+export interface LiveCanvasPerfSummary {
+  sampleCount: number;
+  coalescedUpdates: number;
+  medianSampleToStartMs: number;
+  p95SampleToStartMs: number;
+  medianDrawMs: number;
+  p95DrawMs: number;
+  medianEndToEndMs: number;
+  p95EndToEndMs: number;
+}
+
 interface CanvasPerfGlobal {
   __canvasPerfResults?: CanvasPerfSummary;
+  __canvasLivePerfResults?: LiveCanvasPerfSummary;
 }
 
 const WARMUP_FRAMES = 12;
 const SAMPLE_FRAMES = 120;
 const FRAME_BUDGET_60HZ_MS = 1000 / 60;
+const LIVE_SAMPLE_WINDOW = 10;
+
+export class LiveCanvasPerfCollector {
+  private samples: MountainWorkerPerfSample[] = [];
+  private lastSequence = 0;
+  private coalescedUpdates = 0;
+
+  record(sample: MountainWorkerPerfSample): void {
+    if (this.lastSequence > 0) {
+      this.coalescedUpdates += Math.max(0, sample.sequence - this.lastSequence - 1);
+    }
+    this.lastSequence = sample.sequence;
+    this.samples.push(sample);
+
+    if (this.samples.length < LIVE_SAMPLE_WINDOW) return;
+
+    const summary = summarizeLiveCanvasPerf(this.samples, this.coalescedUpdates);
+    (globalThis as unknown as CanvasPerfGlobal).__canvasLivePerfResults = summary;
+    console.info('[canvas-perf-live]', JSON.stringify(summary));
+    this.samples = [];
+    this.coalescedUpdates = 0;
+  }
+}
 
 /**
  * Opt-in diagnostic benchmark used through `?canvasPerf=benchmark`.
@@ -48,6 +86,7 @@ export async function runCanvasPerfBenchmark(width: number, height: number): Pro
   const summary = summarizeCanvasPerf(samples);
   (globalThis as unknown as CanvasPerfGlobal).__canvasPerfResults = summary;
   console.info('[canvas-perf]', JSON.stringify(summary));
+  await runScenePerfBenchmark(width, height);
   return summary;
 }
 
@@ -64,6 +103,25 @@ export function summarizeCanvasPerf(samples: number[]): CanvasPerfSummary {
   };
 }
 
+export function summarizeLiveCanvasPerf(
+  samples: MountainWorkerPerfSample[],
+  coalescedUpdates: number,
+): LiveCanvasPerfSummary {
+  const sampleToStart = sortedValues(samples.map(sample => sample.sampleToFrameStartMs));
+  const draw = sortedValues(samples.map(sample => sample.drawDurationMs));
+  const endToEnd = sortedValues(samples.map(sample => sample.sampleToFrameEndMs));
+  return {
+    sampleCount: samples.length,
+    coalescedUpdates,
+    medianSampleToStartMs: round(percentile(sampleToStart, 0.5)),
+    p95SampleToStartMs: round(percentile(sampleToStart, 0.95)),
+    medianDrawMs: round(percentile(draw, 0.5)),
+    p95DrawMs: round(percentile(draw, 0.95)),
+    medianEndToEndMs: round(percentile(endToEnd, 0.5)),
+    p95EndToEndMs: round(percentile(endToEnd, 0.95)),
+  };
+}
+
 function cameraPosition(frame: number): number {
   return -3 + (frame % 120) / 120 * 4;
 }
@@ -77,6 +135,10 @@ function round(value: number): number {
   return Math.round(value * 1000) / 1000;
 }
 
+function sortedValues(values: number[]): number[] {
+  return values.sort((a, b) => a - b);
+}
+
 function nextAnimationFrame(): Promise<void> {
   return new Promise(resolve => requestAnimationFrame(() => resolve()));
 }
@@ -86,4 +148,23 @@ function createFallbackCanvas(width: number, height: number): HTMLCanvasElement 
   canvas.width = width;
   canvas.height = height;
   return canvas;
+}
+
+async function runScenePerfBenchmark(width: number, height: number): Promise<void> {
+  const canvas = document.createElement('canvas');
+  const renderer = new SceneRenderer(canvas, defaultConfig(false));
+  renderer.resize(width, height);
+
+  for (let i = 0; i < WARMUP_FRAMES; i++) renderer.drawFrame(i * 16, i * 12);
+
+  const samples: number[] = [];
+  for (let i = 0; i < SAMPLE_FRAMES; i++) {
+    await nextAnimationFrame();
+    const start = performance.now();
+    renderer.drawFrame(i * 16, i * 12);
+    samples.push(performance.now() - start);
+  }
+
+  renderer.destroy();
+  console.info('[canvas-perf-scene]', JSON.stringify(summarizeCanvasPerf(samples)));
 }

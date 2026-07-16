@@ -15,7 +15,7 @@ import { SceneRenderer } from './scene-renderer';
 import { defaultConfig } from './scene-entities';
 import { MountainWorkerBridge } from './mountain-worker-bridge';
 import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
-import { runCanvasPerfBenchmark } from './canvas-perf-benchmark';
+import { LiveCanvasPerfCollector, runCanvasPerfBenchmark } from './canvas-perf-benchmark';
 
 @Component({
   selector: 'app-background-scene',
@@ -42,7 +42,8 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    if (new URLSearchParams(window.location.search).get('canvasPerf') === 'benchmark') {
+    const perfMode = new URLSearchParams(window.location.search).get('canvasPerf');
+    if (perfMode === 'benchmark') {
       void runCanvasPerfBenchmark(window.innerWidth, window.innerHeight);
       return;
     }
@@ -55,7 +56,10 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     this.renderer.resize(window.innerWidth, window.innerHeight);
 
     // Transfer mountain canvas to OffscreenCanvas worker — main thread does zero draw work
-    this.mountainWorker = new MountainWorkerBridge();
+    const perfCollector = perfMode === 'live' ? new LiveCanvasPerfCollector() : null;
+    this.mountainWorker = new MountainWorkerBridge(
+      perfCollector ? sample => perfCollector.record(sample) : undefined,
+    );
     this.mountainWorker.init(
       this.mountainCanvasRef().nativeElement,
       window.innerWidth,

@@ -14,8 +14,6 @@ export class SceneRenderer {
   private cssHeight = 0;
   private stars: Star[] = [];
   private particles: SceneParticle[] = [];
-  private atmosphereGradient: CanvasGradient | null = null;
-  private horizonGradient: CanvasGradient | null = null;
   private lastTimestamp = -1;
   private destroyed = false;
 
@@ -35,7 +33,6 @@ export class SceneRenderer {
     this.cssHeight = cssHeight;
     this.stars = createStars(this.config.starCount, cssWidth, cssHeight);
     this.particles = createParticles(this.config.particleCount, cssWidth, cssHeight);
-    this.buildGradients();
     this.lastTimestamp = -1;
   }
 
@@ -88,8 +85,12 @@ export class SceneRenderer {
    * the horizon, giving the sky a sense of light scatter before the mountains.
    */
   private drawAtmosphere(): void {
-    if (!this.atmosphereGradient) return;
-    this.ctx.fillStyle = this.atmosphereGradient;
+    const grad = this.ctx.createLinearGradient(0, this.cssHeight * 0.42, 0, this.cssHeight);
+    grad.addColorStop(0, 'rgba(56, 189, 248, 0)');
+    grad.addColorStop(0.35, 'rgba(56, 189, 248, 0.04)');
+    grad.addColorStop(0.65, 'rgba(99, 102, 241, 0.035)');
+    grad.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    this.ctx.fillStyle = grad;
     this.ctx.fillRect(0, this.cssHeight * 0.42, this.cssWidth, this.cssHeight * 0.58);
   }
 
@@ -130,37 +131,15 @@ export class SceneRenderer {
    * simulate atmospheric light scatter along the ridge line.
    */
   private drawHorizonGlow(): void {
-    if (!this.horizonGradient) return;
     const bandTop = this.cssHeight * 0.2;
     const bandBot = this.cssHeight * 1.0;
-    this.ctx.fillStyle = this.horizonGradient;
+    const grad = this.ctx.createLinearGradient(0, bandTop, 0, bandBot);
+    grad.addColorStop(0, 'rgba(56, 189, 248, 0.00)');
+    grad.addColorStop(0.35, 'rgba(56, 189, 248, 0.1)');
+    grad.addColorStop(0.65, 'rgba(168, 85, 247, 0.075)');
+    grad.addColorStop(1, 'rgba(168, 85, 247, 0.01)');
+    this.ctx.fillStyle = grad;
     this.ctx.fillRect(0, bandTop, this.cssWidth, bandBot - bandTop);
-  }
-
-  /** Build size-dependent gradients once instead of allocating them every frame. */
-  private buildGradients(): void {
-    if (this.cssWidth === 0 || this.cssHeight === 0) return;
-
-    const atmosphere = this.ctx.createLinearGradient(
-      0,
-      this.cssHeight * 0.42,
-      0,
-      this.cssHeight,
-    );
-    atmosphere.addColorStop(0, 'rgba(56, 189, 248, 0)');
-    atmosphere.addColorStop(0.35, 'rgba(56, 189, 248, 0.04)');
-    atmosphere.addColorStop(0.65, 'rgba(99, 102, 241, 0.035)');
-    atmosphere.addColorStop(1, 'rgba(99, 102, 241, 0)');
-    this.atmosphereGradient = atmosphere;
-
-    const bandTop = this.cssHeight * 0.2;
-    const bandBot = this.cssHeight;
-    const horizon = this.ctx.createLinearGradient(0, bandTop, 0, bandBot);
-    horizon.addColorStop(0, 'rgba(56, 189, 248, 0.00)');
-    horizon.addColorStop(0.35, 'rgba(56, 189, 248, 0.1)');
-    horizon.addColorStop(0.65, 'rgba(168, 85, 247, 0.075)');
-    horizon.addColorStop(1, 'rgba(168, 85, 247, 0.01)');
-    this.horizonGradient = horizon;
   }
 
   private drawParticles(deltaTime: number): void {
