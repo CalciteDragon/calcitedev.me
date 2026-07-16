@@ -104,8 +104,6 @@ export class MountainRenderer {
 
     // Draw back to front
     for (let r = this.ROWS - 1; r >= 0; r--) {
-      const fogA = this.fogAlphas[r];
-
       // Fill pass
       for (let c = 0; c < this.COLS; c++) {
         const i00 =  r      * (this.COLS + 1) + c;
@@ -126,13 +124,6 @@ export class MountainRenderer {
         ctx.fillStyle = this.faceColors[r][c];
         ctx.globalAlpha = 1;
         ctx.fill();
-
-        if (fogA > 0.01) {
-          // Reuse the path still active from the fill above — no beginPath() needed
-          ctx.fillStyle = 'rgba(4,6,16,1)';
-          ctx.globalAlpha = fogA * 0.88;
-          ctx.fill();
-        }
       }
 
       // Wire pass — horizontal
@@ -255,7 +246,7 @@ export class MountainRenderer {
           this.grid[r][c] + this.grid[r][c + 1] +
           this.grid[r + 1][c] + this.grid[r + 1][c + 1]
         ) * 0.25;
-        this.faceColors[r][c] = this.faceColor(depth, avgH, c / COLS);
+        this.faceColors[r][c] = this.faceColor(depth, avgH, c / COLS, fogA);
       }
 
       // Horizontal wire colors (front edge of each row quad)
@@ -354,14 +345,18 @@ export class MountainRenderer {
     return `rgba(${r},${g},${b},${a.toFixed(2)})`;
   }
 
-  private faceColor(depth: number, height: number, cx01: number): string {
+  private faceColor(depth: number, height: number, cx01: number, fogAlpha: number): string {
     const depthT  = this.clamp(depth / 6.5, 0, 1);
     const heightT = this.clamp(height / 2.5, 0, 1);
     const sideT   = this.clamp(cx01, 0, 1);
-    const r = Math.round(this.lerp(4 + heightT * 6 + sideT * 8, 12, depthT));
-    const g = Math.round(this.lerp(10 + heightT * 8, 14, depthT));
-    const b = Math.round(this.lerp(18 + heightT * 10 + sideT * 5, 24, depthT));
-    return `rgb(${r},${g},${b})`;
+    const r = this.lerp(4 + heightT * 6 + sideT * 8, 12, depthT);
+    const g = this.lerp(10 + heightT * 8, 14, depthT);
+    const b = this.lerp(18 + heightT * 10 + sideT * 5, 24, depthT);
+    const fog = fogAlpha > 0.01 ? fogAlpha * 0.88 : 0;
+    const foggedR = Math.round(this.lerp(r, 4, fog));
+    const foggedG = Math.round(this.lerp(g, 6, fog));
+    const foggedB = Math.round(this.lerp(b, 16, fog));
+    return `rgb(${foggedR},${foggedG},${foggedB})`;
   }
 
   // ─── Atmosphere ────────────────────────────────────────────────────────────
