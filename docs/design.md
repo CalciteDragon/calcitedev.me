@@ -178,10 +178,10 @@ The page is a single-page scroll: Home hero → Projects → About → Skills �
 | Element           | Description                                                                                          |
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
 | Star field        | 130 stars (65 reduced), radius 0.4–2.5px, opacity 0.2–0.8, concentrated in upper 85% of canvas. Large stars get cross-sparkle arms. Per-star parallax (0.01–0.04). |
-| Cyber mountains   | Perspective-projected FBM terrain with filled faces, wire passes, depth fog, and a scroll-driven camera. The mountain canvas is transferred to `MountainRenderer` in a dedicated worker through `MountainWorkerBridge`. Terrain is painted as row-batched compound paths with sampled horizontal gradients, preserving the overall neon color/fog treatment while keeping scroll redraws within a much smaller Canvas2D command budget. It renders site-wide, not only behind the hero. |
+| Cyber mountains   | Perspective-projected FBM terrain with filled faces, wire passes, per-face fog, and a scroll-driven camera. The mountain canvas is transferred to `MountainRenderer` in a dedicated worker through `MountainWorkerBridge`. It renders site-wide, not only behind the hero. |
 | Atmosphere        | Subtle cyan-to-indigo linear gradient haze toward the lower canvas — simulates light scatter.        |
 | Horizon glow      | Neon bloom band (cyan → purple) drawn above mountains to simulate atmospheric ridge scatter.         |
-| Parallax          | Mountains shift on scroll via `camY = scrollY / 1200` panning. Passive scroll sampling forwards the camera before the main animation callback; worker updates coalesce to the newest state in an immediate worker task instead of waiting for worker-vsync. |
+| Parallax          | Mountains shift on scroll via `camY = scrollY / 1200` panning.                                      |
 | Particles         | Minimal upward-drifting pixel particles (very subtle, 20 default / 8 reduced).                      |
 
 > **Note:** The UFO and Rocket were removed from the canvas in the layout-and-design-tweaks pass. The UFO is now an HTML/CSS element inside `HeroComponent` (see Hero Section Design below). The rocket is planned for Phase 8 (Easter Eggs) as a controllable element.

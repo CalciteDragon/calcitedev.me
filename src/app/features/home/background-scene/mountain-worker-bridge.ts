@@ -1,4 +1,4 @@
-import type { MountainWorkerMsg, MountainWorkerPerfSample } from './mountain-worker.protocol';
+import type { MountainWorkerMsg } from './mountain-worker.protocol';
 import type { MountainConfig } from './mountain.config';
 
 /**
@@ -8,35 +8,18 @@ import type { MountainConfig } from './mountain.config';
  */
 export class MountainWorkerBridge {
   private readonly worker: Worker;
-  private readonly metricsEnabled: boolean;
-  private lastCamY: number | null = null;
-  private sequence = 0;
 
-  constructor(onPerfSample?: (sample: MountainWorkerPerfSample) => void) {
-    this.metricsEnabled = Boolean(onPerfSample);
+  constructor() {
     this.worker = new Worker(
       new URL('./mountain.worker', import.meta.url),
       { type: 'module' },
     );
-    if (onPerfSample) {
-      this.worker.addEventListener('message', ({ data }: MessageEvent<MountainWorkerPerfSample>) => {
-        if (data.type === 'perf') onPerfSample(data);
-      });
-    }
   }
 
-  /** Transfer canvas control and provide the camera for the worker's first draw. */
-  init(canvas: HTMLCanvasElement, width: number, height: number, camY: number): void {
+  /** Transfer canvas control to the worker and start the render loop. */
+  init(canvas: HTMLCanvasElement, width: number, height: number): void {
     const offscreen = canvas.transferControlToOffscreen();
-    this.lastCamY = camY;
-    const msg: MountainWorkerMsg = {
-      type: 'init',
-      canvas: offscreen,
-      width,
-      height,
-      camY,
-      metricsEnabled: this.metricsEnabled,
-    };
+    const msg: MountainWorkerMsg = { type: 'init', canvas: offscreen, width, height };
     this.worker.postMessage(msg, [offscreen]);
   }
 
@@ -45,26 +28,15 @@ export class MountainWorkerBridge {
   }
 
   setConfig(config: MountainConfig): void {
-    this.lastCamY = config.camY;
     this.worker.postMessage({ type: 'config', config } satisfies MountainWorkerMsg);
   }
 
-  /** Fire-and-forget camera update, suppressing values the worker already has. */
+  /** Fire-and-forget camY update — < 0.1 ms on the main thread. */
   setCamY(value: number): void {
-    if (value === this.lastCamY) return;
-
-    this.lastCamY = value;
-    const metrics = this.metricsEnabled
-      ? { sequence: ++this.sequence, sampledAt: absoluteNow() }
-      : {};
-    this.worker.postMessage({ type: 'camY', value, ...metrics } satisfies MountainWorkerMsg);
+    this.worker.postMessage({ type: 'camY', value } satisfies MountainWorkerMsg);
   }
 
   destroy(): void {
     this.worker.terminate();
   }
-}
-
-function absoluteNow(): number {
-  return performance.timeOrigin + performance.now();
 }

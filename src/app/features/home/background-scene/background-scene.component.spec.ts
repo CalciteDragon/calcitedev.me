@@ -94,7 +94,7 @@ describe('BackgroundSceneComponent', () => {
   describe('scroll path optimization', () => {
     afterEach(() => vi.restoreAllMocks());
 
-    it('forwards scroll camera state before the next animation frame', async () => {
+    it('calls MountainWorkerBridge.setCamY() when scrollY changes', async () => {
       let rafCallback: ((ts: number) => void) | null = null;
       vi.stubGlobal('ResizeObserver', vi.fn(function () { return { observe: vi.fn(), disconnect: vi.fn() }; }));
       vi.stubGlobal('requestAnimationFrame', vi.fn((cb: (ts: number) => void) => {
@@ -116,34 +116,35 @@ describe('BackgroundSceneComponent', () => {
       const f = TestBed.createComponent(BackgroundSceneComponent);
       f.detectChanges();
 
-      Object.defineProperty(window, 'scrollY', { value: 120, writable: true, configurable: true });
-      window.dispatchEvent(new Event('scroll'));
-      expect(setCamYSpy).toHaveBeenCalledTimes(1);
-      expect(setCamYSpy).toHaveBeenLastCalledWith(-2.9);
-
+      // First frame: scrollY=100, lastScrollY=-1 → setCamY called
       rafCallback!(0);
       expect(setCamYSpy).toHaveBeenCalledTimes(1);
 
+      // Second frame: scrollY unchanged → setCamY NOT called again
       rafCallback!(16);
       expect(setCamYSpy).toHaveBeenCalledTimes(1);
 
+      // Third frame: scrollY changes → setCamY called again
       Object.defineProperty(window, 'scrollY', { value: 300, writable: true, configurable: true });
-      window.dispatchEvent(new Event('scroll'));
+      rafCallback!(32);
       expect(setCamYSpy).toHaveBeenCalledTimes(2);
-      f.destroy();
     });
 
-    it('passes the initial camera position with worker initialization', async () => {
+    it('does NOT call MountainWorkerBridge.setCamY() when scrollY is unchanged', async () => {
+      let rafCallback: ((ts: number) => void) | null = null;
       vi.stubGlobal('ResizeObserver', vi.fn(function () { return { observe: vi.fn(), disconnect: vi.fn() }; }));
-      vi.stubGlobal('requestAnimationFrame', vi.fn().mockReturnValue(1));
+      vi.stubGlobal('requestAnimationFrame', vi.fn((cb: (ts: number) => void) => {
+        rafCallback = cb;
+        return 1;
+      }));
       vi.stubGlobal('cancelAnimationFrame', vi.fn());
       vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches: false }));
       vi.stubGlobal('Worker', vi.fn(function () { return { postMessage: vi.fn(), terminate: vi.fn() }; }));
 
       const { MountainWorkerBridge } = await import('./mountain-worker-bridge');
-      const initSpy = vi.spyOn(MountainWorkerBridge.prototype, 'init').mockImplementation(() => {});
+      const setCamYSpy = vi.spyOn(MountainWorkerBridge.prototype, 'setCamY').mockImplementation(() => {});
 
-      Object.defineProperty(window, 'scrollY', { value: 600, writable: true, configurable: true });
+      Object.defineProperty(window, 'scrollY', { value: 50, writable: true, configurable: true });
 
       await TestBed.configureTestingModule({
         imports: [BackgroundSceneComponent],
@@ -151,13 +152,10 @@ describe('BackgroundSceneComponent', () => {
       const f = TestBed.createComponent(BackgroundSceneComponent);
       f.detectChanges();
 
-      expect(initSpy).toHaveBeenCalledWith(
-        expect.any(HTMLCanvasElement),
-        window.innerWidth,
-        window.innerHeight,
-        -2.5,
-      );
-      f.destroy();
+      // Two frames at the same scrollY — setCamY should only be called once (first frame)
+      rafCallback!(0);
+      rafCallback!(16);
+      expect(setCamYSpy).toHaveBeenCalledTimes(1);
     });
   });
 

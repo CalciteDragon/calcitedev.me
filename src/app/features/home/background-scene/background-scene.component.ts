@@ -15,7 +15,6 @@ import { SceneRenderer } from './scene-renderer';
 import { defaultConfig } from './scene-entities';
 import { MountainWorkerBridge } from './mountain-worker-bridge';
 import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
-import { LiveCanvasPerfCollector, runCanvasPerfBenchmark } from './canvas-perf-benchmark';
 
 @Component({
   selector: 'app-background-scene',
@@ -36,17 +35,12 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   private rafId = 0;
   private resizeObserver: ResizeObserver | null = null;
   private resizeTimeout = 0;
+  private lastScrollY = -1;
   private reducedMotionQuery: MediaQueryList | null = null;
   private prefersReducedMotion = false;
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-
-    const perfMode = new URLSearchParams(window.location.search).get('canvasPerf');
-    if (perfMode === 'benchmark') {
-      void runCanvasPerfBenchmark(window.innerWidth, window.innerHeight);
-      return;
-    }
 
     const canvas = this.canvasRef().nativeElement;
     const isReduced = window.matchMedia('(max-width: 767px)').matches;
@@ -56,15 +50,11 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     this.renderer.resize(window.innerWidth, window.innerHeight);
 
     // Transfer mountain canvas to OffscreenCanvas worker — main thread does zero draw work
-    const perfCollector = perfMode === 'live' ? new LiveCanvasPerfCollector() : null;
-    this.mountainWorker = new MountainWorkerBridge(
-      perfCollector ? sample => perfCollector.record(sample) : undefined,
-    );
+    this.mountainWorker = new MountainWorkerBridge();
     this.mountainWorker.init(
       this.mountainCanvasRef().nativeElement,
       window.innerWidth,
       window.innerHeight,
-      this.cameraYForScroll(window.scrollY),
     );
 
     // Observe <html> element as a viewport-resize proxy for fixed elements
@@ -80,17 +70,14 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     }
     this.document.addEventListener('visibilitychange', this.onVisibilityChange);
 
-    this.ngZone.runOutsideAngular(() => {
-      window.addEventListener('scroll', this.onScroll, { passive: true });
-      this.startRendering();
-    });
+    this.ngZone.runOutsideAngular(() => this.startRendering());
   }
 
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId)) {
       cancelAnimationFrame(this.rafId);
       clearTimeout(this.resizeTimeout);
-      window.removeEventListener('scroll', this.onScroll);
+      window.removeEventListener('scroll', this.onStaticScroll);
       this.document.removeEventListener('visibilitychange', this.onVisibilityChange);
       if (this.reducedMotionQuery && typeof this.reducedMotionQuery.removeEventListener === 'function') {
         this.reducedMotionQuery.removeEventListener('change', this.onReducedMotionChange);
@@ -103,6 +90,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
 
   /** Enter the rendering mode matching the current motion preference. */
   private startRendering(): void {
+    window.removeEventListener('scroll', this.onStaticScroll);
     if (this.prefersReducedMotion) {
       this.startStaticMode();
     } else {
@@ -114,6 +102,13 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     cancelAnimationFrame(this.rafId);
     const loop = (timestamp: number): void => {
       const scrollY = window.scrollY;
+
+      if (scrollY !== this.lastScrollY) {
+        this.lastScrollY = scrollY;
+        const camY = scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset;
+        this.mountainWorker?.setCamY(camY); // fire-and-forget postMessage — no draw call here
+      }
+
       this.renderer?.drawFrame(timestamp, scrollY);
       this.rafId = requestAnimationFrame(loop);
     };
@@ -129,27 +124,17 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     cancelAnimationFrame(this.rafId);
     this.rafId = 0;
     this.drawStaticFrame();
+    window.addEventListener('scroll', this.onStaticScroll, { passive: true });
   }
 
-  /** Forward camera state before the next main-thread animation callback. */
-  private readonly onScroll = (): void => {
-    const scrollY = window.scrollY;
-    this.mountainWorker?.setCamY(this.cameraYForScroll(scrollY));
-
-    if (this.prefersReducedMotion) {
-      this.renderer?.drawFrame(0, scrollY);
-    }
-  };
+  private readonly onStaticScroll = (): void => this.drawStaticFrame();
 
   private drawStaticFrame(): void {
     const scrollY = window.scrollY;
-    this.mountainWorker?.setCamY(this.cameraYForScroll(scrollY));
+    this.lastScrollY = scrollY;
+    this.mountainWorker?.setCamY(scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset);
     // Constant timestamp — star twinkle and particle drift stay frozen.
     this.renderer?.drawFrame(0, scrollY);
-  }
-
-  private cameraYForScroll(scrollY: number): number {
-    return scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset;
   }
 
   /** Pause the animation loop entirely while the tab is hidden. */
