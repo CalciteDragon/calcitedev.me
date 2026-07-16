@@ -18,6 +18,8 @@ export interface CanvasScrollPerfSummary {
   renderedUpdates: number;
   coalescedUpdates: number;
   mainFrameInterval: PerfDistribution & { over20Ms: number; over34Ms: number };
+  scrollEventInterval: PerfDistribution;
+  workerDrawInterval: PerfDistribution & { over20Ms: number; over34Ms: number };
   scrollToWorkerReceive: PerfDistribution;
   scrollToDrawStart: PerfDistribution;
   workerQueue: PerfDistribution;
@@ -53,6 +55,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
   private lastScrollEventAt: number | null = null;
   private lastFrameTimestamp: number | null = null;
   private readonly frameIntervals: number[] = [];
+  private readonly scrollEventTimes: number[] = [];
   private readonly workerSamples: MountainWorkerPerfSample[] = [];
   private controls: HTMLElement | null = null;
   private output: HTMLOutputElement | null = null;
@@ -74,6 +77,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
     this.lastScrollEventAt = null;
     this.lastFrameTimestamp = null;
     this.frameIntervals.length = 0;
+    this.scrollEventTimes.length = 0;
     this.workerSamples.length = 0;
   }
 
@@ -95,6 +99,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
     if (!this.active) return;
     this.scrollEvents++;
     this.lastScrollEventAt = this.absoluteNow();
+    this.scrollEventTimes.push(this.lastScrollEventAt);
   }
 
   recordFrame(timestamp: number): void {
@@ -133,6 +138,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
   private summarize(label: string): CanvasScrollPerfSummary {
     const now = this.absoluteNow();
     const samples = this.workerSamples;
+    const workerDrawIntervals = intervals(samples.map(sample => sample.drawStartedAt));
     return {
       label,
       durationMs: round(now - this.startedAt),
@@ -144,6 +150,12 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
         ...distribution(this.frameIntervals),
         over20Ms: this.frameIntervals.filter(value => value > 20).length,
         over34Ms: this.frameIntervals.filter(value => value > 34).length,
+      },
+      scrollEventInterval: distribution(intervals(this.scrollEventTimes)),
+      workerDrawInterval: {
+        ...distribution(workerDrawIntervals),
+        over20Ms: workerDrawIntervals.filter(value => value > 20).length,
+        over34Ms: workerDrawIntervals.filter(value => value > 34).length,
       },
       scrollToWorkerReceive: distribution(
         samples.map(sample => sample.workerReceivedAt - sample.scrollEventAt),
@@ -207,6 +219,10 @@ export function distribution(samples: number[]): PerfDistribution {
     p95Ms: round(percentile(sorted, 0.95)),
     maxMs: round(sorted.at(-1) ?? 0),
   };
+}
+
+function intervals(timestamps: number[]): number[] {
+  return timestamps.slice(1).map((timestamp, index) => timestamp - timestamps[index]);
 }
 
 function percentile(sorted: number[], fraction: number): number {

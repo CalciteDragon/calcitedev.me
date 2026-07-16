@@ -42,6 +42,7 @@ describe('CanvasScrollPerfMetrics', () => {
     expect(summary.scrollEvents).toBe(1);
     expect(summary.renderedUpdates).toBe(1);
     expect(summary.mainFrameInterval.medianMs).toBe(17);
+    expect(summary.workerDrawInterval.sampleCount).toBe(0);
     expect(summary.scrollToDrawStart.medianMs).toBe(5);
     expect(summary.workerQueue.medianMs).toBe(2);
     expect(summary.draw.medianMs).toBe(4);
