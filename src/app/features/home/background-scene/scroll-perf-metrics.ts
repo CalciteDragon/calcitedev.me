@@ -40,6 +40,7 @@ declare global {
 }
 
 const SCROLL_ACTIVITY_WINDOW_MS = 120;
+const TRACE_FRAMES_PER_DIRECTION = 30;
 
 /**
  * Opt-in measurement of the production scroll path. It remains inert unless
@@ -48,6 +49,7 @@ const SCROLL_ACTIVITY_WINDOW_MS = 120;
  */
 export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
   private active = false;
+  private traceRun = 0;
   private startedAt = 0;
   private sequence = 0;
   private scrollEvents = 0;
@@ -79,17 +81,23 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
     this.frameIntervals.length = 0;
     this.scrollEventTimes.length = 0;
     this.workerSamples.length = 0;
+    if (this.output) {
+      delete this.output.dataset['summary'];
+      this.output.dataset['state'] = 'recording';
+    }
   }
 
   stop(label = 'scroll-run'): CanvasScrollPerfSummary {
     const summary = this.summarize(label);
     this.active = false;
+    this.traceRun++;
     this.target.__canvasScrollPerfLast = summary;
     if (this.output) {
       const serialized = JSON.stringify(summary);
       this.output.value = serialized;
       this.output.textContent = serialized;
       this.output.dataset['summary'] = serialized;
+      this.output.dataset['state'] = 'complete';
     }
     console.info('[canvas-scroll-perf]', JSON.stringify(summary));
     return summary;
@@ -184,7 +192,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
     if (!document?.body) return;
 
     const controls = document.createElement('div');
-    controls.style.cssText = 'position:fixed;left:0;top:0;z-index:2147483647;opacity:0.01;';
+    controls.style.cssText = 'position:fixed;left:0;top:0;z-index:2147483647;';
     controls.dataset['canvasScrollPerf'] = 'ready';
 
     const start = document.createElement('button');
@@ -197,11 +205,60 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
     stop.textContent = 'Stop canvas scroll metrics';
     stop.addEventListener('click', () => this.stop(stop.dataset['label'] ?? 'scroll-run'));
 
+    const run = document.createElement('button');
+    run.id = 'canvas-scroll-perf-run';
+    run.textContent = 'Run canvas scroll metrics';
+    run.addEventListener('click', () => void this.runScrollTrace());
+
     this.output = document.createElement('output');
     this.output.id = 'canvas-scroll-perf-output';
-    controls.append(start, stop, this.output);
+    controls.append(run, start, stop, this.output);
     document.body.append(controls);
     this.controls = controls;
+  }
+
+  private async runScrollTrace(): Promise<void> {
+    if (this.active) return;
+    const traceRun = ++this.traceRun;
+    const maxScroll = Math.max(
+      0,
+      this.target.document.documentElement.scrollHeight - this.target.innerHeight,
+    );
+    const root = this.target.document.documentElement;
+    const originalScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    root.scrollTop = 0;
+    this.start();
+
+    await new Promise<void>(resolve => {
+      let frame = 0;
+      const totalFrames = TRACE_FRAMES_PER_DIRECTION * 2;
+      const step = (): void => {
+        if (traceRun !== this.traceRun) {
+          resolve();
+          return;
+        }
+        const directionalFrame = frame <= TRACE_FRAMES_PER_DIRECTION
+          ? frame
+          : totalFrames - frame;
+        root.scrollTop = Math.round(
+          maxScroll * directionalFrame / TRACE_FRAMES_PER_DIRECTION,
+        );
+        frame++;
+        if (frame <= totalFrames) {
+          this.target.requestAnimationFrame(step);
+        } else {
+          resolve();
+        }
+      };
+      this.target.requestAnimationFrame(step);
+    });
+
+    root.style.scrollBehavior = originalScrollBehavior;
+    if (traceRun !== this.traceRun) return;
+    await new Promise(resolve => this.target.setTimeout(resolve, 100));
+    if (traceRun !== this.traceRun) return;
+    this.stop('standard-scroll-trace');
   }
 }
 

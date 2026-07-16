@@ -68,6 +68,7 @@ describe('CanvasScrollPerfMetrics', () => {
     document.querySelector<HTMLButtonElement>('#canvas-scroll-perf-stop')?.click();
 
     expect(document.querySelector('#canvas-scroll-perf-output')?.textContent).toContain('scroll-run');
+    expect(document.querySelector('#canvas-scroll-perf-run')).not.toBeNull();
     metrics.destroy();
     expect(document.querySelector('#canvas-scroll-perf-output')).toBeNull();
     infoSpy.mockRestore();
