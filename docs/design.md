@@ -178,7 +178,7 @@ The page is a single-page scroll: Home hero → Projects → About → Skills �
 | Element           | Description                                                                                          |
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
 | Star field        | 130 stars (65 reduced), radius 0.4–2.5px, opacity 0.2–0.8, concentrated in upper 85% of canvas. Large stars get cross-sparkle arms. Per-star parallax (0.01–0.04). |
-| Cyber mountains   | Perspective-projected FBM terrain with filled faces, wire passes, per-face fog, and a scroll-driven camera. The mountain canvas is transferred to `MountainRenderer` in a dedicated worker through `MountainWorkerBridge`. It renders site-wide, not only behind the hero. |
+| Cyber mountains   | Perspective-projected FBM terrain with filled faces, wire passes, per-face fog, and a scroll-driven camera. The static fog blend is cached in each face color so the visual treatment needs one face fill instead of two. The mountain canvas is transferred to `MountainRenderer` in a dedicated worker through `MountainWorkerBridge`. It renders site-wide, not only behind the hero. |
 | Atmosphere        | Subtle cyan-to-indigo linear gradient haze toward the lower canvas — simulates light scatter.        |
 | Horizon glow      | Neon bloom band (cyan → purple) drawn above mountains to simulate atmospheric ridge scatter.         |
 | Parallax          | Mountains shift on scroll via `camY = scrollY / 1200` panning.                                      |

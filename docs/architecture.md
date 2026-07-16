@@ -137,10 +137,10 @@ Hydration uses event replay. Browser-only behavior must be guarded with `isPlatf
 
 `BackgroundSceneComponent` coordinates two fixed canvases:
 
-1. The mountain canvas is transferred to a dedicated worker. `MountainWorkerBridge` posts resize and camera updates; `MountainRenderer` draws perspective-projected FBM terrain on an `OffscreenCanvas`.
+1. The mountain canvas is transferred to a dedicated worker. `MountainWorkerBridge` posts resize and camera updates; `MountainRenderer` draws perspective-projected FBM terrain on an `OffscreenCanvas`. Static fog is precomposed into the cached face colors, removing the second per-face fog fill without changing the worker's original rAF scheduling or draw order.
 2. The transparent scene canvas remains on the main thread and draws atmosphere, horizon glow, stars, and particles using `SceneRenderer`.
 
-The component runs its animation loop outside Angular’s zone and reduces scene entity counts below 768px. Hidden-tab suspension and high-DPR mountain rendering remain Phase 9 tasks.
+The component runs its animation loop outside Angular’s zone and reduces scene entity counts below 768px. `scroll-perf-metrics.ts` provides opt-in production-path measurements through `?canvasPerf=scroll`: real document scrolling is correlated with main-frame cadence, worker receipt/queue time, mountain draw duration, and main-thread receipt. The worker protocol carries timing metadata only in this mode. High-DPR mountain rendering remains a Phase 9 task.
 
 ## Build and Deployment
 
