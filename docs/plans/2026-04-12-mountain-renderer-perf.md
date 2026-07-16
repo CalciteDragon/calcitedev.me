@@ -6,6 +6,8 @@
 
 **Execution order:** Phase 1 → Phase 2 → Phase 3. Each phase ships and measures independently.
 
+> **Status / July 15, 2026 correction:** The three phases in this historical implementation plan shipped, but its worker-rAF scheduling snippets are no longer the current design. A later demand-scheduled worker rAF produced measured 80–160 ms scroll-sample-to-worker-start outliers. The worker now reserves rAF for the initial transferred-canvas paint and uses a coalesced zero-delay task for camera/resize/config redraws. The same-session live benchmark measured 0.1 ms median / 0.3–0.4 ms p95 sample-to-start and 1.6–2.1 ms p95 end-to-end after the correction. The row-batched renderer remains because the isolated A/B measured 1.3 ms median / 1.5 ms p95 versus 6.1 ms / 8.1 ms on the pre-batching commit. Treat the phase code blocks below as historical execution notes; `docs/architecture.md` and `docs/development.md` describe the current implementation and `?canvasPerf=benchmark|live` supplies repeatable validation.
+
 ---
 
 ## Current Bottlenecks

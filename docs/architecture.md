@@ -137,10 +137,12 @@ Hydration uses event replay. Browser-only behavior must be guarded with `isPlatf
 
 `BackgroundSceneComponent` coordinates two fixed canvases:
 
-1. The mountain canvas is transferred to a dedicated worker. `MountainWorkerBridge` posts resize and camera updates; `MountainRenderer` draws perspective-projected FBM terrain on an `OffscreenCanvas`. Passive scroll events forward camera state before the main-thread animation callback. The worker uses demand-driven, single-pending-frame invalidation so clustered messages coalesce to one render using the newest state.
-2. The transparent scene canvas remains on the main thread and draws atmosphere, horizon glow, stars, and particles using `SceneRenderer`. Its viewport-sized gradients are cached until the next resize instead of being recreated every frame.
+1. The mountain canvas is transferred to a dedicated worker. `MountainWorkerBridge` posts resize and camera updates; `MountainRenderer` draws perspective-projected FBM terrain on an `OffscreenCanvas`. Passive scroll events forward camera state before the main-thread animation callback. Camera updates use a coalesced zero-delay worker task rather than worker `requestAnimationFrame`, avoiding measured worker-vsync scheduling stalls while retaining latest-state coalescing. The initial paint still uses worker rAF so the transferred canvas joins the browser's rendering lifecycle before presentation.
+2. The transparent scene canvas remains on the main thread and draws atmosphere, horizon glow, stars, and particles using `SceneRenderer`.
 
 Mountain painting is batched into one compound face path and two wire paths per visible terrain row. Cached sampled gradients preserve the left/right, height, and fog color variation without issuing paint commands per grid cell; behind-camera rows are skipped during projection and drawing. The component runs its animation loop outside Angular’s zone, reduces scene entity counts below 768px, and suspends the animation loop while the tab is hidden. High-DPR mountain rendering remains deferred because increasing the worker canvas pixel count would work against the current latency target.
+
+Canvas performance diagnostics are opt-in. `?canvasPerf=benchmark` runs 120 measured mountain and scene frames on isolated canvases and logs median/p95/max timing plus missed-frame counts. `?canvasPerf=live` records scroll-sample-to-worker-start, worker draw, end-to-end, and coalesced-update metrics in ten-frame windows. Normal visits do not create metric timestamps or worker responses.
 
 ## Build and Deployment
 
