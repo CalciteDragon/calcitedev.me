@@ -52,7 +52,7 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     this.renderer.resize(window.innerWidth, window.innerHeight);
 
     // Transfer mountain canvas to OffscreenCanvas worker — main thread does zero draw work
-    if (canvasScrollPerfEnabled(window.location.search)) {
+    if (canvasScrollPerfEnabled(window.location.search, window.location.hash)) {
       this.scrollPerf = new CanvasScrollPerfMetrics(window, performance);
       window.addEventListener('scroll', this.onPerfScroll, { passive: true });
     }

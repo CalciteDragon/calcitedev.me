@@ -50,7 +50,9 @@ export class ScrollService {
 
     if (activeId !== null) {
       this.activeSection.set(activeId);
-      history.replaceState(null, '', activeId === 'home' ? '/' : `/#${activeId}`);
+      const search = this.document.defaultView?.location.search ?? '';
+      const fragment = activeId === 'home' ? '' : `#${activeId}`;
+      history.replaceState(null, '', `/${search}${fragment}`);
     }
   }
 

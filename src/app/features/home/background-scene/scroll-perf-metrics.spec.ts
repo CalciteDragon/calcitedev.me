@@ -9,8 +9,9 @@ describe('CanvasScrollPerfMetrics', () => {
 
   it('enables only for the scroll benchmark query', () => {
     expect(canvasScrollPerfEnabled('?canvasPerf=scroll')).toBe(true);
+    expect(canvasScrollPerfEnabled('', '#canvasPerf=scroll')).toBe(true);
     expect(canvasScrollPerfEnabled('?canvasPerf=benchmark')).toBe(false);
-    expect(canvasScrollPerfEnabled('')).toBe(false);
+    expect(canvasScrollPerfEnabled('', '#projects')).toBe(false);
   });
 
   it('summarizes real scroll, worker, draw, and main-frame timings', () => {
@@ -56,5 +57,18 @@ describe('CanvasScrollPerfMetrics', () => {
       p95Ms: 4,
       maxMs: 4,
     });
+  });
+
+  it('exposes inert DOM controls for browser-driven scroll runs', () => {
+    const metrics = new CanvasScrollPerfMetrics(window, performance);
+    const infoSpy = vi.spyOn(console, 'info').mockImplementation(() => {});
+
+    document.querySelector<HTMLButtonElement>('#canvas-scroll-perf-start')?.click();
+    document.querySelector<HTMLButtonElement>('#canvas-scroll-perf-stop')?.click();
+
+    expect(document.querySelector('#canvas-scroll-perf-output')?.textContent).toContain('scroll-run');
+    metrics.destroy();
+    expect(document.querySelector('#canvas-scroll-perf-output')).toBeNull();
+    infoSpy.mockRestore();
   });
 });

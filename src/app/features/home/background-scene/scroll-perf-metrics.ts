@@ -54,12 +54,15 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
   private lastFrameTimestamp: number | null = null;
   private readonly frameIntervals: number[] = [];
   private readonly workerSamples: MountainWorkerPerfSample[] = [];
+  private controls: HTMLElement | null = null;
+  private output: HTMLOutputElement | null = null;
 
   constructor(
     private readonly target: Window,
     private readonly clock: Performance,
   ) {
     target.__canvasScrollPerf = this;
+    this.installDomControls();
   }
 
   start(): void {
@@ -78,6 +81,12 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
     const summary = this.summarize(label);
     this.active = false;
     this.target.__canvasScrollPerfLast = summary;
+    if (this.output) {
+      const serialized = JSON.stringify(summary);
+      this.output.value = serialized;
+      this.output.textContent = serialized;
+      this.output.dataset['summary'] = serialized;
+    }
     console.info('[canvas-scroll-perf]', JSON.stringify(summary));
     return summary;
   }
@@ -118,6 +127,7 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
 
   destroy(): void {
     if (this.target.__canvasScrollPerf === this) delete this.target.__canvasScrollPerf;
+    this.controls?.remove();
   }
 
   private summarize(label: string): CanvasScrollPerfSummary {
@@ -156,10 +166,37 @@ export class CanvasScrollPerfMetrics implements CanvasScrollPerfController {
   private absoluteNow(): number {
     return this.clock.timeOrigin + this.clock.now();
   }
+
+  private installDomControls(): void {
+    const document = this.target.document;
+    if (!document?.body) return;
+
+    const controls = document.createElement('div');
+    controls.style.cssText = 'position:fixed;left:0;top:0;z-index:2147483647;opacity:0.01;';
+    controls.dataset['canvasScrollPerf'] = 'ready';
+
+    const start = document.createElement('button');
+    start.id = 'canvas-scroll-perf-start';
+    start.textContent = 'Start canvas scroll metrics';
+    start.addEventListener('click', () => this.start());
+
+    const stop = document.createElement('button');
+    stop.id = 'canvas-scroll-perf-stop';
+    stop.textContent = 'Stop canvas scroll metrics';
+    stop.addEventListener('click', () => this.stop(stop.dataset['label'] ?? 'scroll-run'));
+
+    this.output = document.createElement('output');
+    this.output.id = 'canvas-scroll-perf-output';
+    controls.append(start, stop, this.output);
+    document.body.append(controls);
+    this.controls = controls;
+  }
 }
 
-export function canvasScrollPerfEnabled(search: string): boolean {
-  return new URLSearchParams(search).get('canvasPerf') === 'scroll';
+export function canvasScrollPerfEnabled(search: string, hash = ''): boolean {
+  const queryMode = new URLSearchParams(search).get('canvasPerf');
+  const fragmentMode = new URLSearchParams(hash.replace(/^#/, '')).get('canvasPerf');
+  return queryMode === 'scroll' || fragmentMode === 'scroll';
 }
 
 export function distribution(samples: number[]): PerfDistribution {
