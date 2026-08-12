@@ -1,12 +1,8 @@
 import {
   Star,
-  UFO,
-  Rocket,
   SceneParticle,
   SceneConfig,
   createStars,
-  createUFO,
-  createRocket,
   createParticles,
 } from './scene-entities';
 
@@ -17,8 +13,6 @@ export class SceneRenderer {
   private cssWidth = 0;
   private cssHeight = 0;
   private stars: Star[] = [];
-  private ufo: UFO | null = null;
-  private rocket: Rocket | null = null;
   private particles: SceneParticle[] = [];
   private lastTimestamp = -1;
   private destroyed = false;
@@ -39,13 +33,6 @@ export class SceneRenderer {
     this.cssHeight = cssHeight;
     this.stars = createStars(this.config.starCount, cssWidth, cssHeight);
     this.particles = createParticles(this.config.particleCount, cssWidth, cssHeight);
-    if (!this.config.reducedComplexity) {
-      this.ufo = createUFO();
-      this.rocket = createRocket();
-    } else {
-      this.ufo = null;
-      this.rocket = null;
-    }
     this.lastTimestamp = -1;
   }
 
@@ -64,11 +51,10 @@ export class SceneRenderer {
 
   /**
    * Draw one animation frame.
-   * @param timestamp  — rAF timestamp in ms
-   * @param scrollY    — window.scrollY in CSS px
-   * @param heroHeight — offsetHeight of the #home section; gates hero-only elements
+   * @param timestamp — rAF timestamp in ms
+   * @param scrollY   — window.scrollY in CSS px
    */
-  drawFrame(timestamp: number, scrollY: number, heroHeight: number): void {
+  drawFrame(timestamp: number, scrollY: number): void {
     if (this.destroyed || this.cssWidth === 0) return;
 
     const deltaTime = this.lastTimestamp === -1 ? 16 : timestamp - this.lastTimestamp;
@@ -82,24 +68,14 @@ export class SceneRenderer {
     // Subtle neon bloom along the mountain ridge
     this.drawHorizonGlow();
 
-    // Stars and particles render site-wide
     this.drawStars(timestamp, scrollY);
     this.drawParticles(deltaTime);
-
-    // UFO and rocket are hero-specific — only visible while in the hero section
-    const heroVisible = scrollY < heroHeight;
-    if (heroVisible && !this.config.reducedComplexity) {
-      if (this.ufo) this.drawUFO(deltaTime);
-      if (this.rocket) this.drawRocket(deltaTime);
-    }
   }
 
   destroy(): void {
     this.destroyed = true;
     this.stars = [];
     this.particles = [];
-    this.ufo = null;
-    this.rocket = null;
   }
 
   // ─── Private Draw Methods ──────────────────────────────────────────────────
@@ -176,102 +152,5 @@ export class SceneRenderer {
       this.ctx.fillStyle = `rgba(139, 92, 246, ${p.opacity.toFixed(3)})`;
       this.ctx.fillRect(p.x, p.y, p.size, p.size);
     }
-  }
-
-  private drawUFO(deltaTime: number): void {
-    const ufo = this.ufo!;
-    ufo.bobPhase += ufo.bobSpeed * deltaTime;
-
-    const x = ufo.nx * this.cssWidth;
-    const y = ufo.baseNy * this.cssHeight + Math.sin(ufo.bobPhase) * ufo.bobAmplitude;
-
-    // Saucer body
-    this.ctx.beginPath();
-    this.ctx.ellipse(x, y, 28, 10, 0, 0, Math.PI * 2);
-    this.ctx.strokeStyle = 'rgba(34, 211, 238, 0.7)';
-    this.ctx.lineWidth = 1.5;
-    this.ctx.stroke();
-    this.ctx.fillStyle = 'rgba(34, 211, 238, 0.08)';
-    this.ctx.fill();
-
-    // Dome
-    this.ctx.beginPath();
-    this.ctx.ellipse(x, y - 4, 14, 10, 0, Math.PI, Math.PI * 2);
-    this.ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
-    this.ctx.stroke();
-    this.ctx.fillStyle = 'rgba(34, 211, 238, 0.06)';
-    this.ctx.fill();
-
-    // Tractor beam
-    const beam = this.ctx.createLinearGradient(x, y + 10, x, y + 60);
-    beam.addColorStop(0, 'rgba(34, 211, 238, 0.1)');
-    beam.addColorStop(1, 'rgba(34, 211, 238, 0)');
-    this.ctx.beginPath();
-    this.ctx.moveTo(x - 12, y + 10);
-    this.ctx.lineTo(x + 12, y + 10);
-    this.ctx.lineTo(x + 20, y + 60);
-    this.ctx.lineTo(x - 20, y + 60);
-    this.ctx.closePath();
-    this.ctx.fillStyle = beam;
-    this.ctx.fill();
-  }
-
-  private drawRocket(deltaTime: number): void {
-    const rocket = this.rocket!;
-    rocket.flamePhase += rocket.flameSpeed * deltaTime;
-
-    const x = rocket.nx * this.cssWidth;
-    const y = rocket.ny * this.cssHeight;
-    const flicker = 0.7 + 0.3 * Math.sin(rocket.flamePhase);
-
-    this.ctx.save();
-    this.ctx.translate(x, y);
-
-    // Nose cone
-    this.ctx.beginPath();
-    this.ctx.moveTo(0, -22);
-    this.ctx.lineTo(-7, 0);
-    this.ctx.lineTo(7, 0);
-    this.ctx.closePath();
-    this.ctx.strokeStyle = 'rgba(245, 158, 11, 0.7)';
-    this.ctx.lineWidth = 1.5;
-    this.ctx.stroke();
-    this.ctx.fillStyle = 'rgba(245, 158, 11, 0.08)';
-    this.ctx.fill();
-
-    // Fuselage
-    this.ctx.strokeRect(-7, 0, 14, 14);
-
-    // Left fin
-    this.ctx.beginPath();
-    this.ctx.moveTo(-7, 8);
-    this.ctx.lineTo(-13, 18);
-    this.ctx.lineTo(-7, 14);
-    this.ctx.closePath();
-    this.ctx.stroke();
-
-    // Right fin
-    this.ctx.beginPath();
-    this.ctx.moveTo(7, 8);
-    this.ctx.lineTo(13, 18);
-    this.ctx.lineTo(7, 14);
-    this.ctx.closePath();
-    this.ctx.stroke();
-
-    // Animated flame
-    const flameHeight = 16 * flicker;
-    const flame = this.ctx.createLinearGradient(0, 14, 0, 14 + flameHeight);
-    flame.addColorStop(0, `rgba(245, 158, 11, ${(0.8 * flicker).toFixed(2)})`);
-    flame.addColorStop(0.5, `rgba(236, 72, 153, ${(0.5 * flicker).toFixed(2)})`);
-    flame.addColorStop(1, 'rgba(139, 92, 246, 0)');
-    this.ctx.beginPath();
-    this.ctx.moveTo(-5, 14);
-    this.ctx.lineTo(5, 14);
-    this.ctx.lineTo(0, 14 + flameHeight);
-    this.ctx.closePath();
-    this.ctx.fillStyle = flame;
-    this.ctx.fill();
-
-    this.ctx.restore();
   }
 }

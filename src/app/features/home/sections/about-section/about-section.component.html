@@ -1,7 +1,10 @@
 <section class="about-section">
   <app-section-header title="About Me" />
   <div class="about-section__content" appScrollReveal>
-    <p class="about-section__bio">{{ bio().shortBio }}</p>
-    <p class="about-section__extended">{{ bio().extendedBio }}</p>
+    <div class="about-section__card">
+      <p class="about-section__bio">{{ bio().shortBio }}</p>
+      <hr class="about-section__divider" aria-hidden="true" />
+      <p class="about-section__extended">{{ bio().extendedBio }}</p>
+    </div>
   </div>
 </section>

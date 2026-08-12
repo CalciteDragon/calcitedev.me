@@ -5,7 +5,9 @@
     </div>
   }
   <div class="project-card__body">
-    <h3 class="project-card__title">{{ title() }}</h3>
+    <h3 class="project-card__title">
+      <a class="project-card__title-link" [routerLink]="['/projects', slug()]">{{ title() }}</a>
+    </h3>
     <p class="project-card__description">{{ description() }}</p>
     @if (tags().length > 0) {
       <div class="project-card__tags">

@@ -73,13 +73,29 @@
 }
 
 // Supporting browsers: animation is live-linked to scroll position.
-// animation-range: entry 20% entry 100% — begins when 20% of the element
-// has entered the viewport, completes when fully visible; reverses on scroll-up.
+//
+// A `view()` timeline's `entry` range spans exactly the subject's own height, so
+// percentage-only offsets scale the reveal with the element rather than holding a
+// consistent pace. `entry 20% entry 100%` therefore made the project grid (~970px
+// at desktop, ~2280px single-column) take roughly 1200–1800px of scrolling to
+// finish fading, and — because `entry 100%` is by definition the moment the
+// subject's bottom edge reaches the viewport bottom — any subject taller than the
+// viewport could only finish after its top had already scrolled off screen.
+//
+// The min() caps bound both ends in absolute scroll distance:
+//   start — 20% of height, but never more than $scroll-reveal-max-delay
+//   end   — full height, but never more than $scroll-reveal-max-distance
+// Subjects shorter than $scroll-reveal-max-distance keep the original timing,
+// which already completed as they became fully visible. Reverses on scroll-up.
+//
+// The `#{}` interpolation is required: it forces Sass to emit a plain CSS min()
+// instead of evaluating its own min(), which rejects mixed % and px units.
 @supports (animation-timeline: view()) {
   .scroll-reveal {
     animation: scroll-reveal-slide ease-in-out both;
     animation-timeline: view();
-    animation-range: entry 20% entry 100%;
+    animation-range: entry min(20%, #{$scroll-reveal-max-delay}) entry
+      min(100%, #{$scroll-reveal-max-distance});
   }
 }
 

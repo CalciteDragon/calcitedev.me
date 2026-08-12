@@ -1,4 +1,8 @@
-import type { MountainWorkerMsg } from './mountain-worker.protocol';
+import type {
+  MountainWorkerMsg,
+  MountainWorkerPerfRequest,
+  MountainWorkerPerfSample,
+} from './mountain-worker.protocol';
 import type { MountainConfig } from './mountain.config';
 
 /**
@@ -9,11 +13,18 @@ import type { MountainConfig } from './mountain.config';
 export class MountainWorkerBridge {
   private readonly worker: Worker;
 
-  constructor() {
+  constructor(onPerfSample?: (sample: MountainWorkerPerfSample) => void) {
     this.worker = new Worker(
       new URL('./mountain.worker', import.meta.url),
       { type: 'module' },
     );
+    if (onPerfSample) {
+      this.worker.addEventListener('message', ({ data }: MessageEvent<MountainWorkerPerfSample>) => {
+        if (data.type === 'perf') {
+          onPerfSample({ ...data, mainReceivedAt: absoluteNow() });
+        }
+      });
+    }
   }
 
   /** Transfer canvas control to the worker and start the render loop. */
@@ -32,11 +43,15 @@ export class MountainWorkerBridge {
   }
 
   /** Fire-and-forget camY update — < 0.1 ms on the main thread. */
-  setCamY(value: number): void {
-    this.worker.postMessage({ type: 'camY', value } satisfies MountainWorkerMsg);
+  setCamY(value: number, perf?: MountainWorkerPerfRequest): void {
+    this.worker.postMessage({ type: 'camY', value, perf } satisfies MountainWorkerMsg);
   }
 
   destroy(): void {
     this.worker.terminate();
   }
+}
+
+function absoluteNow(): number {
+  return performance.timeOrigin + performance.now();
 }

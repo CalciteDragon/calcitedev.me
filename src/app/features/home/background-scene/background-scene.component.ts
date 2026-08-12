@@ -15,6 +15,7 @@ import { SceneRenderer } from './scene-renderer';
 import { defaultConfig } from './scene-entities';
 import { MountainWorkerBridge } from './mountain-worker-bridge';
 import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
+import { CanvasScrollPerfMetrics, canvasScrollPerfEnabled } from './scroll-perf-metrics';
 
 @Component({
   selector: 'app-background-scene',
@@ -36,6 +37,9 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
   private resizeTimeout = 0;
   private lastScrollY = -1;
+  private reducedMotionQuery: MediaQueryList | null = null;
+  private prefersReducedMotion = false;
+  private scrollPerf: CanvasScrollPerfMetrics | null = null;
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -48,7 +52,13 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     this.renderer.resize(window.innerWidth, window.innerHeight);
 
     // Transfer mountain canvas to OffscreenCanvas worker — main thread does zero draw work
-    this.mountainWorker = new MountainWorkerBridge();
+    if (canvasScrollPerfEnabled(window.location.search, window.location.hash)) {
+      this.scrollPerf = new CanvasScrollPerfMetrics(window, performance);
+      window.addEventListener('scroll', this.onPerfScroll, { passive: true });
+    }
+    this.mountainWorker = new MountainWorkerBridge(
+      this.scrollPerf ? sample => this.scrollPerf?.recordWorkerSample(sample) : undefined,
+    );
     this.mountainWorker.init(
       this.mountainCanvasRef().nativeElement,
       window.innerWidth,
@@ -59,46 +69,105 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
     this.resizeObserver = new ResizeObserver(() => this.scheduleResize());
     this.resizeObserver.observe(this.document.documentElement);
 
-    this.ngZone.runOutsideAngular(() => this.startLoop());
+    // Motion policy: honor prefers-reduced-motion, and pause on hidden tabs.
+    // (The unit-test matchMedia stub returns a bare object — guard the listener.)
+    this.reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    this.prefersReducedMotion = this.reducedMotionQuery.matches;
+    if (typeof this.reducedMotionQuery.addEventListener === 'function') {
+      this.reducedMotionQuery.addEventListener('change', this.onReducedMotionChange);
+    }
+    this.document.addEventListener('visibilitychange', this.onVisibilityChange);
+
+    this.ngZone.runOutsideAngular(() => this.startRendering());
   }
 
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId)) {
       cancelAnimationFrame(this.rafId);
       clearTimeout(this.resizeTimeout);
+      window.removeEventListener('scroll', this.onStaticScroll);
+      window.removeEventListener('scroll', this.onPerfScroll);
+      this.document.removeEventListener('visibilitychange', this.onVisibilityChange);
+      if (this.reducedMotionQuery && typeof this.reducedMotionQuery.removeEventListener === 'function') {
+        this.reducedMotionQuery.removeEventListener('change', this.onReducedMotionChange);
+      }
     }
     this.resizeObserver?.disconnect();
     this.renderer?.destroy();
     this.mountainWorker?.destroy();
+    this.scrollPerf?.destroy();
+  }
+
+  /** Enter the rendering mode matching the current motion preference. */
+  private startRendering(): void {
+    window.removeEventListener('scroll', this.onStaticScroll);
+    if (this.prefersReducedMotion) {
+      this.startStaticMode();
+    } else {
+      this.startLoop();
+    }
   }
 
   private startLoop(): void {
+    cancelAnimationFrame(this.rafId);
     const loop = (timestamp: number): void => {
       const scrollY = window.scrollY;
-      const heroHeight = this.getHeroHeight();
+      this.scrollPerf?.recordFrame(timestamp);
 
       if (scrollY !== this.lastScrollY) {
         this.lastScrollY = scrollY;
         const camY = scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset;
-        this.mountainWorker?.setCamY(camY); // fire-and-forget postMessage — no draw call here
+        this.mountainWorker?.setCamY(camY, this.scrollPerf?.createWorkerRequest());
       }
 
-      this.renderer?.drawFrame(timestamp, scrollY, heroHeight);
+      this.renderer?.drawFrame(timestamp, scrollY);
       this.rafId = requestAnimationFrame(loop);
     };
     this.rafId = requestAnimationFrame(loop);
   }
 
   /**
-   * Returns the pixel height of the #home section — used to gate hero-only
-   * canvas elements. Falls back to window.innerHeight when element isn't found.
+   * Reduced motion: no autonomous animation. Draw one still frame, then
+   * redraw only on scroll so the parallax layers stay in sync with the
+   * user's own gesture (scroll-driven movement is not autonomous motion).
    */
-  private getHeroHeight(): number {
-    return (
-      (this.document.getElementById('home') as HTMLElement | null)?.offsetHeight ??
-      window.innerHeight
-    );
+  private startStaticMode(): void {
+    cancelAnimationFrame(this.rafId);
+    this.rafId = 0;
+    this.drawStaticFrame();
+    window.addEventListener('scroll', this.onStaticScroll, { passive: true });
   }
+
+  private readonly onStaticScroll = (): void => this.drawStaticFrame();
+
+  private readonly onPerfScroll = (): void => this.scrollPerf?.recordScrollEvent();
+
+  private drawStaticFrame(): void {
+    const scrollY = window.scrollY;
+    this.lastScrollY = scrollY;
+    this.mountainWorker?.setCamY(
+      scrollY / 1200 - DEFAULT_MOUNTAIN_CONFIG.camYOffset,
+      this.scrollPerf?.createWorkerRequest(),
+    );
+    // Constant timestamp — star twinkle and particle drift stay frozen.
+    this.renderer?.drawFrame(0, scrollY);
+  }
+
+  /** Pause the animation loop entirely while the tab is hidden. */
+  private readonly onVisibilityChange = (): void => {
+    if (this.document.hidden) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = 0;
+    } else if (!this.prefersReducedMotion) {
+      this.ngZone.runOutsideAngular(() => this.startLoop());
+    }
+    // Static mode needs no resume work — the still frame is already drawn.
+  };
+
+  private readonly onReducedMotionChange = (event: MediaQueryListEvent): void => {
+    this.prefersReducedMotion = event.matches;
+    this.ngZone.runOutsideAngular(() => this.startRendering());
+  };
 
   private scheduleResize(): void {
     clearTimeout(this.resizeTimeout);
@@ -107,6 +176,11 @@ export class BackgroundSceneComponent implements AfterViewInit, OnDestroy {
         this.renderer.resize(window.innerWidth, window.innerHeight);
       }
       this.mountainWorker?.resize(window.innerWidth, window.innerHeight);
+      // resize() re-seeds entities and leaves the canvas cleared — in static
+      // mode nothing else will repaint it, so draw the still frame now.
+      if (this.prefersReducedMotion) {
+        this.drawStaticFrame();
+      }
     }, 100);
   }
 }

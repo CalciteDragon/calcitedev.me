@@ -7,6 +7,18 @@
 - **Placeholder-first for assets.** All pixel art, images, and project screenshots use styled placeholders. Tyler creates art in parallel; swapping in is a file drop, not a code change.
 - **Easter eggs are last.** The core site works cleanly without them — they're layered on top, never load-bearing.
 
+## Current Status Audit — July 15, 2026
+
+- Phases 0–6 are functionally implemented, including five prerendered project-detail routes.
+- The `visual-and-ux-improvements` branch was reviewed and its eight commits cherry-picked into `layout-and-design-tweaks`: content-section min-height removal (hero-only `--full` modifier), footer `SocialLinksComponent` reuse, 3-column grid cap + popular-tag filter pruning, About card panel, project-detail card redesign with related projects, dynamic page titles via the Title service, and two cleanup commits. Its 1,343-line plan document was intentionally not ported — the work it planned is complete and recorded here.
+- The July 2026 polish pass added: five themed project-thumbnail placeholder SVGs (with layout guards so missing images can't collapse cards), hero UFO repositioned clear of the headline, stretched-link card navigation to `/projects/:slug`, mobile-local hero gradients, a global `:focus-visible` ring, skip-to-content link, drawer body-scroll lock with md auto-close, a one-row scrollable mobile filter bar, press-state compression on pill controls, canvas reduced-motion still-frame + hidden-tab rAF pause, static head metadata (title/description/theme-color/OG/Twitter), and a pixel-C SVG favicon.
+- Phase 7 is now mostly complete: card hover lift/glow, section scroll reveals, active navbar state, smooth scrolling, CSS reduced-motion fallbacks, button micro-interactions, gradient rendering across breakpoints, and a canvas reduced-motion policy. Card tilt and route transitions remain open.
+- Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, reduced mobile scene entity counts, skip link, hidden-tab canvas suspension, and baseline SEO metadata.
+- Static output is configured and verified: 117 tests pass and a production build prerenders eight routes.
+- The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
+- The July 16 mountain-performance audit restored the original worker-rAF renderer, added opt-in real-scroll metrics (`?canvasPerf=scroll`), and tested scheduling, path reuse, projection-loop, and fog candidates independently. Only static fog precomposition was retained: three standard scroll traces reduced worker-draw cadence p95 from roughly 30–33 ms to 22–25 ms, end-to-end p95 from 19.8–21.4 ms to 18.1–19.8 ms, and draw median from 5.5–5.7 ms to 5.2–5.4 ms. Immediate worker tasks, repeated-path reuse, and projection-loop changes were discarded because they did not improve real scroll cadence consistently.
+- Known repository gaps: the hero stylesheet exceeds the 4 kB warning budget (7.4 kB); mountain DPR scaling, full responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
+
 ---
 
 ## Dependency Graph
@@ -23,7 +35,7 @@ Phase 0: Scaffold & Global Styles
     │        │        │        │
     │        │        ├────────┤
     │        │        ↓        ↓
-    │        │   Phase 4: Home Page — Hero + Feature Cards
+    │        │   Phase 4: Home Page — Hero + Single-Page Layout
     │        │        │
     │        │        ├──→ Phase 5: Home Page — Background Scene (canvas)
     │        │        │
@@ -54,12 +66,12 @@ Phase 0: Scaffold & Global Styles
 **Dependencies:** None
 
 **Tasks:**
-- [x] `ng new` with Angular 19, standalone, SCSS, SSR enabled, routing
+- [x] Angular scaffold upgraded to Angular 21, standalone, SCSS, SSR tooling, routing
 - [x] Configure `tsconfig.json` strict mode
 - [x] Set up global SCSS partials:
   - `_variables.scss` — full color palette, spacing scale (8px), breakpoints, glow presets
   - `_reset.scss` — CSS reset/normalize
-  - `_typography.scss` — `@font-face` for Space Grotesk, Inter, JetBrains Mono (+ Press Start 2P for pixel text)
+  - `_typography.scss` — font stacks for Space Grotesk, Inter, JetBrains Mono, and Press Start 2P; final font loading/self-hosting remains Phase 9 work
   - `_mixins.scss` — responsive breakpoint mixins, glow mixin
   - `_glow.scss` — neon box-shadow presets per accent color
   - `_animations.scss` — shared keyframes (fadeIn, slideUp, glow pulse)
@@ -86,17 +98,16 @@ Phase 0: Scaffold & Global Styles
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer
 - [x] `FooterComponent`:
-  - Centered social icon links (GitHub, Discord, LinkedIn) — inline SVGs
-  - Copyright line
-  - Icons glow on hover (GitHub=cyan, Twitter=blue, LinkedIn=purple)
-- [x] `app.routes.ts` — home route lazy-loads `HomeComponent`; old `/about`, `/projects`, `/contact` paths redirect to `/`; wildcard redirect to `/`
+  - Copyright line, centered — the footer's only content
+  - [x] Social icons removed from the footer: it renders directly under the Contact section at scroll-bottom, so both rendering `SocialLinksComponent` showed two duplicate icon rows on one screen. `ContactSectionComponent` is now the sole consumer of `socialLinksData`, and `FooterComponent` is a data-free shell. (Supersedes the earlier port of `SocialLinksComponent` into the footer from `visual-and-ux-improvements`.)
+- [x] `app.routes.ts` — home and `projects/:slug` lazy-load their components; `/about` and `/contact` redirect to `/`; wildcard redirects to `/`
 - [x] Stub feature components (empty shell for Home, About, Projects, Contact) so routing works — stubs for About, Projects, Contact later removed in single-page refactor
 
 **Deliverable:** App shell renders. Navbar and footer appear on every route.
 
 ---
 
-## Phase 2: Shared Components & Directives
+## Phase 2: Shared Components & Directives ✅ COMPLETE
 
 **Goal:** The reusable building blocks. These are stateless, input-driven, and visually polished.
 
@@ -105,15 +116,14 @@ Phase 0: Scaffold & Global Styles
 **Parallel with:** Phase 3
 
 **Tasks:**
-- [ ] `CardComponent` — generic neon-bordered card with configurable glow color (cyan/blue/purple/pink). Dark surface background, rounded corners, hover lift + glow intensify
-- [ ] `CtaButtonComponent` — rounded rectangle, neon border glow, hover scale(1.02), click scale(0.98)
-- [ ] `SectionHeaderComponent` — gradient text heading, optional subtitle
-- [ ] `SkillChipComponent` — small pill/badge displaying a skill name, optionally color-coded by category
-- [ ] `TechTagComponent` — tag for project tech stack (could use pixel-style font variant)
-- [ ] `SocialLinksComponent` — row of social icon links with individual glow colors on hover
-- [ ] `ProjectCardComponent` — card variant: thumbnail placeholder at top, title, description, tech tags, hover glow
-- [x] `ScrollRevealDirective` — CSS scroll-driven animation via `animation-timeline: view()`, adds `.scroll-reveal` class when on a browser platform; the CSS handles all animation logic
-- [ ] `GlowDirective` — applies neon glow box-shadow on hover with configurable color
+- [x] `CardComponent` — generic neon-bordered card with configurable glow color, hover lift, and stronger glow
+- [x] `SectionHeaderComponent` — gradient text heading with optional subtitle
+- [x] `SkillChipComponent` — category-colored skill pill
+- [x] `TechTagComponent` — compact project technology tag
+- [x] `SocialLinksComponent` — typed social-link row with platform-specific presentation
+- [x] `ProjectCardComponent` — project thumbnail, title, description, tags, links, and detail navigation
+- [x] `ScrollRevealDirective` — CSS scroll-driven animation via `animation-timeline: view()`, adds `.scroll-reveal` class when on a browser platform; the CSS handles all animation logic, including the `min()` caps that keep tall subjects from stretching the reveal (see `docs/design.md` → Scroll Reveal Range)
+- [x] `GlowDirective` — configurable neon glow behavior
 
 **Deliverable:** A mini component library. Can be visually tested in isolation on a scratch route or via `ng serve` on the home page.
 
@@ -134,40 +144,39 @@ Phase 0: Scaffold & Global Styles
 - [x] `projects.data.ts` — 4–6 placeholder projects with realistic titles/descriptions and placeholder image paths
 - [x] `skills.data.ts` — full skills list organized by the 8 categories Tyler provided
 - [x] `bio.data.ts` — placeholder bio text (Tyler fills in real copy later)
-- [x] `social-links.data.ts` — GitHub, Twitter/X, LinkedIn entries
-- [x] Create placeholder images in `assets/images/` — styled dark rectangles with project name text, matching the color palette
-- [x] Create placeholder pixel-art sprites in `assets/pixel-art/` — simple colored rectangles or silhouettes for avatar, UFO, rocket, card icons
+- [x] `social-links.data.ts` — GitHub, Discord, and LinkedIn entries
+- [x] Five themed placeholder SVGs restored under `public/assets/images/` (per-project motif in the project's glow color); swapping in real screenshots stays a file drop at the same paths
+- [x] Current pixel-art placeholders for the avatar and UFO live under `public/assets/pixel-art/`; the rocket and card-icon assets were removed with their corresponding UI
 
 **Deliverable:** `import { projectsData } from './data/projects.data'` works everywhere. Placeholder visuals exist for every slot.
 
 ---
 
-## Phase 4: Home Page — Hero + Feature Cards
+## Phase 4: Home Page — Hero + Single-Page Layout ✅ COMPLETE
 
-**Goal:** The landing page hero section and feature cards strip, fully styled, no canvas background yet.
+**Goal:** Build the landing hero and establish the full single-page section layout before adding the canvas background.
 
-**Dependencies:** Phase 1 (layout/routing), Phase 2 (card, CTA button), Phase 3 (data)
+**Dependencies:** Phase 1 (layout/routing), Phase 2 (shared UI), Phase 3 (data)
 
 **Tasks:**
 - [x] `HeroComponent`:
-  - Pixel-art avatar placeholder (left side desktop, top on mobile)
-  - "HEY, I'M" pre-heading (spaced out, small)
-  - "TYLER HAWTHORN" (large, gradient text via `background-clip: text`)
-  - "AKA CALCITE" (gold/orange styled)
-  - "Code · Create · Innovate" tagline
-  - "Full Stack Developer & Game Enthusiast" subtitle
-  - "View My Work" CTA button (scrolls to the Projects section)
-- [x] `FeatureCardsComponent`:
-  - Three `CardComponent` instances: About Me (cyan glow), Latest Projects (blue glow), My Skills (purple glow)
-  - Each has a placeholder pixel icon, short text, and a CTA ("Learn More", "See Projects", "View Skills")
-  - Cards scroll to their respective sections (not router links)
-- [x] `HomeComponent` — smart container; orchestrates Hero + FeatureCards + all scroll sections; solid dark background (canvas comes next)
-- [x] Scroll-reveal animation on the feature cards section
+  - Pixel-art avatar placeholder (left side desktop, top on mobile), floating `avatar-float` animation
+  - Sci-fi glowing platform below avatar (CSS `::before`/`::after` 3D depth effect)
+  - "TYLER HAWTHORN" / "AKA CALCITE" / subtitle — all use cyan→pink `background-attachment: fixed` gradient via `background-clip: text`
+  - HTML/CSS UFO (`hero__ufo`) with `ufo-float` keyframe + scroll-driven parallax (drifts 140vh over 200vh scroll)
+  - CSS tractor beam (`hero__ufo-beam`) — gradient cone beneath the disc
+  - Scroll indicator — 3 staggered pink chevrons that fade out at 150px scroll
+  - ~~"HEY, I'M" pre-heading~~ — removed in layout-and-design-tweaks
+  - ~~"Code · Create · Innovate" tagline~~ — removed in layout-and-design-tweaks
+  - ~~"View My Work" CTA button~~ — removed in layout-and-design-tweaks
+- [x] `HomeComponent` — smart container; orchestrates Hero + all scroll sections; solid dark background (canvas comes next)
 - [x] Single-page refactor: `ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent` created at `features/home/sections/`; old route stubs removed; `ScrollService` added for active section tracking; navbar updated to scroll buttons
 
-**Built:** `HeroComponent` (presentational, `bio` signal input), `FeatureCardsComponent` (static card config, smooth scroll), `HomeComponent` (smart container, reads `bioData`, hosts all sections). `appScrollReveal` applied to feature cards section from HomeComponent template. Canvas background deferred to Phase 5.
+**Built:** `HeroComponent` (presentational, `bio` signal input), `HomeComponent` (smart container, reads `bioData`, hosts all sections). Canvas background deferred to Phase 5. `FeatureCardsComponent` was built then removed — it duplicated the navbar and added no value.
 
-**Deliverable:** Full single-page scroll layout. Hero and feature cards visible; all five sections present and scrollable.
+**Updated in layout-and-design-tweaks:** `HeroComponent` redesigned — removed pre-heading, tagline, CTA; added platform, CSS UFO + beam, scroll indicator; all text switched to fixed-attachment cyan→pink gradient.
+
+**Deliverable:** Full single-page scroll layout with the redesigned hero and all five sections present and scrollable. The former feature-card strip is intentionally absent.
 
 ---
 
@@ -181,22 +190,24 @@ Phase 0: Scaffold & Global Styles
 - [x] `BackgroundSceneComponent` — full-viewport `<canvas>` element positioned behind hero content
 - [x] `isPlatformBrowser` guard — skip canvas init during SSR/prerender
 - [x] **Star field:** sparse pixel-style stars, subtle twinkle animation, random placement
-- [x] **Cyber mountains:** low-poly wireframe silhouettes along the horizon, faint neon outlines (blue/purple)
+- [x] **Cyber mountains:** perspective-projected FBM terrain with filled faces, wire passes, fog, and scroll-driven camera movement
 - [x] **Parallax:** mountains and elements shift based on scroll position
-- [x] **UFO sprite:** placeholder graphic, slow floating bob animation, soft glow beam downward
-- [x] **Rocket sprite:** placeholder graphic, launch animation with stylized smoke particles
+- [x] **UFO:** implemented as an HTML/CSS hero element with floating motion, parallax, and a tractor beam; removed from the canvas renderer
+- [ ] **Rocket:** removed from the initial scene renderer and deferred to Phase 8 as a controllable Easter egg
 - [x] **Floating particles:** minimal pixel particles drifting (very subtle)
 - [x] **Faint scanline/grid overlay:** CSS pseudo-element on the page background (very low opacity)
 - [x] Performance: use `requestAnimationFrame`, reduce on mobile
-- [ ] Performance: throttle on hidden tab (deferred to Phase 9 — canvas: skip rendering when `document.hidden`)
+- [x] Performance: the scene rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 
-**Built:** Two-canvas architecture inside `BackgroundSceneComponent` — **mountain canvas** (DOM-order first, bottom layer) owned by `MountainRenderer`; **scene canvas** (DOM-order second, top layer, transparent background) owned by `SceneRenderer`. Both canvases are `position: absolute; inset: 0` within the `position: fixed` host. `body { background-color: transparent }` lets canvases show through all sections. CSS `::after` scanline overlay covers both canvases as a viewport-wide CRT effect.
+**Built:** Two-canvas architecture inside `BackgroundSceneComponent` — **mountain canvas** (DOM-order first, bottom layer) transferred to `MountainRenderer` inside `mountain.worker.ts` through `MountainWorkerBridge`; **scene canvas** (DOM-order second, top layer, transparent background) owned by `SceneRenderer` on the main thread. Both canvases fill the fixed host. `body { background-color: transparent }` lets the canvases show through all sections. A CSS `::after` scanline overlay covers both canvases.
 
-**MountainRenderer** (`mountain-renderer.ts`, `mountain.config.ts`): 3D perspective-projected FBM terrain. Draws dark background fill, radial horizon glow, terrain grid (back-to-front with fill + wire passes + per-face fog), and depth fog overlay. `setConfig()` rebuilds the terrain grid only when structural params change (not on camY-only updates). `camY = scrollY / 1200` drives scroll parallax — camera pans through the valley over a 1200px scroll range. Scanlines are handled entirely by the CSS `::after` pseudo-element on the host (not drawn in canvas). The rAF loop skips `MountainRenderer.draw()` when `scrollY` has not changed since the last frame (`lastScrollY` guard in `BackgroundSceneComponent`). `.mountain-canvas` has `will-change: transform` + `transform: translateZ(0)` to promote it to its own GPU compositor layer.
+**MountainRenderer** (`mountain-renderer.ts`, `mountain.config.ts`): 3D perspective-projected FBM terrain. It draws the terrain grid back-to-front with face and wire passes; the static fog blend is precomposed into cached face colors, eliminating a second face fill on every scrolling frame. `setConfig()` rebuilds the terrain only when structural parameters change. `camY = scrollY / 1200 - camYOffset` drives scroll parallax. `BackgroundSceneComponent` sends fire-and-forget camera and resize messages through `MountainWorkerBridge`; the worker retains its original rAF loop and only redraws when dirty, leaving the main thread with minimal mountain work.
 
-**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles` → UFO/rocket (hero-only).
+**SceneRenderer** (`scene-renderer.ts`): draws on transparent canvas. Render order each frame: `drawAtmosphere` (linear gradient haze) → `drawHorizonGlow` (neon bloom band) → `drawStars` → `drawParticles`. `drawFrame(timestamp, scrollY)` — no `heroHeight` param.
 
-**Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced. UFO and rocket remain hero-only (`scrollY < heroHeight`).
+**Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced.
+
+**Updated in layout-and-design-tweaks:** UFO and Rocket removed from `SceneRenderer` entirely — `UFO`/`Rocket` interfaces, `createUFO()`/`createRocket()` factories, `drawUFO()`/`drawRocket()` methods, and the `heroHeight` hero-visibility gate all deleted. The UFO moved to `HeroComponent` as a CSS/HTML element. The rocket is deferred to Phase 8 (Easter Eggs).
 
 Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Phase 9 performance work.
 
@@ -226,15 +237,15 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 ### Projects Section (`features/home/sections/projects-section/`)
 - [x] `ProjectListComponent` — responsive grid of `ProjectCardComponent`
 - [x] Filter bar: filter by tech tag or category (signals-based, no RxJS needed)
-- [x] Placeholder project thumbnails are easy-swap (just change `imageUrl` in data file)
+- [x] Easy-swap project thumbnails exist at the `imageUrl` paths (themed placeholder SVGs); card thumbnails and the detail hero image carry layout guards so a missing file can't collapse the layout
 - [x] `ProjectDetailComponent` — route `/projects/:slug` at `features/projects/project-detail/`, displays full project info (long description, tech tags, links, larger image placeholder)
 
 ### Contact Section (`features/home/sections/contact-section/`)
 - [x] Email link (styled as a prominent CTA or card)
-- [x] `SocialLinksComponent` reuse — GitHub, Twitter/X, LinkedIn with glow hover
+- [x] `SocialLinksComponent` reuse — GitHub, Discord, and LinkedIn with glow hover
 - [x] Clean, minimal layout — no form
 
-**Built:** `BackgroundSceneComponent` moved to `LayoutComponent` (persists across all routes). `HomeComponent` wired as smart container — reads `projectsData`, `skillsData`, `socialLinksData`, `bioData` and passes down via signal inputs. `AboutSectionComponent` (shortBio + extendedBio with `white-space: pre-line`). `ContactSectionComponent` (email CTA with neon-bordered pill, `SocialLinksComponent`). `SkillsSectionComponent` + `SkillsGridComponent` sub-component (auto-fill grid, accent-colored category labels). `ProjectsSectionComponent` + `ProjectListComponent` sub-component (signal-based filter: `activeFilter`, `allTags`, `filteredProjects` computed, filter pill bar). `ProjectCardComponent` extended with optional `liveUrl`/`githubUrl` inputs. `ProjectDetailComponent` at `features/projects/project-detail/` using `toSignal(route.paramMap)` + `computed()` for slug resolution. `app.routes.ts` updated with `projects/:slug` lazy route (before wildcard). `app.routes.server.ts` uses `getPrerenderParams` to enumerate all 5 project slugs. Global CSS: added `--section-padding-v`, `--section-padding-h`, and `--accent-*-rgb` tokens to `:root`. `SocialLinksComponent` unified to use canonical `SocialLink` type. Production build pre-renders 8 static routes. 99/99 unit tests passing.
+**Built:** `BackgroundSceneComponent` moved to `LayoutComponent` so it persists across routes. `HomeComponent` reads `projectsData`, `skillsData`, `socialLinksData`, and `bioData` and passes them through signal inputs. About, Contact, Skills/SkillsGrid, and Projects/ProjectList components implement the five-section content experience. `ProjectDetailComponent` uses `toSignal(route.paramMap)` plus `computed()` for slug resolution. `app.routes.ts` places `projects/:slug` before the wildcard, and `app.routes.server.ts` enumerates all five slugs. The July 2026 verification run passes 106 tests and prerenders eight routes.
 
 **Deliverable:** All five scroll sections are content-complete with placeholder data. Full in-page navigation works end to end. `/projects/:slug` route live with 5 pre-rendered project detail pages.
 
@@ -247,15 +258,16 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 **Dependencies:** Phases 4–6 (all pages built)
 
 **Tasks:**
-- [ ] **Card hover effects:** glow intensify + `translateY(-4px)` lift on all cards site-wide
+- [x] **Card hover effects:** shared `CardComponent` intensifies its glow and lifts by `translateY(-4px)`
 - [ ] **Card tilt:** subtle 3D tilt following mouse position on project cards (vanilla-tilt style via directive)
-- [ ] **Button micro-interactions:** glow pulse on hover, slight compression on click
-- [ ] **Scroll reveals:** apply `ScrollRevealDirective` to all major sections across pages
-- [ ] **Navbar active link indicator:** underline or accent glow on current route
-- [ ] **Smooth scroll:** smooth anchor scrolling for in-page navigation
-- [ ] **Gradient text polish:** ensure hero gradient renders well across browsers
+- [x] **Button micro-interactions:** motion-safe press compression on filter pills, card/detail links, and the email CTA; glow hover states already existed
+- [x] **Scroll reveals:** applied to the major About, Projects, Skills, and Contact content groups
+  - [x] Reveal range capped to an absolute scroll distance. `view()` measures its `entry` range as the subject's own height, so the ~970px (desktop) / ~2280px (mobile) project grid needed roughly 1200–1800px of scrolling to finish fading and could only complete once its top had left the screen. `min()` caps in `_variables.scss` bound the reveal; every short subject on the page keeps its original timing, and only the grid and About content are clamped. See `docs/design.md` → Scroll Reveal Range.
+- [x] **Navbar active link indicator:** `ScrollService.activeSection` drives desktop and drawer active states
+- [x] **Smooth scroll:** `ScrollService.scrollToSection()` and router anchor scrolling are configured
+- [x] **Gradient text polish:** viewport-fixed gradient ≥ lg; per-element local gradients below lg (fixes muddy mobile blend and iOS Safari's missing fixed-attachment support)
 - [ ] **Page transitions:** subtle fade between routes (Angular router animations)
-- [ ] **`prefers-reduced-motion`:** disable non-essential animations globally via media query
+- [x] **`prefers-reduced-motion`:** CSS fallbacks disable shared/hero animations, and the canvas renders a still frame that redraws only on scroll
 
 **Deliverable:** The site feels polished and responsive to interaction. Every hover, scroll, and click has intentional feedback.
 
@@ -312,26 +324,25 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 ### Responsive
 - [ ] Test and fix all layouts at each breakpoint (xs, sm, md, lg, xl)
 - [ ] Hero: avatar stacks above text on mobile
-- [ ] Feature cards: single column on mobile
 - [ ] Project grid: 1 → 2 → 3 columns as viewport widens
 - [ ] Navbar: hamburger menu works correctly, drawer closes on navigation
-- [ ] Reduce canvas scene complexity on mobile (fewer stars, skip parallax, simpler mountains)
+- [ ] Complete mobile canvas policy: reduced star/particle counts already exist, but parallax and terrain complexity still need profiling
 - [ ] Reduce glow intensity on small/OLED screens
 
 ### Accessibility
 - [ ] Semantic HTML throughout (`<nav>`, `<main>`, `<section>`, `<footer>`, `<h1>`–`<h3>`)
 - [ ] ARIA labels on interactive elements (nav links, social links, filters, buttons)
-- [ ] Keyboard navigation: all interactive elements focusable and operable
-- [ ] Skip-to-content link
+- [x] Keyboard navigation: interactive elements are focusable with a global cyan `:focus-visible` ring; project cards expose a stretched title link with a card-wide focus ring (full audit still pending below)
+- [x] Skip-to-content link (manual focus jump in `LayoutComponent` — fragment hrefs would re-route against `<base href>`)
 - [ ] Color contrast: verify all text meets WCAG AA (4.5:1 for body, 3:1 for large text)
 - [ ] Easter egg interactions don't trap focus or break tab order
 
 ### Performance
 - [ ] Lighthouse audit: target 90+ on Performance, Accessibility, Best Practices, SEO
-- [ ] Lazy-load route chunks (already configured via `loadComponent`)
-- [ ] Lazy-load images (`loading="lazy"`)
+- [x] Lazy-load the Home and Project Detail route chunks via `loadComponent`
+- [x] Lazy-load project-card images with `loading="lazy"`
 - [ ] Optimize font loading: `font-display: swap`, preload critical fonts
-- [ ] Canvas: skip rendering when tab is hidden (`document.hidden`)
+- [x] Canvas: rendering pauses while the tab is hidden (`visibilitychange` cancels/restarts the rAF loop)
 - [ ] Tree-shake unused code, verify bundle size
 
 **Deliverable:** Site scores 90+ on Lighthouse, works on all screen sizes, and is keyboard/screen-reader navigable.
@@ -345,16 +356,16 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 **Dependencies:** Phase 9
 
 **Tasks:**
-- [ ] Configure Angular pre-rendering (`ng build` with `prerender: true` in `angular.json`)
-- [ ] Verify all routes pre-render correctly (check `dist/browser/` for HTML files)
+- [x] Configure Angular static output and prerendering through `outputMode: "static"` and `app.routes.server.ts`
+- [x] Verify the production build prerenders eight routes into `dist/portfolio/browser/`
 - [ ] Set up Render:
   - Static site service
-  - Build command: `ng build`
-  - Publish directory: `dist/<project-name>/browser`
+  - Build command: `npm run build`
+  - Publish directory: `dist/portfolio/browser`
 - [ ] Connect custom domain `calcitedev.me` in Render dashboard
 - [ ] Configure DNS records (CNAME or A record pointing to Render)
 - [ ] Enable HTTPS (Render provides free TLS via Let's Encrypt)
-- [ ] Add meta tags and Open Graph data via `MetaService` (title, description, image per page)
+- [x] Page titles (Title service per route), meta description, theme-color, and Open Graph/Twitter tags in `index.html`; an `og:image` PNG asset remains open (crawlers don't render SVG)
 - [ ] Verify social sharing previews (Twitter Card, LinkedIn, etc.)
 - [ ] Add `robots.txt` and `sitemap.xml`
 

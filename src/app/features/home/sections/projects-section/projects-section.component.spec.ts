@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { ProjectsSectionComponent } from './projects-section.component';
 import { Project } from '../../../../models/project.model';
 
@@ -13,7 +14,11 @@ describe('ProjectsSectionComponent', () => {
   let ref: ComponentRef<ProjectsSectionComponent>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({ imports: [ProjectsSectionComponent] });
+    // Project cards render routerLink anchors, so a router must be provided.
+    TestBed.configureTestingModule({
+      imports: [ProjectsSectionComponent],
+      providers: [provideRouter([])],
+    });
     const fixture = TestBed.createComponent(ProjectsSectionComponent);
     ref = fixture.componentRef;
     ref.setInput('projects', mockProjects);
@@ -36,13 +41,14 @@ describe('ProjectsSectionComponent', () => {
     expect(ref.instance.filteredProjects()).toHaveLength(3);
   });
 
-  it('derives unique tags from all projects', () => {
-    const tags = ref.instance.allTags();
+  it('returns only tags appearing in 2 or more projects', () => {
+    // mockProjects: a=['Angular','TypeScript'], b=['React','TypeScript'], c=['Angular','Node.js']
+    // Angular: a,c → 2 ✓   TypeScript: a,b → 2 ✓
+    // React: b → 1 ✗        Node.js: c → 1 ✗
+    const tags = ref.instance.popularTags();
     expect(tags).toContain('Angular');
-    expect(tags).toContain('React');
     expect(tags).toContain('TypeScript');
-    expect(tags).toContain('Node.js');
-    // No duplicates
-    expect(tags.length).toBe(new Set(tags).size);
+    expect(tags).not.toContain('React');
+    expect(tags).not.toContain('Node.js');
   });
 });

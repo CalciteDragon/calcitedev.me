@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="NeonChat placeholder art">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1424"/>
+      <stop offset="1" stop-color="#0b0f1a"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#1e2a45" stroke-opacity="0.35" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <rect width="640" height="360" fill="url(#grid)"/>
+
+  <!-- incoming bubble -->
+  <g filter="url(#glow)">
+    <rect x="96" y="72" width="248" height="72" rx="12" fill="#111c33" stroke="#8b5cf6" stroke-opacity="0.85" stroke-width="2"/>
+    <path d="M112 144l-16 20 4-20z" fill="#111c33" stroke="#8b5cf6" stroke-opacity="0.85" stroke-width="2"/>
+  </g>
+  <g fill="#8b5cf6" opacity="0.85">
+    <rect x="116" y="92" width="168" height="10" rx="3"/>
+    <rect x="116" y="112" width="120" height="10" rx="3" opacity="0.55"/>
+  </g>
+  <!-- avatar + presence -->
+  <circle cx="64" cy="100" r="18" fill="#111c33" stroke="#8b5cf6" stroke-width="2"/>
+  <rect x="56" y="90" width="16" height="12" rx="2" fill="#8b5cf6" opacity="0.8"/>
+  <rect x="52" y="104" width="24" height="8" rx="3" fill="#8b5cf6" opacity="0.5"/>
+  <circle cx="78" cy="112" r="6" fill="#22d3ee" stroke="#0b0f1a" stroke-width="2"/>
+
+  <!-- outgoing bubble -->
+  <g filter="url(#glow)">
+    <rect x="296" y="168" width="248" height="72" rx="12" fill="#161033" stroke="#ec4899" stroke-opacity="0.85" stroke-width="2"/>
+    <path d="M528 240l16 20-4-20z" fill="#161033" stroke="#ec4899" stroke-opacity="0.85" stroke-width="2"/>
+  </g>
+  <g fill="#ec4899" opacity="0.85">
+    <rect x="316" y="188" width="184" height="10" rx="3"/>
+    <rect x="316" y="208" width="104" height="10" rx="3" opacity="0.55"/>
+  </g>
+  <circle cx="576" cy="196" r="18" fill="#161033" stroke="#ec4899" stroke-width="2"/>
+  <rect x="568" y="186" width="16" height="12" rx="2" fill="#ec4899" opacity="0.8"/>
+  <rect x="564" y="200" width="24" height="8" rx="3" fill="#ec4899" opacity="0.5"/>
+
+  <!-- typing indicator bubble -->
+  <g filter="url(#glow)">
+    <rect x="96" y="264" width="120" height="48" rx="12" fill="#111c33" stroke="#8b5cf6" stroke-opacity="0.7" stroke-width="2"/>
+  </g>
+  <g fill="#8b5cf6">
+    <circle cx="132" cy="288" r="6"/>
+    <circle cx="156" cy="288" r="6" opacity="0.65"/>
+    <circle cx="180" cy="288" r="6" opacity="0.35"/>
+  </g>
+
+  <!-- corner brackets -->
+  <g stroke="#8b5cf6" stroke-width="3" fill="none" opacity="0.7">
+    <path d="M14 34V14h20"/><path d="M606 14h20v20"/>
+    <path d="M626 326v20h-20"/><path d="M34 346H14v-20"/>
+  </g>
+</svg>

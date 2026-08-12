@@ -1,4 +1,5 @@
-import { Component, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { CardComponent } from '../card/card.component';
 import { TechTagComponent } from '../tech-tag/tech-tag.component';
 import { GlowColor } from '../../types/glow-color.type';
@@ -7,20 +8,17 @@ import { GlowColor } from '../../types/glow-color.type';
   selector: 'app-project-card',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardComponent, TechTagComponent],
+  imports: [RouterLink, CardComponent, TechTagComponent],
   templateUrl: './project-card.component.html',
   styleUrl: './project-card.component.scss',
-  host: {
-    '(click)': 'cardClick.emit()',
-  },
 })
 export class ProjectCardComponent {
   readonly title = input.required<string>();
+  readonly slug = input.required<string>();
   readonly description = input.required<string>();
   readonly imageUrl = input<string>('');
   readonly tags = input<string[]>([]);
   readonly glowColor = input<GlowColor>('cyan');
   readonly liveUrl = input<string>();
   readonly githubUrl = input<string>();
-  readonly cardClick = output<void>();
 }

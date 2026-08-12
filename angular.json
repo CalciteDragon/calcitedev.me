@@ -99,7 +99,10 @@
               "buildTarget": "portfolio:build:production"
             },
             "development": {
-              "buildTarget": "portfolio:build:development"
+              "buildTarget": "portfolio:build:development",
+              "liveReload": true,
+              "hmr": false,
+              "poll": 1000
             }
           },
           "defaultConfiguration": "development"

@@ -2,17 +2,44 @@
 @use 'mixins' as *;
 @use 'glow' as *;
 
+// Clip declarations must follow every background shorthand — the shorthand
+// resets background-clip, so each gradient mixin re-applies the text fill.
+@mixin hero-text-fill {
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+// Mobile base: gradient spans the text element itself so the full
+// cyan→pink range stays vivid on small viewports (viewport-fixed
+// attachment leaves mobile text sitting in the muddy mid-blend, and
+// iOS Safari doesn't support fixed attachment at all).
+@mixin hero-gradient($direction: to bottom) {
+  background: linear-gradient($direction, $accent-cyan 15%, $accent-pink 85%);
+  @include hero-text-fill;
+}
+
+// Desktop enhancement: viewport-fixed gradient — text picks its color
+// from screen position and shifts subtly while scrolling.
+@mixin hero-gradient-fixed {
+  background: linear-gradient(to bottom, $accent-cyan 0%, $accent-cyan 30%, $accent-pink 70%, $accent-pink 100%);
+  background-attachment: fixed;
+  @include hero-text-fill;
+}
+
 :host {
   display: block;
 }
 
 .hero {
   @include content-container;
-  // 64px is approximate navbar height — tune in Phase 9 responsive pass
   min-height: calc(100svh - 64px);
   display: flex;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
   padding-block: $space-8;
+  position: relative;
 
   &__container {
     display: flex;
@@ -30,20 +57,91 @@
 
   &__avatar {
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: avatar-float 6s ease-in-out infinite;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  &__platform {
+    position: relative;
+    width: 220px;
+    height: 18px;
+    margin-top: -20px;
+    // Subtle vertical panel dividers on the top face
+    background:
+      repeating-linear-gradient(
+        90deg,
+        rgba(34, 211, 238, 0.07) 0px,
+        rgba(34, 211, 238, 0.07) 1px,
+        transparent 1px,
+        transparent 28px
+      ),
+      linear-gradient(to bottom, rgba(34, 211, 238, 0.12), $bg-surface);
+    border-top: 3px solid $accent-cyan;
+    border-left: 3px solid rgba(34, 211, 238, 0.45);
+    border-right: 3px solid rgba(34, 211, 238, 0.45);
+    box-shadow:
+      0 0 18px rgba(34, 211, 238, 0.55),
+      0 0 36px rgba(34, 211, 238, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+
+    // LED accent stripe near the top surface
+    &::before {
+      content: '';
+      position: absolute;
+      top: 4px;
+      left: 10px;
+      right: 10px;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        rgba(34, 211, 238, 0.7),
+        transparent 25%,
+        transparent 75%,
+        rgba(34, 211, 238, 0.7)
+      );
+    }
+
+    // Front face — gives the 3D block depth
+    &::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 2px;
+      right: 2px;
+      height: 10px;
+      background: linear-gradient(to bottom, rgba(0, 30, 50, 0.95), rgba(0, 0, 0, 0.7));
+      border-left: 2px solid rgba(34, 211, 238, 0.2);
+      border-right: 2px solid rgba(34, 211, 238, 0.2);
+      border-bottom: 2px solid rgba(34, 211, 238, 0.08);
+    }
+
+    @include lg {
+      width: 300px;
+      height: 22px;
+      margin-top: -30px;
+    }
   }
 
   &__avatar-img {
-    width: 160px;
-    height: 160px;
+    width: 200px;
+    height: 200px;
     image-rendering: pixelated;
 
     @include lg {
-      width: 220px;
-      height: 220px;
+      width: 300px;
+      height: 300px;
     }
   }
 
   &__content {
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -56,40 +154,258 @@
     }
   }
 
-  &__pre-heading {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.3em;
-    color: var(--text-secondary);
-    margin: 0;
-  }
-
   &__name {
-    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-size: clamp(3rem, 8vw, 7rem);
     font-weight: 700;
-    line-height: 1.1;
+    line-height: 1.05;
     margin: 0;
-    @include gradient-text;
+    // Two-line mobile name reads cyan top line, pink bottom line.
+    @include hero-gradient(to bottom);
+
+    @include lg {
+      @include hero-gradient-fixed;
+    }
   }
 
   &__alias {
-    font-family: 'Press Start 2P', monospace;
-    font-size: clamp(0.5rem, 1.5vw, 0.75rem);
-    color: var(--accent-gold);
-    letter-spacing: 0.1em;
-    margin: 0;
-  }
-
-  &__tagline {
-    font-size: 1.125rem;
-    color: var(--text-secondary);
+    font-size: clamp(1rem, 2.5vw, 1.75rem);
+    font-weight: 600;
     letter-spacing: 0.05em;
-    margin: $space-2 0 0;
+    margin: 0;
+    @include hero-gradient(to right);
+
+    @include lg {
+      @include hero-gradient-fixed;
+    }
   }
 
   &__subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
-    margin: 0 0 $space-4;
+    font-size: clamp(1rem, 2vw, 1.375rem);
+    letter-spacing: 0.03em;
+    margin: $space-1 0 0;
+    @include hero-gradient(to right);
+
+    @include lg {
+      @include hero-gradient-fixed;
+    }
+  }
+
+  &__ufo {
+    position: absolute;
+    right: -$space-6;
+    top: 10%;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: none;
+    animation: ufo-float 7s ease-in-out infinite, ufo-parallax linear both;
+    animation-duration: 7s, auto;
+    animation-timeline: auto, scroll(root);
+    animation-range: normal, 0 200vh;
+
+    @include lg {
+      // High in the empty upper-right sky, clear of the headline at rest.
+      // max() stops the disc drifting too far offscreen on ultrawide viewports.
+      right: max(calc(760px - 50vw), -60px);
+      top: 4%;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+
+    // Atmospheric haze — vignette over disc only, not beam
+    &::after {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: -20px;
+      right: -20px;
+      height: 200px;
+      background: radial-gradient(
+        ellipse at 50% 50%,
+        transparent 25%,
+        rgba(11, 15, 26, 0.32) 55%,
+        rgba(11, 15, 26, 0.58) 100%
+      );
+      mask-image: radial-gradient(ellipse at 50% 50%, black 42%, transparent 88%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 42%, transparent 88%);
+      pointer-events: none;
+    }
+  }
+
+  &__ufo-disc {
+    position: relative;
+  }
+
+  &__ufo-glow {
+    position: absolute;
+    // Extend 100px beyond the disc on all sides so drop-shadow bleed stays
+    // within the masked area — mask-image only fades what's inside this box.
+    inset: -100px;
+    pointer-events: none;
+
+    img {
+      position: absolute;
+      top: 100px;
+      left: 100px;
+      width: 250px;
+      height: auto;
+      image-rendering: pixelated;
+
+      @include lg {
+        width: 325px;
+      }
+    }
+
+    &--l {
+      // calc(50%) aligns with the disc centre regardless of breakpoint;
+      // the ±60px window is the blend zone where cyan fades to nothing.
+      mask-image: linear-gradient(to right, black, black calc(50% - 60px), transparent calc(50% + 60px));
+      -webkit-mask-image: linear-gradient(to right, black, black calc(50% - 60px), transparent calc(50% + 60px));
+
+      img {
+        filter:
+          drop-shadow(0 0 4px rgba(34, 211, 238, 0.95))
+          drop-shadow(0 0 10px rgba(34, 211, 238, 0.6))
+          drop-shadow(0 0 22px rgba(34, 211, 238, 0.25));
+      }
+    }
+
+    &--r {
+      mask-image: linear-gradient(to right, transparent calc(50% - 60px), black calc(50% + 60px), black);
+      -webkit-mask-image: linear-gradient(to right, transparent calc(50% - 60px), black calc(50% + 60px), black);
+
+      img {
+        filter:
+          drop-shadow(0 0 4px rgba(236, 72, 153, 0.95))
+          drop-shadow(0 0 10px rgba(236, 72, 153, 0.6))
+          drop-shadow(0 0 22px rgba(236, 72, 153, 0.25));
+      }
+    }
+  }
+
+  &__ufo-img {
+    width: 250px;
+    height: auto;
+    image-rendering: pixelated;
+
+    @include lg {
+      width: 325px;
+      height: auto;
+    }
+  }
+
+  &__ufo-beam {
+    position: relative;
+    z-index: 1;
+    width: 250px;
+    height: 400px;
+    margin-top: 0px;
+    opacity: 50%;
+    background: linear-gradient(
+      to bottom,
+      rgba(34, 211, 238, 0.28) 0%,
+      rgba(34, 211, 238, 0.12) 40%,
+      rgba(34, 211, 238, 0.04) 72%,
+      transparent 100%
+    );
+    clip-path: polygon(38% 0%, 62% 0%, 100% 100%, 0% 100%);
+
+    // Particle shimmer — horizontal scan lines animate downward, clipped by beam polygon
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 10px,
+        rgba(34, 211, 238, 0.07) 10px,
+        rgba(34, 211, 238, 0.07) 11px
+      );
+      animation: beam-shimmer 1.8s linear infinite;
+    }
+
+    @include lg {
+      width: 325px;
+      height: 550px;
+      margin-top: 0px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &::after { animation: none; }
+    }
+  }
+
+  &__scroll-indicator {
+    position: absolute;
+    bottom: $space-4;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: scroll-indicator-fade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px 150px;
+
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
+  }
+
+  &__scroll-arrow {
+    display: block;
+    width: 28px;
+    height: 28px;
+    border-right: 3px solid $accent-pink;
+    border-bottom: 3px solid $accent-pink;
+    transform: rotate(45deg);
+    animation: scroll-pulse 2.5s ease-in-out infinite;
+
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: 0.35s; }
+    &:nth-child(3) { animation-delay: 0.7s; }
+  }
+}
+
+@keyframes ufo-float {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
+}
+
+@keyframes ufo-parallax {
+  from { translate: 0 0; }
+  to { translate: 0 140vh; }
+}
+
+@keyframes beam-shimmer {
+  from { transform: translateY(0); }
+  to { transform: translateY(11px); }
+}
+
+@keyframes avatar-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes scroll-indicator-fade {
+  from { opacity: 1; }
+  to { opacity: 0; pointer-events: none; }
+}
+
+@keyframes scroll-pulse {
+  0%, 100% {
+    opacity: 0.1;
+    transform: rotate(45deg) translate(0, 0);
+    filter: drop-shadow(0 0 2px rgba(236, 72, 153, 0.3));
+  }
+  50% {
+    opacity: 0.55;
+    transform: rotate(45deg) translate(2px, 2px);
+    filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.8)) drop-shadow(0 0 12px rgba(236, 72, 153, 0.4));
   }
 }

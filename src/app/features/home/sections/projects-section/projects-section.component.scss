@@ -1,4 +1,5 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
 :host {
   display: block;
@@ -8,14 +9,43 @@
   padding: var(--section-padding-v) var(--section-padding-h);
 }
 
+.projects-section__content {
+  max-width: var(--max-content-width);
+  margin: 0 auto;
+}
+
 .projects-section__filter-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  gap: $space-1;
+  margin-bottom: $space-4;
+  // Mobile: one horizontally scrollable row so the pills never push the
+  // project grid below the fold. Vertical padding + negative margin give
+  // the pill glow room inside the scroll clip without moving the layout.
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 12px 4px;
+  margin-block: -12px calc($space-4 - 12px);
+  scrollbar-width: none;
+  // Trailing-edge fade hints at more pills offscreen.
+  mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  @include md {
+    flex-wrap: wrap;
+    overflow-x: visible;
+    padding: 0;
+    margin-block: 0 $space-4;
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
 }
 
 .filter-pill {
+  flex: 0 0 auto;
   padding: 6px 16px;
   border-radius: 999px;
   border: 1px solid var(--bg-border);
@@ -30,5 +60,11 @@
     border-color: rgba(var(--accent-cyan-rgb), 0.5);
     color: var(--accent-cyan);
     box-shadow: var(--glow-cyan);
+  }
+
+  @include motion-safe {
+    &:active {
+      transform: scale(0.96);
+    }
   }
 }

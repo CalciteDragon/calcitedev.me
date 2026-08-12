@@ -30,6 +30,27 @@ describe('MountainWorkerBridge', () => {
     );
   });
 
+  it('records main-thread receipt time for worker performance samples', () => {
+    const addEventListenerSpy = vi.fn();
+    vi.stubGlobal('Worker', vi.fn(function () {
+      return {
+        postMessage: postMessageSpy,
+        terminate: terminateSpy,
+        addEventListener: addEventListenerSpy,
+      };
+    }));
+    const callback = vi.fn();
+    new MountainWorkerBridge(callback);
+    const listener = addEventListenerSpy.mock.calls[0][1] as (event: MessageEvent) => void;
+
+    listener({ data: { type: 'perf', mainReceivedAt: 0 } } as MessageEvent);
+
+    expect(callback).toHaveBeenCalledWith(expect.objectContaining({
+      type: 'perf',
+      mainReceivedAt: expect.any(Number),
+    }));
+  });
+
   it('resize() posts a resize message', () => {
     const bridge = new MountainWorkerBridge();
     bridge.resize(1280, 720);

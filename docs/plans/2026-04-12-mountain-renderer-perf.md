@@ -4,6 +4,8 @@
 **Branch:** `mountains-refactor`
 **Goal:** Eliminate per-frame allocations and string building (Phase 1), split projection math so scroll frames do near-zero arithmetic (Phase 2), then offload the entire mountain rAF loop to an OffscreenCanvas web worker so the main thread does zero mountain rendering work during scroll (Phase 3).
 
+> **July 16, 2026 measured follow-up:** Later row-batching and alternate worker-scheduling changes were reverted after a user-visible scroll regression. The production renderer again uses the original dirty-gated worker rAF loop described here. A real-document scroll harness now measures frame cadence and end-to-end worker timing. Of the follow-up candidates tested independently, only precomposing the static fog blend into `faceColors` was retained; it removes the second per-face fog fill while preserving the original draw order and appearance.
+
 **Execution order:** Phase 1 → Phase 2 → Phase 3. Each phase ships and measures independently.
 
 ---

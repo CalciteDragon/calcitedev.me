@@ -34,17 +34,16 @@ describe('SceneRenderer', () => {
       expect(() => renderer.init(800, 600)).not.toThrow();
     });
 
-    it('drawFrame() does not throw after init() — hero visible (scrollY < heroHeight)', () => {
+    it('drawFrame() does not throw after init()', () => {
       renderer.init(800, 600);
-      expect(() => renderer.drawFrame(0, 0, 900)).not.toThrow();
-      expect(() => renderer.drawFrame(16, 100, 900)).not.toThrow();
+      expect(() => renderer.drawFrame(0, 0)).not.toThrow();
+      expect(() => renderer.drawFrame(16, 100)).not.toThrow();
     });
 
-    it('drawFrame() does not throw when hero is not visible (scrollY >= heroHeight)', () => {
+    it('drawFrame() does not throw when scrolled past the hero', () => {
       renderer.init(800, 600);
-      // scrollY=1000, heroHeight=900 — mountains/UFO/rocket should be skipped
-      expect(() => renderer.drawFrame(16, 1000, 900)).not.toThrow();
-      expect(() => renderer.drawFrame(32, 2000, 900)).not.toThrow();
+      expect(() => renderer.drawFrame(16, 1000)).not.toThrow();
+      expect(() => renderer.drawFrame(32, 2000)).not.toThrow();
     });
 
     it('resize() re-seeds entities by calling init() with the new CSS dimensions', () => {
@@ -53,7 +52,7 @@ describe('SceneRenderer', () => {
       renderer.resize(1600, 900);
       expect(initSpy).toHaveBeenCalledWith(1600, 900);
       // Smoke test: drawFrame still works after resize
-      expect(() => renderer.drawFrame(16, 0, 900)).not.toThrow();
+      expect(() => renderer.drawFrame(16, 0)).not.toThrow();
     });
 
     it('destroy() does not throw', () => {
@@ -64,7 +63,7 @@ describe('SceneRenderer', () => {
     it('drawFrame() is a no-op after destroy() — does not throw', () => {
       renderer.init(800, 600);
       renderer.destroy();
-      expect(() => renderer.drawFrame(32, 0, 900)).not.toThrow();
+      expect(() => renderer.drawFrame(32, 0)).not.toThrow();
     });
   });
 
@@ -78,7 +77,7 @@ describe('SceneRenderer', () => {
     it('drawFrame() does not throw after init()', () => {
       const r = new SceneRenderer(canvas, defaultConfig(true));
       r.init(800, 600);
-      expect(() => r.drawFrame(16, 0, 900)).not.toThrow();
+      expect(() => r.drawFrame(16, 0)).not.toThrow();
       r.destroy();
     });
   });

@@ -67,3 +67,14 @@ $transition-fast: 150ms ease-out;
 $transition-base: 300ms ease-out;
 $transition-slow: 500ms ease-out;
 $ease-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+
+// ======================
+// Scroll-Driven Reveal
+// ======================
+// A `view()` timeline defines its `entry` range as exactly the subject's own
+// height, so percentage offsets stretch the reveal with the element. These caps
+// bound it to an absolute scroll distance instead. Subjects shorter than
+// $scroll-reveal-max-distance are unaffected. See `_animations.scss`.
+
+$scroll-reveal-max-delay: 40px;     // cap on the dead zone before the fade starts
+$scroll-reveal-max-distance: 400px; // reveal is always complete by this far into `entry`

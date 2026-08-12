@@ -2,13 +2,21 @@
 
 :host {
   display: block;
-  cursor: pointer;
+  // Containing block for the stretched title link overlay.
+  position: relative;
 }
 
 .project-card__thumbnail {
+  // Fixed height on the wrapper (not the img) so a missing image
+  // can never collapse the card layout.
+  height: 200px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid rgba($bg-border, 0.6);
+
   img {
+    display: block;
     width: 100%;
-    height: 200px;
+    height: 100%;
     object-fit: cover;
   }
 }
@@ -20,6 +28,29 @@
 .project-card__title {
   color: var(--text-primary);
   margin-bottom: $space-1;
+}
+
+.project-card__title-link {
+  color: inherit;
+  text-decoration: none;
+
+  // Stretched link — covers the whole card so any click opens the project.
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: $radius-md;
+  }
+
+  &:focus-visible {
+    outline: none;
+
+    &::after {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 3px;
+    }
+  }
 }
 
 .project-card__description {
@@ -40,6 +71,9 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-top: $space-2;
+  // Keep external links clickable above the stretched title link.
+  position: relative;
+  z-index: 2;
 }
 
 .project-card__link {
@@ -57,5 +91,11 @@
     border-color: rgba(var(--accent-cyan-rgb), 0.8);
     box-shadow: var(--glow-cyan);
     background: rgba(var(--accent-cyan-rgb), 0.08);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      transform: scale(0.96);
+    }
   }
 }

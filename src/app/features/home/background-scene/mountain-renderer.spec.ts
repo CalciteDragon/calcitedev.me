@@ -94,6 +94,19 @@ describe('MountainRenderer', () => {
       // Same grid reference proves no rebuild occurred
       expect(rr.grid).toBe(gridBefore);
     });
+
+    it('precomposes fog into cached face colors when fogIntensity changes', () => {
+      const r = new MountainRenderer(canvas);
+      r.setConfig(DEFAULT_MOUNTAIN_CONFIG);
+      const rr = r as unknown as { faceColors: string[][]; ROWS: number; COLS: number };
+      const row = rr.ROWS - 1;
+      const column = Math.floor(rr.COLS / 2);
+      const foggedColor = rr.faceColors[row][column];
+
+      r.setConfig({ ...DEFAULT_MOUNTAIN_CONFIG, fogIntensity: 0 });
+
+      expect(rr.faceColors[row][column]).not.toBe(foggedColor);
+    });
   });
 
   // ─── buildGradients() ──────────────────────────────────────────────────────
