@@ -1,20 +1,215 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Minecraft Hide and Seek voxel map preview">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title description">
+  <title id="title">Minecraft Hide and Seek voxel arena</title>
+  <desc id="description">An isometric block arena shows a red seeker searching for two concealed hiders while a wormhole power-up glows nearby.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0d1424"/><stop offset="1" stop-color="#0b0f1a"/></linearGradient>
-    <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <pattern id="pixels" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#1e2a45" stroke-opacity=".26"/></pattern>
+    <linearGradient id="hs-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#10192f"/>
+      <stop offset="0.58" stop-color="#0b1222"/>
+      <stop offset="1" stop-color="#070c16"/>
+    </linearGradient>
+    <radialGradient id="hs-haze" cx="50%" cy="48%" r="58%">
+      <stop stop-color="#3b82f6" stop-opacity="0.13"/>
+      <stop offset="0.58" stop-color="#3b82f6" stop-opacity="0.035"/>
+      <stop offset="1" stop-color="#3b82f6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="hs-ground" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#254b3d"/>
+      <stop offset="0.5" stop-color="#17372f"/>
+      <stop offset="1" stop-color="#102b27"/>
+    </linearGradient>
+    <linearGradient id="hs-path" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#536179"/>
+      <stop offset="1" stop-color="#35435c"/>
+    </linearGradient>
+    <pattern id="hs-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#7c92ba" stroke-opacity="0.055"/>
+    </pattern>
+    <filter id="hs-blue-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="hs-red-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="hs-gold-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="hs-purple-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="7" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="hs-frame-clip"><rect x="12" y="12" width="616" height="336" rx="6"/></clipPath>
+
+    <g id="hs-stone" stroke="#24344c" stroke-width="1">
+      <path d="M0 11 22 0l44 11-22 12z" fill="#718096"/>
+      <path d="m0 11 44 12v20L0 31z" fill="#3b4a61"/>
+      <path d="m44 23 22-12v20L44 43z" fill="#28374d"/>
+      <path d="m7 14 15-7 31 8-15 7z" fill="#94a3b8" opacity="0.34"/>
+    </g>
+    <g id="hs-grass" stroke="#173d30" stroke-width="1">
+      <path d="M0 11 22 0l44 11-22 12z" fill="#52b788"/>
+      <path d="m0 11 44 12v20L0 31z" fill="#26734f"/>
+      <path d="m44 23 22-12v20L44 43z" fill="#1d5844"/>
+      <path d="m8 11 8-4 8 2-8 4zm23 6 8-4 8 2-8 4z" fill="#86d6a8" opacity="0.58"/>
+    </g>
+    <g id="hs-wood" stroke="#4d2d1a" stroke-width="1">
+      <path d="M0 11 22 0l44 11-22 12z" fill="#b7793e"/>
+      <path d="m0 11 44 12v20L0 31z" fill="#87502c"/>
+      <path d="m44 23 22-12v20L44 43z" fill="#61381f"/>
+      <path d="M13 9c7-4 19-3 27 0-7 5-20 6-27 0z" fill="none" stroke="#6b3f24"/>
+    </g>
+    <g id="hs-leaf" stroke="#14532d" stroke-width="1">
+      <path d="M0 11 22 0l44 11-22 12z" fill="#4ade80"/>
+      <path d="m0 11 44 12v20L0 31z" fill="#229a52"/>
+      <path d="m44 23 22-12v20L44 43z" fill="#17733f"/>
+      <path d="m8 15 7-4 6 2-7 4zm23 7 6-3 7 2-7 4z" fill="#bbf7d0" opacity="0.48"/>
+    </g>
+    <g id="hs-hay" stroke="#8a5b12" stroke-width="1">
+      <path d="M0 11 22 0l44 11-22 12z" fill="#facc15"/>
+      <path d="m0 11 44 12v20L0 31z" fill="#ca8a04"/>
+      <path d="m44 23 22-12v20L44 43z" fill="#a16207"/>
+      <path d="M7 18l28 8m-22-4 25 7m9-12 12-6" stroke="#fef08a" stroke-opacity="0.52"/>
+    </g>
   </defs>
-  <rect width="640" height="360" fill="url(#bg)"/><rect width="640" height="360" fill="url(#pixels)"/>
-  <g transform="translate(124 43) skewY(-8)" stroke="#3b82f6" stroke-opacity=".42">
-    <g fill="#111827"><rect x="0" y="0" width="72" height="48"/><rect x="72" y="0" width="48" height="96"/><rect x="120" y="48" width="96" height="48"/><rect x="216" y="0" width="48" height="96"/><rect x="264" y="0" width="120" height="48"/><rect x="0" y="96" width="48" height="96"/><rect x="48" y="144" width="120" height="48"/><rect x="168" y="96" width="48" height="96"/><rect x="216" y="144" width="96" height="48"/><rect x="312" y="96" width="72" height="96"/><rect x="0" y="192" width="120" height="48"/><rect x="120" y="192" width="48" height="72"/><rect x="168" y="240" width="144" height="24"/><rect x="312" y="192" width="72" height="72"/></g>
-    <g fill="#18243a"><rect x="8" y="8" width="56" height="32"/><rect x="128" y="56" width="80" height="32"/><rect x="272" y="8" width="104" height="32"/><rect x="56" y="152" width="104" height="32"/><rect x="224" y="152" width="80" height="32"/></g>
+
+  <rect width="640" height="360" fill="url(#hs-bg)"/>
+  <rect width="640" height="360" fill="url(#hs-haze)"/>
+  <rect width="640" height="360" fill="url(#hs-grid)"/>
+
+  <g clip-path="url(#hs-frame-clip)">
+    <!-- arena shadow and floating base -->
+    <ellipse cx="320" cy="315" rx="255" ry="29" fill="#000713" opacity="0.72"/>
+    <g shape-rendering="crispEdges">
+      <path d="M78 176 320 66l244 110-244 128z" fill="url(#hs-ground)" stroke="#60a5fa" stroke-opacity="0.48" stroke-width="2"/>
+      <path d="m78 176 242 128v28L78 203z" fill="#0e2425" stroke="#1e4d50"/>
+      <path d="m320 304 244-128v27L320 332z" fill="#0a1c23" stroke="#1e4050"/>
+
+      <!-- stone paths -->
+      <path d="M129 184 166 167l194 93-40 21z" fill="url(#hs-path)" opacity="0.88"/>
+      <path d="M271 88 316 68l112 50-43 22z" fill="url(#hs-path)" opacity="0.86"/>
+      <path d="M281 286 523 162l42 19-244 128z" fill="url(#hs-path)" opacity="0.78"/>
+      <path d="M169 166 407 264M315 69l-34 217M427 118l-259 135" fill="none" stroke="#93a4bb" stroke-opacity="0.22" stroke-width="2"/>
+      <path d="M107 183 320 82l214 95-214 112z" fill="none" stroke="#7dd3fc" stroke-opacity="0.12"/>
+    </g>
+
+    <!-- back-left ruined wall -->
+    <g shape-rendering="crispEdges">
+      <use href="#hs-stone" x="127" y="133"/>
+      <use href="#hs-stone" x="169" y="154"/>
+      <use href="#hs-stone" x="211" y="175"/>
+      <use href="#hs-stone" x="127" y="111"/>
+      <use href="#hs-stone" x="211" y="153"/>
+      <use href="#hs-stone" x="127" y="89"/>
+      <use href="#hs-stone" x="169" y="110"/>
+      <path d="M135 104 179 116v5l-44-12zM218 168l44 12v5l-44-12z" fill="#cbd5e1" opacity="0.3"/>
+    </g>
+
+    <!-- center cover crates -->
+    <g shape-rendering="crispEdges">
+      <use href="#hs-wood" x="278" y="201"/>
+      <use href="#hs-wood" x="320" y="222"/>
+      <use href="#hs-hay" x="362" y="243"/>
+      <path d="M287 219l27 7m-20-2 28 8M371 261l28 7" fill="none" stroke="#fef3c7" stroke-opacity="0.3"/>
+    </g>
+
+    <!-- right-side tree and hedge cover -->
+    <g shape-rendering="crispEdges">
+      <use href="#hs-grass" x="445" y="174"/>
+      <use href="#hs-grass" x="487" y="153"/>
+      <use href="#hs-wood" x="430" y="132"/>
+      <use href="#hs-wood" x="430" y="110"/>
+      <use href="#hs-leaf" x="405" y="86"/>
+      <use href="#hs-leaf" x="445" y="96"/>
+      <use href="#hs-leaf" x="425" y="65"/>
+      <use href="#hs-leaf" x="465" y="76"/>
+    </g>
+
+    <!-- foreground grass blocks -->
+    <g shape-rendering="crispEdges">
+      <use href="#hs-grass" x="173" y="232"/>
+      <use href="#hs-grass" x="215" y="253"/>
+      <use href="#hs-grass" x="424" y="259"/>
+      <use href="#hs-grass" x="466" y="238"/>
+    </g>
+
+    <!-- seeker vision sweep -->
+    <path d="M332 166 202 244 454 264z" fill="#ef4444" opacity="0.065" stroke="#fb7185" stroke-opacity="0.26" stroke-dasharray="7 7"/>
+    <path d="M332 166 454 264" fill="none" stroke="#fb7185" stroke-opacity="0.4" stroke-dasharray="5 7"/>
+
+    <!-- cyan hider peeking through the ruins -->
+    <g transform="translate(203 151)" shape-rendering="crispEdges" filter="url(#hs-blue-glow)">
+      <path d="M0 7 12 0l24 7-12 7z" fill="#67e8f9"/>
+      <path d="m0 7 24 7v22L0 29z" fill="#0891b2"/>
+      <path d="m24 14 12-7v22l-12 7z" fill="#0e7490"/>
+      <rect x="6" y="13" width="5" height="5" fill="#07111f"/><rect x="16" y="16" width="5" height="5" fill="#07111f"/>
+      <path d="M5 31 24 36v27L5 57z" fill="#155e75"/><path d="m24 36 9-5v26l-9 6z" fill="#164e63"/>
+      <path d="M7 59l8 2v14l-8-2zm13 3 8 2v14l-8-2z" fill="#22d3ee"/>
+    </g>
+
+    <!-- red seeker in the open -->
+    <g transform="translate(311 126)" shape-rendering="crispEdges" filter="url(#hs-red-glow)">
+      <path d="M0 8 14 0l28 8-14 8z" fill="#fda4af"/>
+      <path d="m0 8 28 8v26L0 34z" fill="#ef4444"/>
+      <path d="m28 16 14-8v26l-14 8z" fill="#be123c"/>
+      <rect x="7" y="16" width="5" height="5" fill="#2a0810"/><rect x="19" y="19" width="5" height="5" fill="#2a0810"/>
+      <path d="M5 36 28 42v31L5 67z" fill="#be123c"/><path d="m28 42 11-6v30l-11 7z" fill="#881337"/>
+      <path d="M8 68l9 2v17l-9-2zm14 4 9 2v17l-9-2z" fill="#fb7185"/>
+      <path d="M-7 39 5 36v19L-7 59zm46-3 9-5v20l-9 5z" fill="#f43f5e"/>
+    </g>
+
+    <!-- gold hider behind the tree -->
+    <g transform="translate(447 146)" shape-rendering="crispEdges" filter="url(#hs-gold-glow)">
+      <path d="M0 7 11 1l22 6-11 7z" fill="#fde68a"/>
+      <path d="m0 7 22 7v21L0 28z" fill="#f59e0b"/>
+      <path d="m22 14 11-7v21l-11 7z" fill="#b45309"/>
+      <rect x="5" y="14" width="4" height="4" fill="#241403"/><rect x="14" y="17" width="4" height="4" fill="#241403"/>
+      <path d="M4 31 22 35v25L4 55z" fill="#b45309"/>
+    </g>
+
+    <!-- wormhole power-up -->
+    <g transform="translate(272 242)" filter="url(#hs-purple-glow)">
+      <ellipse cx="0" cy="0" rx="34" ry="15" fill="#8b5cf6" opacity="0.2"/>
+      <ellipse cx="0" cy="0" rx="25" ry="11" fill="none" stroke="#c084fc" stroke-width="3"/>
+      <ellipse cx="0" cy="0" rx="12" ry="5" fill="#ec4899"/>
+      <path d="M-29 0c8-19 48-20 59 0M-20 6c8 10 31 10 40 0" fill="none" stroke="#67e8f9" stroke-width="2" stroke-dasharray="4 4"/>
+      <rect x="-3" y="-29" width="6" height="16" fill="#f0abfc"/>
+      <rect x="-6" y="-26" width="12" height="6" fill="#f0abfc"/>
+    </g>
+
+    <!-- role pointers -->
+    <g font-family="'JetBrains Mono', monospace" font-size="9" letter-spacing="1.2">
+      <path d="M289 112h28l8 10" fill="none" stroke="#fb7185" stroke-width="1.5"/>
+      <text x="246" y="115" fill="#fda4af">SEEKER</text>
+      <path d="M179 184h21l6-8" fill="none" stroke="#67e8f9" stroke-width="1.5"/>
+      <text x="135" y="187" fill="#67e8f9">HIDER</text>
+    </g>
+
+    <!-- HUD -->
+    <g font-family="'JetBrains Mono', monospace" shape-rendering="auto">
+      <g transform="translate(88 24)">
+        <rect width="168" height="49" rx="7" fill="#0a1120" fill-opacity="0.93" stroke="#3b82f6" stroke-opacity="0.62"/>
+        <text x="15" y="20" fill="#93c5fd" font-size="9" letter-spacing="1.6">HUNT TIMER</text>
+        <text x="15" y="39" fill="#f8fafc" font-size="16" font-weight="700" letter-spacing="1">02:18</text>
+        <circle cx="139" cy="25" r="6" fill="#ef4444" filter="url(#hs-red-glow)"/>
+        <text x="151" y="29" fill="#fda4af" font-size="9">LIVE</text>
+      </g>
+      <g transform="translate(413 25)">
+        <rect width="131" height="39" rx="19.5" fill="#0a1120" fill-opacity="0.93" stroke="#22d3ee" stroke-opacity="0.62"/>
+        <circle cx="19" cy="19.5" r="5" fill="#22d3ee" filter="url(#hs-blue-glow)"/>
+        <text x="34" y="24" fill="#e2e8f0" font-size="11" letter-spacing="1.2">HIDERS 02</text>
+      </g>
+      <g transform="translate(390 296)">
+        <rect width="160" height="40" rx="7" fill="#0a1120" fill-opacity="0.94" stroke="#c084fc" stroke-opacity="0.64"/>
+        <text x="13" y="17" fill="#c084fc" font-size="9" letter-spacing="1.3">POWER-UP</text>
+        <text x="13" y="31" fill="#f8fafc" font-size="10" letter-spacing="0.8">WORMHOLE READY</text>
+      </g>
+    </g>
   </g>
-  <g shape-rendering="crispEdges" filter="url(#glow)">
-    <g transform="translate(206 122)" fill="#22d3ee"><rect width="18" height="18"/><rect x="-4" y="18" width="26" height="28" fill="#0e7490"/><rect x="2" y="46" width="8" height="15"/><rect x="12" y="46" width="8" height="15"/></g>
-    <g transform="translate(390 174)" fill="#ec4899"><rect width="20" height="20"/><rect x="-5" y="20" width="30" height="31" fill="#be185d"/><rect x="1" y="51" width="9" height="16"/><rect x="14" y="51" width="9" height="16"/></g>
-    <g transform="translate(316 258)" fill="#f59e0b"><rect width="16" height="16"/><rect x="-3" y="16" width="22" height="24" fill="#b45309"/></g>
+
+  <rect x="12" y="12" width="616" height="336" rx="6" fill="none" stroke="#243553" stroke-width="1"/>
+  <g stroke="#3b82f6" stroke-width="3" fill="none" opacity="0.82">
+    <path d="M16 42V16h26M598 16h26v26M624 318v26h-26M42 344H16v-26"/>
   </g>
-  <g transform="translate(502 74)"><circle r="56" fill="#0b0f1a" stroke="#ec4899" stroke-opacity=".45"/><circle r="38" fill="none" stroke="#ec4899" stroke-dasharray="4 7"/><circle r="20" fill="none" stroke="#ec4899" stroke-opacity=".4"/><path d="M-56 0h112M0-56v112" stroke="#ec4899" stroke-opacity=".25"/><circle cx="-19" cy="13" r="5" fill="#22d3ee"/><circle cx="22" cy="-12" r="7" fill="#ec4899" filter="url(#glow)"/></g>
-  <g font-family="monospace"><rect x="30" y="28" width="166" height="50" rx="7" fill="#111827" stroke="#3b82f6" stroke-opacity=".5"/><text x="48" y="50" fill="#9ca3af" font-size="10">HUNT_TIMER</text><text x="48" y="68" fill="#e5e7eb" font-size="16">08:42 REMAINING</text><rect x="446" y="282" width="160" height="44" rx="7" fill="#111827" stroke="#f59e0b" stroke-opacity=".5"/><text x="464" y="301" fill="#f59e0b" font-size="10">POWER_UP</text><text x="464" y="317" fill="#e5e7eb" font-size="10">WORMHOLE READY</text></g>
-  <g stroke="#3b82f6" stroke-width="2" fill="none" opacity=".7"><path d="M14 34V14h20M606 14h20v20M626 326v20h-20M34 346H14v-20"/></g>
 </svg>

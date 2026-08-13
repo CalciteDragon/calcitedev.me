@@ -55,7 +55,7 @@ public/
     └── pixel-art/                       # Current avatar and UFO placeholders
 ```
 
-Assets are served from `public/`, not `src/assets/`. Project visuals referenced by `projects.data.ts` live under `public/assets/images/`: the original Pixel Quest preview plus six project-specific SVGs for Live Bingo, Pineapple Expense, Calcite Portfolio, Mochi 2026, Minecraft Hide & Seek, and the work-in-progress Roblox world. The recursive portfolio art is a finite SVG composition rather than an iframe or runtime recursion.
+Assets are served from `public/`, not `src/assets/`. All seven project visuals referenced by `projects.data.ts` are project-specific SVGs under `public/assets/images/`: Live Bingo, Pineapple Expense, Calcite Portfolio, Mochi 2026, Pixel Quest, Minecraft Hide & Seek, and the work-in-progress Roblox world. The recursive portfolio art is a finite SVG composition rather than an iframe or runtime recursion.
 
 ## Routing
 

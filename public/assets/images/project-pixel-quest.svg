@@ -1,72 +1,184 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="Pixel Quest placeholder art">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-labelledby="title description">
+  <title id="title">Pixel Quest co-op dungeon run</title>
+  <desc id="description">Two pixel adventurers cross a layered neon dungeon filled with coins, a slime, spikes, and a glowing exit portal.</desc>
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#0d1424"/>
-      <stop offset="1" stop-color="#0b0f1a"/>
+    <linearGradient id="pq-bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#111933"/>
+      <stop offset="0.58" stop-color="#0b1226"/>
+      <stop offset="1" stop-color="#080d18"/>
     </linearGradient>
-    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-      <feGaussianBlur stdDeviation="4" result="b"/>
-      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M32 0H0V32" fill="none" stroke="#1e2a45" stroke-opacity="0.35" stroke-width="1"/>
+    <linearGradient id="pq-haze" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#22d3ee" stop-opacity="0.08"/>
+      <stop offset="0.55" stop-color="#8b5cf6" stop-opacity="0.03"/>
+      <stop offset="1" stop-color="#ec4899" stop-opacity="0.09"/>
+    </linearGradient>
+    <linearGradient id="pq-portal" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#22d3ee"/>
+      <stop offset="0.48" stop-color="#8b5cf6"/>
+      <stop offset="1" stop-color="#ec4899"/>
+    </linearGradient>
+    <linearGradient id="pq-floor" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#233353"/>
+      <stop offset="1" stop-color="#10182b"/>
+    </linearGradient>
+    <radialGradient id="pq-moon">
+      <stop stop-color="#a78bfa" stop-opacity="0.5"/>
+      <stop offset="0.45" stop-color="#8b5cf6" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="pq-grid" width="16" height="16" patternUnits="userSpaceOnUse">
+      <path d="M16 0H0V16" fill="none" stroke="#8da2c9" stroke-opacity="0.06"/>
     </pattern>
+    <pattern id="pq-bricks" width="48" height="24" patternUnits="userSpaceOnUse">
+      <path d="M0 0H48M0 24H48M24 0V12M0 12H48M12 12V24M36 12V24" fill="none" stroke="#344563" stroke-opacity="0.46"/>
+    </pattern>
+    <filter id="pq-cyan-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pq-pink-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="pq-gold-glow" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="pq-frame-clip"><rect x="12" y="12" width="616" height="336" rx="6"/></clipPath>
   </defs>
 
-  <rect width="640" height="360" fill="url(#bg)"/>
-  <rect width="640" height="360" fill="url(#grid)"/>
+  <rect width="640" height="360" fill="url(#pq-bg)"/>
+  <rect width="640" height="360" fill="url(#pq-haze)"/>
+  <rect width="640" height="360" fill="url(#pq-grid)"/>
 
-  <!-- distant pixel clouds -->
-  <g fill="#1e2a45" shape-rendering="crispEdges" opacity="0.9">
-    <rect x="96" y="64" width="64" height="12"/><rect x="112" y="52" width="32" height="12"/>
-    <rect x="432" y="88" width="80" height="12"/><rect x="456" y="76" width="40" height="12"/>
-  </g>
-
-  <!-- horizon glow -->
-  <rect x="0" y="298" width="640" height="3" fill="#22d3ee" opacity="0.55" filter="url(#glow)"/>
-  <rect x="0" y="301" width="640" height="59" fill="#22d3ee" opacity="0.05"/>
-
-  <!-- staircase platforms -->
-  <g shape-rendering="crispEdges">
-    <g fill="#101a30" stroke="#22d3ee" stroke-opacity="0.8" stroke-width="2" filter="url(#glow)">
-      <rect x="72" y="264" width="112" height="20"/>
-      <rect x="232" y="224" width="112" height="20"/>
-      <rect x="392" y="184" width="112" height="20"/>
+  <g clip-path="url(#pq-frame-clip)" shape-rendering="crispEdges">
+    <!-- distant dungeon skyline -->
+    <circle cx="505" cy="89" r="92" fill="url(#pq-moon)" shape-rendering="auto"/>
+    <g fill="#111b31">
+      <path d="M0 99h72V72h16v27h78v147H0z"/>
+      <path d="M72 58h16v14H72zM61 78h38v168H61z"/>
+      <path d="M132 118h99V80h18v38h70v128H132z"/>
+      <path d="M430 101h36V76h18v25h45V56h22v45h89v145H430z"/>
     </g>
-    <!-- platform top highlights -->
-    <g fill="#22d3ee" opacity="0.55">
-      <rect x="76" y="266" width="104" height="2"/>
-      <rect x="236" y="226" width="104" height="2"/>
-      <rect x="396" y="186" width="104" height="2"/>
+    <g fill="#0b1222" stroke="#263758" stroke-width="2">
+      <path d="M92 246V154c0-32 22-54 51-54s51 22 51 54v92h-24v-89c0-18-11-31-27-31s-27 13-27 31v89z"/>
+      <path d="M383 246V134c0-35 24-59 56-59s56 24 56 59v112h-26V137c0-21-12-36-30-36s-30 15-30 36v109z"/>
+    </g>
+    <g fill="#293956" opacity="0.8">
+      <rect x="18" y="126" width="42" height="5"/><rect x="25" y="151" width="28" height="5"/>
+      <rect x="211" y="139" width="59" height="5"/><rect x="279" y="164" width="34" height="5"/>
+      <rect x="526" y="125" width="68" height="5"/><rect x="551" y="153" width="59" height="5"/>
+    </g>
+
+    <!-- torchlight and ambient pixels -->
+    <g fill="#f59e0b" filter="url(#pq-gold-glow)">
+      <rect x="64" y="171" width="6" height="12"/><rect x="61" y="174" width="12" height="5"/>
+      <rect x="404" y="146" width="6" height="12"/><rect x="401" y="149" width="12" height="5"/>
+    </g>
+    <g fill="#fef3c7"><rect x="66" y="170" width="2" height="5"/><rect x="406" y="145" width="2" height="5"/></g>
+    <g fill="#4b638b" opacity="0.75">
+      <rect x="116" y="48" width="4" height="4"/><rect x="283" y="70" width="3" height="3"/>
+      <rect x="347" y="111" width="4" height="4"/><rect x="571" y="47" width="3" height="3"/>
+      <rect x="34" y="211" width="3" height="3"/><rect x="465" y="187" width="3" height="3"/>
+    </g>
+
+    <!-- exit portal -->
+    <g transform="translate(480 137)">
+      <rect x="0" y="0" width="72" height="122" rx="2" fill="#0a0f1d" stroke="#334766" stroke-width="5"/>
+      <rect x="10" y="10" width="52" height="102" fill="#141335"/>
+      <g filter="url(#pq-pink-glow)">
+        <rect x="14" y="14" width="44" height="94" fill="none" stroke="url(#pq-portal)" stroke-width="4"/>
+        <rect x="22" y="22" width="28" height="78" fill="#8b5cf6" opacity="0.2"/>
+      </g>
+      <path d="M24 30h24v8H30v10h17v8H25v11h20v8H30v17h-6z" fill="#f0abfc" opacity="0.8"/>
+    </g>
+
+    <!-- platforms and dungeon floor -->
+    <g>
+      <path d="M-8 264H148v20H-8zM179 280h217v20H179zM431 257h217v24H431z" fill="url(#pq-floor)"/>
+      <path d="M-8 284H148v76H-8zM179 300h217v60H179zM431 281h217v79H431z" fill="#0d1527"/>
+      <path d="M-8 284H148v76H-8zM179 300h217v60H179zM431 281h217v79H431z" fill="url(#pq-bricks)" opacity="0.72"/>
+      <path d="M-8 264H148M179 280h217M431 257h217" fill="none" stroke="#22d3ee" stroke-width="3" filter="url(#pq-cyan-glow)"/>
+      <path d="M219 208h132v17H219z" fill="url(#pq-floor)"/>
+      <path d="M219 225h132v14H219z" fill="#0d1527"/>
+      <path d="M219 225h132v14H219z" fill="url(#pq-bricks)"/>
+      <path d="M219 208h132" stroke="#8b5cf6" stroke-width="3" filter="url(#pq-pink-glow)"/>
+    </g>
+
+    <!-- spikes in the gap -->
+    <g fill="#64748b">
+      <path d="M148 327l12-27 12 27 12-27 12 27 12-27 12 27z"/>
+      <path d="M396 327l12-27 12 27 12-27 12 27z"/>
+    </g>
+    <g fill="#cbd5e1" opacity="0.7">
+      <path d="M154 319l6-14 6 14M402 319l6-14 6 14"/>
+    </g>
+
+    <!-- collectible trail -->
+    <g filter="url(#pq-gold-glow)">
+      <g fill="#f59e0b">
+        <rect x="114" y="225" width="12" height="12"/><rect x="167" y="221" width="12" height="12"/>
+        <rect x="195" y="191" width="12" height="12"/><rect x="371" y="203" width="12" height="12"/>
+        <rect x="411" y="222" width="12" height="12"/><rect x="465" y="216" width="12" height="12"/>
+      </g>
+      <g fill="#fff7c2">
+        <rect x="117" y="228" width="4" height="4"/><rect x="170" y="224" width="4" height="4"/>
+        <rect x="198" y="194" width="4" height="4"/><rect x="374" y="206" width="4" height="4"/>
+        <rect x="414" y="225" width="4" height="4"/><rect x="468" y="219" width="4" height="4"/>
+      </g>
+    </g>
+
+    <!-- player one: cyan knight -->
+    <g transform="translate(270 237)" filter="url(#pq-cyan-glow)">
+      <rect x="0" y="0" width="26" height="23" fill="#22d3ee"/>
+      <rect x="4" y="-5" width="18" height="6" fill="#67e8f9"/>
+      <rect x="5" y="5" width="5" height="5" fill="#08111f"/><rect x="17" y="5" width="5" height="5" fill="#08111f"/>
+      <rect x="7" y="15" width="13" height="4" fill="#0e7490"/>
+      <rect x="-5" y="23" width="36" height="9" fill="#0891b2"/>
+      <rect x="0" y="32" width="11" height="11" fill="#155e75"/><rect x="16" y="32" width="11" height="11" fill="#155e75"/>
+      <rect x="28" y="12" width="4" height="21" fill="#cbd5e1"/><rect x="25" y="9" width="10" height="5" fill="#f8fafc"/>
+    </g>
+
+    <!-- player two: pink mage in mid-jump -->
+    <g transform="translate(299 155)" filter="url(#pq-pink-glow)">
+      <rect x="0" y="5" width="24" height="22" fill="#f472b6"/>
+      <path d="M-4 5h32L12-8z" fill="#ec4899"/>
+      <rect x="5" y="10" width="4" height="4" fill="#1a1024"/><rect x="16" y="10" width="4" height="4" fill="#1a1024"/>
+      <rect x="-4" y="27" width="32" height="9" fill="#be185d"/>
+      <rect x="1" y="36" width="9" height="9" fill="#831843"/><rect x="16" y="36" width="9" height="9" fill="#831843"/>
+      <rect x="29" y="12" width="4" height="29" fill="#fef3c7"/><rect x="25" y="9" width="12" height="5" fill="#f59e0b"/>
+    </g>
+    <g fill="#ec4899" opacity="0.55"><rect x="302" y="207" width="5" height="5"/><rect x="315" y="218" width="4" height="4"/></g>
+
+    <!-- slime enemy -->
+    <g transform="translate(96 233)" filter="url(#pq-pink-glow)">
+      <path d="M0 25V10h6V4h8V0h19v4h8v6h6v15z" fill="#8b5cf6"/>
+      <rect x="8" y="12" width="7" height="7" fill="#120d24"/><rect x="32" y="12" width="7" height="7" fill="#120d24"/>
+      <rect x="17" y="20" width="14" height="3" fill="#c4b5fd"/>
+    </g>
+
+    <!-- HUD -->
+    <g font-family="'JetBrains Mono', monospace" shape-rendering="auto">
+      <g transform="translate(88 24)">
+        <rect width="181" height="48" rx="7" fill="#0b1120" fill-opacity="0.9" stroke="#22d3ee" stroke-opacity="0.55"/>
+        <text x="15" y="20" fill="#67e8f9" font-size="10" letter-spacing="1.5">DAILY DUNGEON</text>
+        <text x="15" y="37" fill="#f8fafc" font-size="13" font-weight="700">DEPTH 07</text>
+        <g transform="translate(112 27)" fill="#ec4899">
+          <path d="M0-5h5v-4h7v4h5v7L8 10 0 2z"/><path d="M23-5h5v-4h7v4h5v7l-9 8-8-8z"/>
+        </g>
+      </g>
+      <g transform="translate(407 25)">
+        <rect width="139" height="35" rx="17.5" fill="#0b1120" fill-opacity="0.9" stroke="#8b5cf6" stroke-opacity="0.7"/>
+        <circle cx="20" cy="17.5" r="5" fill="#22d3ee" filter="url(#pq-cyan-glow)"/>
+        <circle cx="37" cy="17.5" r="5" fill="#ec4899" filter="url(#pq-pink-glow)"/>
+        <text x="53" y="22" fill="#e2e8f0" font-size="11" letter-spacing="1.2">CO-OP ×2</text>
+      </g>
     </g>
   </g>
 
-  <!-- coins above platforms -->
-  <g fill="#f59e0b" shape-rendering="crispEdges" filter="url(#glow)">
-    <rect x="120" y="228" width="12" height="12"/>
-    <rect x="280" y="188" width="12" height="12"/>
-    <rect x="440" y="148" width="12" height="12"/>
-  </g>
-  <g fill="#fde68a" shape-rendering="crispEdges">
-    <rect x="123" y="231" width="3" height="3"/>
-    <rect x="283" y="191" width="3" height="3"/>
-    <rect x="443" y="151" width="3" height="3"/>
-  </g>
-
-  <!-- pixel hero sprite on middle platform -->
-  <g shape-rendering="crispEdges">
-    <rect x="296" y="192" width="20" height="20" fill="#22d3ee"/>
-    <rect x="300" y="196" width="4" height="4" fill="#0b0f1a"/>
-    <rect x="308" y="196" width="4" height="4" fill="#0b0f1a"/>
-    <rect x="300" y="205" width="12" height="3" fill="#0b0f1a"/>
-    <rect x="292" y="212" width="28" height="6" fill="#0e7490"/>
-    <rect x="296" y="218" width="8" height="6" fill="#164e63"/>
-    <rect x="308" y="218" width="8" height="6" fill="#164e63"/>
-  </g>
-
-  <!-- corner brackets -->
-  <g stroke="#22d3ee" stroke-width="3" fill="none" opacity="0.7">
-    <path d="M14 34V14h20"/><path d="M606 14h20v20"/>
-    <path d="M626 326v20h-20"/><path d="M34 346H14v-20"/>
+  <!-- finishing frame -->
+  <rect x="12" y="12" width="616" height="336" rx="6" fill="none" stroke="#243553" stroke-width="1"/>
+  <g stroke="#22d3ee" stroke-width="3" fill="none" opacity="0.8">
+    <path d="M16 42V16h26M598 16h26v26M624 318v26h-26M42 344H16v-26"/>
   </g>
 </svg>

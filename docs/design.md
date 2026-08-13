@@ -228,7 +228,7 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 - The active project controls its existing cyan/blue/purple/pink/gold accent through CSS custom properties. Accent affects corner brackets, border, status dot, metadata, and CTAs while the body remains an opaque readable surface over the mountain canvas.
 - Detail hierarchy: project number, status, eyebrow, title, researched long description, technology tags, then available repository/live actions. Projects without public links show a quiet `Building in private` state.
 - The focus image has meaningful alt text. Repository/live actions explicitly announce that they open a new tab and retain 44px touch targets.
-- Original 640×360 SVG art mirrors each real project: a 1v1 bingo board, receipt-processing phone/cloud pipeline, finite recursive portfolio window, swerve/vision field HUD, voxel hide-and-seek maze, and connected persistent-world map. Pixel Quest retains its earlier art.
+- Original 640×360 SVG art mirrors each real project: a 1v1 bingo board, receipt-processing phone/cloud pipeline, finite recursive portfolio window, swerve/vision field HUD, co-op pixel dungeon run, isometric voxel hide-and-seek arena, and connected persistent-world map. Pixel Quest and Hide & Seek use layered, scene-driven compositions with readable characters, objectives, and game-state HUDs rather than sparse placeholder diagrams.
 - The recursive portfolio preview is intentionally finite SVG artwork, not an iframe: browser windows nest a few levels and end in a `YOU ARE HERE` label.
 
 ### Project Selector

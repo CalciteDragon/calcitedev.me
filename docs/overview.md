@@ -49,7 +49,7 @@ An origin-story section led by a larger introductory card and followed by a four
 
 A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. A compact index of smaller preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
 
-Pixel Quest retains its original preview and copy. Live Bingo, Pineapple Expense, this portfolio, Mochi 2026, Minecraft Hide & Seek, and the work-in-progress Roblox world use original themed SVG previews under `public/assets/images/`. Content order and membership are controlled entirely by `projects.data.ts`.
+All seven projects use original themed SVG previews under `public/assets/images/`. Pixel Quest is presented as a layered co-op dungeon run, while Minecraft Hide & Seek uses an isometric voxel arena with visible roles, cover, and a wormhole power-up. Content order and membership are controlled entirely by `projects.data.ts`.
 
 ### 4. Skills
 
