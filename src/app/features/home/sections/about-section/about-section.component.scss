@@ -136,30 +136,19 @@
 
   &__rail {
     position: absolute;
-    top: 1.5rem;
-    bottom: 1.5rem;
+    top: var(--timeline-rail-top, 1.5rem);
     left: 1.1rem;
     width: 2px;
+    height: var(--timeline-rail-height, calc(100% - 3rem));
     background: linear-gradient(
       to bottom,
       rgba(var(--accent-cyan-rgb), 0.28) 0%,
-      rgba(var(--accent-blue-rgb), 0.28) 33%,
-      rgba(var(--accent-purple-rgb), 0.28) 66%,
+      rgba(var(--accent-blue-rgb), 0.28) var(--timeline-blue-stop, 33%),
+      rgba(var(--accent-purple-rgb), 0.28) var(--timeline-purple-stop, 66%),
       rgba(var(--accent-pink-rgb), 0.3) 94%,
-      transparent 100%
+      rgba(var(--accent-pink-rgb), 0.29) 100%
     );
     box-shadow: 0 0 12px rgba(var(--accent-blue-rgb), 0.15);
-
-    &::after {
-      content: '';
-      position: absolute;
-      top: 100%;
-      left: 0;
-      width: 2px;
-      height: 3.5rem;
-      background: linear-gradient(to bottom, rgba(var(--accent-pink-rgb), 0.72), transparent);
-      filter: drop-shadow(0 0 5px rgba(var(--accent-pink-rgb), 0.45));
-    }
   }
 
   &__rail-progress {
@@ -168,11 +157,10 @@
     background: linear-gradient(
       to bottom,
       var(--accent-cyan) 0%,
-      var(--accent-blue) 33%,
-      var(--accent-purple) 66%,
+      var(--accent-blue) var(--timeline-blue-stop, 33%),
+      var(--accent-purple) var(--timeline-purple-stop, 66%),
       var(--accent-pink) 100%
     );
-    filter: drop-shadow(0 0 4px rgba(229, 231, 235, 0.28));
     transform: scaleY(var(--timeline-progress, 0));
     transform-origin: top;
   }
@@ -269,9 +257,7 @@
     box-shadow: 0 16px 42px rgba(0, 0, 0, 0.22);
     transform: perspective(1100px) rotateX(calc(var(--scroll-tilt, 0) * 1deg));
     transform-origin: center;
-    transition: border-color $transition-base, box-shadow $transition-base,
-      transform 80ms linear;
-    will-change: transform;
+    transition: border-color $transition-base, box-shadow $transition-base;
 
     &::before {
       content: '';
@@ -355,6 +341,7 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.86em;
   }
+
 }
 
 @keyframes cursor-blink {

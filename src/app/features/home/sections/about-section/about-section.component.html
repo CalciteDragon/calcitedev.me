@@ -25,6 +25,10 @@
       class="about-section__timeline"
       [attr.data-active-tone]="activeTone()"
       [style.--timeline-progress]="timelineProgress()"
+      [style.--timeline-rail-top]="timelineRailTop()"
+      [style.--timeline-rail-height]="timelineRailHeight()"
+      [style.--timeline-blue-stop]="timelineBlueStop()"
+      [style.--timeline-purple-stop]="timelinePurpleStop()"
     >
       <span class="about-section__rail" aria-hidden="true">
         <span class="about-section__rail-progress"></span>
@@ -72,4 +76,39 @@
       }
     </div>
   </div>
+
+  @if (showScrollDebug()) {
+    <aside class="about-section__scroll-debug" aria-hidden="true">
+      <p class="about-section__scroll-debug-title">Scroll Debug · Dev Only</p>
+      <dl>
+        <div>
+          <dt>Page</dt>
+          <dd>{{ pageScrollY() }} px · {{ formatPercent(pageProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>About</dt>
+          <dd>{{ formatPercent(sectionProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Rail cursor</dt>
+          <dd>{{ formatPercent(rawTimelineProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Rail target</dt>
+          <dd>{{ formatPercent(timelineTargetProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Rail glow</dt>
+          <dd>{{ formatPercent(timelineProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Chapter</dt>
+          <dd>{{ activeEntryIndex() + 1 }} / {{ bio().about.history.length }}</dd>
+        </div>
+      </dl>
+      <p class="about-section__scroll-debug-hint">
+        Bounds: About -6.8% → 64.9%
+      </p>
+    </aside>
+  }
 </section>

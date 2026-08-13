@@ -10,12 +10,12 @@
 ## Current Status Audit — August 12, 2026
 
 - Phases 0–6 are functionally implemented, including five prerendered project-detail routes.
-- The About section now follows the hero and presents Tyler's supplied copy as a compiler-themed origin story: a larger intro card, production-command heading, and four-stage cyan → blue → violet → pink timeline. Passive rAF-throttled scroll measurement keeps exactly one chapter active while driving card tilt and rail progress; only the intro card uses scroll reveal. The content remains typed static data, and desktop/tablet/mobile renders were visually checked against the running site.
+- The About section now follows the hero and presents Tyler's supplied copy as a compiler-themed origin story: a larger intro card, production-command heading, and four-stage cyan → blue → violet → pink timeline. Passive rAF-coalesced scroll measurement keeps exactly one chapter active while frame-rate-independent damping smooths card tilt and rail progress; the rail glow runs from -6.8% to 64.9% through the About section, independent of total page length and the section's document position. Its endpoints and color stops align to the numbered nodes, and number activation follows the same smoothed rail head. A development-only `?aboutDebug=scroll` HUD exposes live tuning values, and only the intro card uses scroll reveal. The content remains typed static data, and desktop/tablet/mobile renders were visually checked against the running site.
 - The `visual-and-ux-improvements` branch was reviewed and its eight commits cherry-picked into `layout-and-design-tweaks`: content-section min-height removal (hero-only `--full` modifier), footer `SocialLinksComponent` reuse, 3-column grid cap + popular-tag filter pruning, About card panel, project-detail card redesign with related projects, dynamic page titles via the Title service, and two cleanup commits. Its 1,343-line plan document was intentionally not ported — the work it planned is complete and recorded here.
 - The July 2026 polish pass added: five themed project-thumbnail placeholder SVGs (with layout guards so missing images can't collapse cards), hero UFO repositioned clear of the headline, stretched-link card navigation to `/projects/:slug`, mobile-local hero gradients, a global `:focus-visible` ring, skip-to-content link, drawer body-scroll lock with md auto-close, a one-row scrollable mobile filter bar, press-state compression on pill controls, canvas reduced-motion still-frame + hidden-tab rAF pause, static head metadata (title/description/theme-color/OG/Twitter), and a pixel-C SVG favicon.
 - Phase 7 is now mostly complete: card hover lift/glow, section scroll reveals, active navbar state, smooth scrolling, CSS reduced-motion fallbacks, button micro-interactions, gradient rendering across breakpoints, and a canvas reduced-motion policy. Card tilt and route transitions remain open.
 - Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, reduced mobile scene entity counts, skip link, hidden-tab canvas suspension, and baseline SEO metadata.
-- Static output is configured and verified: 120 tests pass and a production build prerenders eight routes.
+- Static output is configured and verified: 125 tests pass and a production build prerenders eight routes.
 - The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
 - The July 16 mountain-performance audit restored the original worker-rAF renderer, added opt-in real-scroll metrics (`?canvasPerf=scroll`), and tested scheduling, path reuse, projection-loop, and fog candidates independently. Only static fog precomposition was retained: three standard scroll traces reduced worker-draw cadence p95 from roughly 30–33 ms to 22–25 ms, end-to-end p95 from 19.8–21.4 ms to 18.1–19.8 ms, and draw median from 5.5–5.7 ms to 5.2–5.4 ms. Immediate worker tasks, repeated-path reuse, and projection-loop changes were discarded because they did not improve real scroll cadence consistently.
 - Known repository gaps: the hero stylesheet (7.39 kB) and About stylesheet (7.88 kB) exceed the 4 kB warning budget but remain below the 8 kB error limit; mountain DPR scaling, full responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
@@ -230,7 +230,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] Full five-paragraph bio stored as typed text segments in `bioData`
 - [x] Larger intro card followed by a compiler-themed four-stage history timeline
 - [x] Single-accent cyan → blue → violet → pink chapters with contextual links and inline FIRST side note
-- [x] Continuous scroll-driven active chapter, card tilt, rail fill/head, and softened final rail fade
+- [x] Continuous scroll-driven active chapter, damped card tilt and rail fill/head mapped to the -6.8%–64.9% About-section window, number-aligned rail geometry/color stops, an intentional clean stop at node 04 with no lower tail, and a URL-gated development tuning HUD
 - [x] Scroll reveal retained on the intro card and removed from the history heading/chapters
 - [x] Responsive terminal command and readable desktop/tablet/mobile chapter layouts
 
@@ -250,7 +250,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] `SocialLinksComponent` reuse — GitHub, Discord, and LinkedIn with glow hover
 - [x] Clean, minimal layout — no form
 
-**Built:** `BackgroundSceneComponent` moved to `LayoutComponent` so it persists across routes. `HomeComponent` reads `projectsData`, `skillsData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Skills → Contact. About, Contact, Skills/SkillsGrid, and Projects/ProjectList components implement the five-section content experience. `ProjectDetailComponent` uses `toSignal(route.paramMap)` plus `computed()` for slug resolution. `app.routes.ts` places `projects/:slug` before the wildcard, and `app.routes.server.ts` enumerates all five slugs. The August 2026 verification run passes 120 tests and prerenders eight routes.
+**Built:** `BackgroundSceneComponent` moved to `LayoutComponent` so it persists across routes. `HomeComponent` reads `projectsData`, `skillsData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Skills → Contact. About, Contact, Skills/SkillsGrid, and Projects/ProjectList components implement the five-section content experience. `ProjectDetailComponent` uses `toSignal(route.paramMap)` plus `computed()` for slug resolution. `app.routes.ts` places `projects/:slug` before the wildcard, and `app.routes.server.ts` enumerates all five slugs. The August 2026 verification run passes 125 tests and prerenders eight routes.
 
 **Deliverable:** All five scroll sections are content-complete with placeholder data. Full in-page navigation works end to end. `/projects/:slug` route live with 5 pre-rendered project detail pages.
 
@@ -387,7 +387,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 **Tasks:**
 - [ ] Swap placeholder pixel-art sprites (avatar, UFO, rocket, card icons) with Tyler's custom art
 - [ ] Swap placeholder project thumbnails with real screenshots
-- [ ] Fine-tune the supplied About copy after the timeline structure is approved
+- [x] Fine-tune the supplied About copy after the timeline structure is approved
 - [ ] Update project data with real descriptions, URLs, and tech tags
 - [ ] Full cross-browser test (Chrome, Firefox, Safari, Edge)
 - [ ] Full mobile test (iOS Safari, Android Chrome)
