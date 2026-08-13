@@ -43,8 +43,8 @@ Before starting any phase or feature:
 
 - **Static deployment:** prerendered output; no Node SSR process at runtime.
 - **No backend or CMS:** content is static TypeScript data in `src/app/data/`.
-- **Single-page core experience:** Hero, About, Projects, Skills, and Contact live on `/`; project details use `/projects/:slug`.
-- **Placeholder-first assets:** art and screenshots must be easy to replace through stable file paths or a data-file change.
+- **Single-page core experience:** Hero, About, Projects, Skills, and Contact live on `/`; projects swap inside one in-page showcase rather than opening detail routes.
+- **Data-driven project showcase:** project content and preview assets remain easy to add, remove, reorder, or replace through `projects.data.ts` and stable public asset paths.
 - **Easter eggs are non-load-bearing:** physics, a controllable rocket, a peelable corner, and sound effects layer on top of a complete, usable portfolio.
 - **Deferred:** blog, resume PDF, GitHub API, analytics, light mode, experience timeline, and contact form.
 
@@ -78,13 +78,12 @@ Before starting any phase or feature:
 All routes are children of `LayoutComponent`, which owns the navbar, fixed background scene, routed content, and footer.
 
 ```text
-/               → HomeComponent (all five scroll sections)
-/projects/:slug → ProjectDetailComponent (five slugs currently prerendered)
-/about, /contact → redirect to /
-unknown paths   → redirect to /
+/                          → HomeComponent (all five scroll sections)
+/about, /projects, /contact → redirect to /
+unknown paths              → redirect to /
 ```
 
-There is intentionally no `/projects` redirect because it would conflict with `/projects/:slug`. Homepage section navigation uses `/#projects`. `app.routes.server.ts` enumerates the project slugs used for prerendering.
+Projects are selected with local signal state on the homepage. Selection does not change the URL, reorder previews, or navigate away. `app.routes.server.ts` uses the wildcard prerender rule; the production build currently emits four static routes including redirects.
 
 ## Component and Data Architecture
 
@@ -115,7 +114,7 @@ For UI work, run the site at `http://localhost:4200` and use the browser automat
 
 - Capture screenshots at relevant desktop and mobile widths.
 - Inspect the accessibility tree and interactive states.
-- Exercise navigation, filters, drawers, scrolling, and route transitions.
+- Exercise navigation, project selection, external actions, drawers, and scrolling.
 - Pay particular attention to `BackgroundSceneComponent`, since unit tests cannot prove visual canvas correctness.
 
 Recommended loop: make a focused change → allow the dev server to reload → inspect and interact → capture screenshots → correct visual regressions → run tests/build.

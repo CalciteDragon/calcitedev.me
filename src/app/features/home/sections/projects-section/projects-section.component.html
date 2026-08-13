@@ -1,22 +1,35 @@
 <section class="projects-section">
-  <app-section-header title="Projects" />
+  <app-section-header
+    title="Projects"
+    subtitle="Things I've shipped, joined, and am still building. Pick one to inspect the build."
+  />
 
   <div class="projects-section__content">
-    <div class="projects-section__filter-bar" appScrollReveal>
-      <button
-        class="filter-pill"
-        [class.filter-pill--active]="activeFilter() === null"
-        (click)="setFilter(null)"
-      >All</button>
-      @for (tag of popularTags(); track tag) {
-        <button
-          class="filter-pill"
-          [class.filter-pill--active]="activeFilter() === tag"
-          (click)="setFilter(tag)"
-        >{{ tag }}</button>
-      }
-    </div>
+    @if (selectedProject(); as selected) {
+      <div class="projects-section__showcase" appScrollReveal>
+        <app-project-focus-stage
+          [projects]="projects()"
+          [selectedSlug]="selected.slug"
+        />
 
-    <app-project-list [projects]="filteredProjects()" appScrollReveal />
+        <div class="projects-section__index-heading">
+          <span aria-hidden="true">//</span>
+          <h3>Project index</h3>
+          <span class="projects-section__index-count">{{ projects().length }} entries</span>
+        </div>
+
+        <app-project-selector
+          [projects]="projects()"
+          [selectedSlug]="selected.slug"
+          (projectSelected)="selectProject($event)"
+        />
+      </div>
+    } @else {
+      <p class="projects-section__empty">New builds are compiling. Check back soon.</p>
+    }
   </div>
+
+  <p class="projects-section__announcement" aria-live="polite" aria-atomic="true">
+    {{ announcement() }}
+  </p>
 </section>

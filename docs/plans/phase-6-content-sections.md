@@ -1,5 +1,7 @@
 # Phase 6: Content Sections — Implementation Plan
 
+> **Historical plan notice (August 13, 2026):** References below to project filters, shared project cards, `/projects/:slug`, or `ProjectDetailComponent` describe the architecture at the time this phase was implemented. The current Projects experience is the single-page focus stage and selector documented in `docs/architecture.md`; those routes/components no longer exist.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` (recommended) or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implement all four content sections (About, Projects, Skills, Contact) and the `ProjectDetailComponent` detail route so the site is content-complete and fully navigable end-to-end.

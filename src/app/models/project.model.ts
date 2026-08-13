@@ -1,17 +1,16 @@
 import { GlowColor } from '../shared/types/glow-color.type';
 
-export type ProjectCategory = 'game' | 'web-app' | 'api' | 'tool' | 'other';
-
 export interface Project {
-  title: string;
-  slug: string;
-  description: string;
-  longDescription: string;
-  tags: string[];
-  imageUrl: string;
-  liveUrl?: string;
-  githubUrl?: string;
-  featured: boolean;
-  category: ProjectCategory;
-  glowColor: GlowColor;
+  readonly title: string;
+  readonly slug: string;
+  readonly eyebrow: string;
+  readonly status: string;
+  readonly description: string;
+  readonly longDescription: string;
+  readonly tags: readonly string[];
+  readonly imageUrl: string;
+  readonly imageAlt: string;
+  readonly liveUrl?: string;
+  readonly githubUrl?: string;
+  readonly glowColor: GlowColor;
 }

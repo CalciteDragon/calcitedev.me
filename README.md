@@ -21,7 +21,7 @@ Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)**. It combines a
 ```bash
 npm install
 npm start       # development server at http://localhost:4200
-npm test        # 106 tests at the latest documentation audit
+npm test        # 122 tests at the latest documentation audit
 npm run build   # production bundles + static prerender → dist/portfolio/browser/
 ```
 
@@ -31,8 +31,8 @@ On Windows systems that block PowerShell’s `npm.ps1`, use `npm.cmd` instead.
 
 ```text
 /               Home page: Hero, About, Projects, Skills, Contact
-/projects/:slug Prerendered project detail page
 /about           Redirects to /
+/projects        Redirects to /
 /contact         Redirects to /
 ```
 
@@ -44,7 +44,7 @@ src/
 │   ├── core/             Singleton services
 │   ├── layout/           Navbar, fixed background, footer shell
 │   ├── shared/           Reusable components, directives, and types
-│   ├── features/         Homepage sections and project detail route
+│   ├── features/         Homepage sections and interactive project showcase
 │   ├── models/           TypeScript interfaces
 │   └── data/             Static portfolio content
 ├── styles/               Global SCSS partials

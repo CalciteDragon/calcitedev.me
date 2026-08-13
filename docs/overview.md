@@ -29,7 +29,7 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** with a dark 
 
 ## Core Experience
 
-The homepage is one scrolling route with five sections. Project cards can also open prerendered detail routes.
+The homepage is one scrolling route with five sections. Project selection stays inside the page and never interrupts the scroll experience.
 
 ### 1. Hero
 
@@ -47,9 +47,9 @@ An origin-story section led by a larger introductory card and followed by a four
 
 ### 3. Projects
 
-A filterable grid of five statically defined projects. Cards show a thumbnail, title, description, tags, and available demo/repository links. Each card links to `/projects/:slug`, and all five detail routes are prerendered.
+A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. A compact index of smaller preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
 
-Current project content and URLs are placeholders. Each project has a themed placeholder thumbnail SVG under `public/assets/images/`; swapping in real screenshots is a file drop at the same paths.
+Pixel Quest retains its original preview and copy. Live Bingo, Pineapple Expense, this portfolio, Mochi 2026, Minecraft Hide & Seek, and the work-in-progress Roblox world use original themed SVG previews under `public/assets/images/`. Content order and membership are controlled entirely by `projects.data.ts`.
 
 ### 4. Skills
 
@@ -72,7 +72,7 @@ A direct email link and social links. There is deliberately no contact form or b
 
 In scope for the first complete version:
 
-- Single-page portfolio plus project detail routes.
+- Single-page portfolio with an in-page, swappable project showcase.
 - Neon design system and animated background.
 - Responsive, accessible core content.
 - Replaceable artwork and project screenshots.
@@ -91,4 +91,4 @@ Deferred for future versions:
 
 ## Content Strategy
 
-Portfolio copy, projects, skills, and social links live in `src/app/data/`. Updating content should normally require editing one typed data file or replacing an asset at a stable public path. There is no database, backend, CMS, or runtime API dependency.
+Portfolio copy, projects, skills, and social links live in `src/app/data/`. Updating the project list requires only editing one typed data array and adding or replacing an asset at a stable public path; no route or prerender configuration changes are needed. There is no database, backend, CMS, or runtime API dependency.

@@ -1,0 +1,69 @@
+<div class="project-focus-stage">
+  @for (project of projects(); track project.slug; let index = $index) {
+    <article
+      [class]="projectClass(project)"
+      [class.project-focus--active]="selectedSlug() === project.slug"
+      [attr.aria-hidden]="selectedSlug() === project.slug ? null : 'true'"
+      [attr.inert]="selectedSlug() === project.slug ? null : ''"
+      [id]="'project-focus-' + project.slug"
+      [attr.tabindex]="selectedSlug() === project.slug ? '-1' : null"
+      [attr.aria-labelledby]="'project-focus-title-' + project.slug"
+    >
+      <div class="project-focus__visual">
+        <img
+          [src]="project.imageUrl"
+          [alt]="project.imageAlt"
+          width="640"
+          height="360"
+        />
+        <div class="project-focus__visual-grid" aria-hidden="true"></div>
+        <div class="project-focus__visual-label" aria-hidden="true">
+          <span>VISUAL_FEED</span>
+          <span>{{ project.slug }}</span>
+        </div>
+      </div>
+
+      <div class="project-focus__details">
+        <div class="project-focus__meta">
+          <span class="project-focus__number">
+            {{ projectNumber(index) }} <span>/ {{ projects().length.toString().padStart(2, '0') }}</span>
+          </span>
+          <span class="project-focus__status"><i aria-hidden="true"></i>{{ project.status }}</span>
+        </div>
+
+        <p class="project-focus__eyebrow">{{ project.eyebrow }}</p>
+        <h3 class="project-focus__title" [id]="'project-focus-title-' + project.slug">
+          {{ project.title }}
+        </h3>
+        <p class="project-focus__description">{{ project.longDescription }}</p>
+
+        <div class="project-focus__tags" aria-label="Technologies and keywords">
+          @for (tag of project.tags; track tag) {
+            <app-tech-tag [name]="tag" />
+          }
+        </div>
+
+        @if (project.liveUrl || project.githubUrl) {
+          <div class="project-focus__links">
+            @if (project.liveUrl) {
+              <a [href]="project.liveUrl" target="_blank" rel="noopener noreferrer">
+                <span>Visit project</span>
+                <span aria-hidden="true">↗</span>
+                <span class="project-focus__sr-only"> (opens in a new tab)</span>
+              </a>
+            }
+            @if (project.githubUrl) {
+              <a [href]="project.githubUrl" target="_blank" rel="noopener noreferrer">
+                <span>View repository</span>
+                <span aria-hidden="true">↗</span>
+                <span class="project-focus__sr-only"> (opens in a new tab)</span>
+              </a>
+            }
+          </div>
+        } @else {
+          <p class="project-focus__private-note"><span aria-hidden="true">◌</span> Building in private</p>
+        }
+      </div>
+    </article>
+  }
+</div>

@@ -220,35 +220,44 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 - Desktop uses wide readable chapter panels. Mobile moves the rail toward the left edge, allows the terminal command and long URLs to wrap, and gives the chapter copy the remaining width.
 - `prefers-reduced-motion` disables the terminal cursor blink and card tilt, hides the moving rail head, renders the rail fully filled, and bypasses JavaScript damping so timeline state snaps directly to its target.
 
-### Project Cards
+### Project Showcase
 
-- Dark surface background, rounded corners (12px)
-- Thumbnail/preview at top — fixed 200px-high wrapper with a dark fallback background so a missing asset never collapses the card; current art is per-project placeholder SVGs in each project's glow color under `public/assets/images/`
-- Title, description, tech tags below
-- The title is a stretched `routerLink` anchor (an `::after` overlay covers the card), so clicking anywhere on the card opens `/projects/:slug`; Live Demo / GitHub pills sit above the overlay on their own z-index and keep working independently
-- Keyboard: the stretched link shows a cyan focus-visible ring around the whole card
-- Hover: lift + neon border glow
+- The section uses one **focus stage** followed by a `// PROJECT INDEX`; there are no filters or detail-page transitions.
+- Every focus article occupies the same CSS grid cell. Inactive articles stay in grid sizing but are hidden, inert, and removed from the accessibility tree. The stage therefore reserves its tallest content height and selection never shifts the index or later sections.
+- Desktop focus layout is a 7/5 media-detail split with a stable 30rem minimum height and 16px radius. Below the lg breakpoint it stacks; media is reserved at 16:9 so artwork never collapses or crops into an arbitrary tall box.
+- The active project controls its existing cyan/blue/purple/pink/gold accent through CSS custom properties. Accent affects corner brackets, border, status dot, metadata, and CTAs while the body remains an opaque readable surface over the mountain canvas.
+- Detail hierarchy: project number, status, eyebrow, title, researched long description, technology tags, then available repository/live actions. Projects without public links show a quiet `Building in private` state.
+- The focus image has meaningful alt text. Repository/live actions explicitly announce that they open a new tab and retain 44px touch targets.
+- Original 640×360 SVG art mirrors each real project: a 1v1 bingo board, receipt-processing phone/cloud pipeline, finite recursive portfolio window, swerve/vision field HUD, voxel hide-and-seek maze, and connected persistent-world map. Pixel Quest retains its earlier art.
+- The recursive portfolio preview is intentionally finite SVG artwork, not an iframe: browser windows nest a few levels and end in a `YOU ARE HERE` label.
+
+### Project Selector
+
+- Preview tiles are real `<button type="button">` controls with `aria-pressed`, `aria-controls`, and a project-specific accessible name. External links never nest inside them.
+- Each preview has its own `ScrollRevealDirective` wrapper, so cards reveal as their row enters without the scroll animation overriding the button's hover/press transforms.
+- The selected state adds an `ACTIVE` marker plus accent border/inset glow, so it is not communicated by color alone. Border width does not change and the data order never changes.
+- At 1024px and above, previews form four equal columns; from 480–1023px they use two columns. Below 480px they become compact horizontal cards with a 7rem visual and title/status body, avoiding a second long wall of full-size cards.
+- Desktop/tablet previews include three curated keywords. The smallest layout suppresses them to protect title readability.
+- Selecting a preview updates the focus stage with no route change. If the updated stage is outside the viewport it scrolls beneath the fixed navbar; keyboard activation focuses the active article, and a polite live region announces the change.
 
 ### Buttons and Link CTAs
 
-- Filter pills, project links, and the contact email CTA use compact rounded neon treatments.
+- Project links, project selector buttons, and the contact email CTA use compact neon treatments.
 - Hover states should intensify borders/glow without overwhelming adjacent text.
-- Pressed state: motion-safe `scale(0.96–0.98)` compression on filter pills, card links, detail links, and the email CTA.
-- Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; components with bespoke treatments (social icons, stretched card links) override locally.
-- The filter bar collapses to one horizontally scrollable row with a trailing-edge fade mask below the md breakpoint; from md up it wraps normally.
+- Pressed state: motion-safe `scale(0.96–0.985)` compression on selector buttons, project links, and the email CTA.
+- Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; selector buttons use their project accent and social icons keep their bespoke treatment.
 
 ### Footer
 
 - Minimal by design: a centered copyright line with the "Built with Angular" note, and nothing else
 - Deliberately carries **no** social icons. The footer sits directly beneath the Contact section at scroll-bottom, so rendering `SocialLinksComponent` in both produced two near-identical icon rows within one screen. The Contact section owns the social row because email + social links are its defined purpose; the footer stays a thin closing rule.
-- Trade-off: `/projects/:slug` therefore shows no social links. Detail pages keep their own project Live Demo/GitHub anchors, and the navbar Contact link returns to the row on `/`.
 - Not fixed — sits at bottom of content
 
 ## Animation Guidelines
 
 ### Durations
 
-- Micro-interactions (hover, click): 150–300ms
+- Micro-interactions (hover, click): 150–300ms. Project focus swaps use a 240ms opacity/8px-rise transition with the existing entrance easing.
 - Scroll reveals: scroll-position-linked (not time-based) — animation progress maps directly to scroll position via `animation-timeline: view()`, bounded to a maximum scroll distance (see [Scroll Reveal Range](#scroll-reveal-range))
 - Background elements (star twinkle, avatar float): continuous, slow (2–5s loops)
 
@@ -264,7 +273,7 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 
 ### Scroll Reveal Range
 
-`.scroll-reveal` (applied by `ScrollRevealDirective`) runs `scroll-reveal-slide` on a `view()` timeline. A `view()` timeline defines its `entry` range as **exactly the subject's own height**, so percentage-only offsets stretch the reveal in proportion to the element — and for any subject taller than the viewport, `entry 100%` (the subject's bottom edge reaching the viewport bottom) can only occur after its top has already scrolled off screen. The project grid is ~970px at desktop and ~2280px at mobile widths, so it never finished revealing while still in view.
+`.scroll-reveal` (applied by `ScrollRevealDirective`) runs `scroll-reveal-slide` on a `view()` timeline. A `view()` timeline defines its `entry` range as **exactly the subject's own height**, so percentage-only offsets stretch the reveal in proportion to the element — and for any tall subject, `entry 100%` can occur only after its top has already scrolled off screen. The Projects showcase and other large groups therefore rely on an absolute cap.
 
 The range is therefore capped in absolute scroll distance, using tokens in `_variables.scss`:
 
@@ -277,7 +286,7 @@ animation-range: entry min(20%, $scroll-reveal-max-delay) entry min(100%, $scrol
 | `$scroll-reveal-max-delay` | `40px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
 | `$scroll-reveal-max-distance` | `400px` | The reveal is always complete by this far into `entry` |
 
-The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px (under which 20% of the height is already less than 40px). The filter bar, skills groups, contact block, and About intro are short subjects and retain their height-proportional timing. The project grid uses the cap so its reveal finishes within a practical scroll distance. About history chapters do not use `ScrollRevealDirective`; their motion is limited to the dedicated scroll-progress tilt described above.
+The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px. Skills groups, the contact block, and About intro retain height-proportional timing; the full Projects showcase uses the cap. About history chapters do not use `ScrollRevealDirective`.
 
 Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
 
@@ -291,6 +300,7 @@ Note that `min()` must be written with Sass interpolation (`#{$token}`) so it co
 
 - Smooth, not overwhelming — prioritize clarity
 - Respect `prefers-reduced-motion` — CSS animations are disabled by media-query fallbacks, and the canvas scene renders a still frame (frozen twinkle/particles) that redraws only on scroll so parallax still tracks the user's own gesture
+- Project focus swaps become immediate under `prefers-reduced-motion`: no rise, image scale, or corner sweep. Viewport correction uses instant scrolling.
 - The canvas rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 - Use `transform` and `opacity` only (GPU-composited)
 - Reduce background complexity on small screens and low-power devices
@@ -303,4 +313,5 @@ Note that `min()` must be written with Sass interpolation (`#{$token}`) so it co
 - Hero: stack avatar above text, full-width
 - Background scene: simplify or disable heavy canvas elements
 - Navbar: hamburger menu with slide-in drawer
+- Projects: stacked 16:9 focus stage plus compact horizontal selector cards below 480px; two preview columns from 480px
 - Reduce glow intensity to save battery on OLED screens

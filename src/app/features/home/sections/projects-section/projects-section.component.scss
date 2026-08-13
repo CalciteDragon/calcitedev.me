@@ -1,5 +1,5 @@
 @use 'variables' as *;
-@use 'mixins' as *;
+@use 'typography' as *;
 
 :host {
   display: block;
@@ -11,60 +11,55 @@
 
 .projects-section__content {
   max-width: var(--max-content-width);
-  margin: 0 auto;
+  margin-inline: auto;
 }
 
-.projects-section__filter-bar {
+.projects-section__showcase {
+  display: grid;
+  gap: $space-3;
+}
+
+.projects-section__index-heading {
   display: flex;
-  gap: $space-1;
-  margin-bottom: $space-4;
-  // Mobile: one horizontally scrollable row so the pills never push the
-  // project grid below the fold. Vertical padding + negative margin give
-  // the pill glow room inside the scroll clip without moving the layout.
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  padding: 12px 4px;
-  margin-block: -12px calc($space-4 - 12px);
-  scrollbar-width: none;
-  // Trailing-edge fade hints at more pills offscreen.
-  mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 28px), transparent);
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: $space-2;
+  color: var(--accent-cyan);
+  font-family: $font-code;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  @include md {
-    flex-wrap: wrap;
-    overflow-x: visible;
-    padding: 0;
-    margin-block: 0 $space-4;
-    mask-image: none;
-    -webkit-mask-image: none;
+  h3 {
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    letter-spacing: inherit;
   }
 }
 
-.filter-pill {
-  flex: 0 0 auto;
-  padding: 6px 16px;
-  border-radius: 999px;
-  border: 1px solid var(--bg-border);
-  background: var(--bg-surface);
+.projects-section__index-count {
+  margin-left: auto;
   color: var(--text-secondary);
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 200ms ease-out;
+  font-size: 0.7rem;
+}
 
-  &--active,
-  &:hover {
-    border-color: rgba(var(--accent-cyan-rgb), 0.5);
-    color: var(--accent-cyan);
-    box-shadow: var(--glow-cyan);
-  }
+.projects-section__empty {
+  padding: $space-6;
+  color: var(--text-secondary);
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-border);
+  border-radius: $radius-md;
+}
 
-  @include motion-safe {
-    &:active {
-      transform: scale(0.96);
-    }
-  }
+.projects-section__announcement {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
