@@ -29,7 +29,7 @@ src/
 │   │   ├── home/
 │   │   │   ├── background-scene/       # Scene renderer, mountain renderer, worker bridge
 │   │   │   ├── hero/                   # Avatar, platform, gradient type, CSS/HTML UFO
-│   │   │   ├── sections/               # Projects, About, Skills, Contact
+│   │   │   ├── sections/               # About, Projects, Skills, Contact
 │   │   │   └── home.component.*        # Smart single-page container
 │   │   └── projects/
 │   │       └── project-detail/         # /projects/:slug detail route
@@ -83,9 +83,9 @@ LayoutComponent
 ├── RouterOutlet
 │   ├── HomeComponent
 │   │   ├── HeroComponent
+│   │   ├── AboutSectionComponent
 │   │   ├── ProjectsSectionComponent
 │   │   │   └── ProjectListComponent → ProjectCardComponent
-│   │   ├── AboutSectionComponent
 │   │   ├── SkillsSectionComponent
 │   │   │   └── SkillsGridComponent → SkillChipComponent
 │   │   └── ContactSectionComponent
@@ -94,6 +94,8 @@ LayoutComponent
 ```
 
 `HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives. `ProjectDetailComponent` resolves its slug reactively from `ActivatedRoute.paramMap`.
+
+`bioData.about` stores the About introduction and four history entries as typed text segments. Intro segments can select cyan or pink; history segments carry semantic emphasis while their parent entry supplies the single stage color. Links and the inline FIRST side note remain typed metadata, allowing the template to render rich copy without embedding HTML in the data layer. `AboutSectionComponent` owns a passive, animation-frame-throttled scroll measurement that updates the active chapter, card tilt values, and continuous rail progress.
 
 `ProjectCardComponent` navigates to `/projects/:slug` through a stretched title `routerLink` (an `::after` overlay covering the card); the external Live Demo/GitHub anchors sit above the overlay. `FooterComponent` is a presentation-only shell with no inputs or data dependencies: it renders just the copyright line, because `ContactSectionComponent` is the single consumer of `SocialLinksComponent`/`socialLinksData` and the two would otherwise stack duplicate icon rows at scroll-bottom. `LayoutComponent` also owns the skip-to-content link, which jumps focus to `<main id="main-content">` manually because plain fragment hrefs resolve against `<base href="/">` and would re-route from detail pages.
 

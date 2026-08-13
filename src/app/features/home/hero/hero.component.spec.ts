@@ -9,8 +9,10 @@ const mockBio: Bio = {
   title: 'Full Stack Developer & Game Enthusiast',
   tagline: 'Code · Create · Innovate',
   email: 'tyler@calcitedev.me',
-  shortBio: 'Short bio.',
-  extendedBio: 'Extended bio.',
+  about: {
+    intro: [{ text: 'Short bio.' }],
+    history: [],
+  },
 };
 
 describe('HeroComponent', () => {

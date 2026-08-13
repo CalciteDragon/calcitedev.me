@@ -44,7 +44,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.titleService.setTitle('Tyler Hawthorn — Calcite | Full Stack Developer');
-    this.scrollService.initSectionObserver(['home', 'projects', 'about', 'skills', 'contact']);
+    this.scrollService.initSectionObserver(['home', 'about', 'projects', 'skills', 'contact']);
     if (isPlatformBrowser(this.platformId)) {
       const hash = window.location.hash.replace('#', '');
       if (hash) this.scrollService.scrollToSection(hash);

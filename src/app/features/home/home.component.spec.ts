@@ -75,14 +75,14 @@ describe('HomeComponent', () => {
   it('should render five sections with correct ids', () => {
     const sections = compiled.querySelectorAll('.main-page > section');
     const ids = Array.from(sections).map((s) => s.id);
-    expect(ids).toEqual(['home', 'projects', 'about', 'skills', 'contact']);
+    expect(ids).toEqual(['home', 'about', 'projects', 'skills', 'contact']);
   });
 
   it('should call ScrollService.initSectionObserver with all section ids in ngAfterViewInit', () => {
     expect(mockScrollService.initSectionObserver).toHaveBeenCalledWith([
       'home',
-      'projects',
       'about',
+      'projects',
       'skills',
       'contact',
     ]);

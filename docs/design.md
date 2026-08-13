@@ -171,7 +171,7 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 ### Layout Note
 
-The page is a single-page scroll: Home hero → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
+The page is a single-page scroll: Home hero → About → Projects → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
 
 ### Background Scene (Canvas)
 
@@ -198,13 +198,26 @@ The page is a single-page scroll: Home hero → Projects → About → Skills �
 
 - Fixed to top, semi-transparent `#0B0F1A` with `backdrop-filter: blur(12px)`
 - Small pixel-style icons on the left (branding)
-- Nav links (left-to-right): Projects, About, Skills, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
+- Nav links (left-to-right): About, Projects, Skills, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
 - Hover: glow + color shift, underline animation or pixel highlight
 - Mobile: hamburger → slide-in drawer
 
 ### Removed Hero Feature Cards
 
 The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were removed in the layout-and-design-tweaks pass. Do not reintroduce them without a new product decision; fixed navigation and the natural section order now provide that function.
+
+### About Story Timeline
+
+- The About section immediately follows the hero and begins with one prominent intro card. Its copy is slightly larger than the history copy and limits emphasis to the site's cyan/pink identity colors.
+- `// My history` introduces a terminal-style production command, followed by four compiler stages: Source Parsing, AST Construction, Bytecode Generation, and JIT Optimization.
+- The history palette follows one intentional cold-to-warm progression: cyan → blue → violet → pink. Every chapter owns one accent; its heading, emphasized phrases, links, edge, and node all use that color rather than mixing accents inside a card.
+- The component measures each chapter against a fixed activation line 40% up from the viewport bottom (60% from the top) during passive, animation-frame-throttled scroll updates. The closest chapter is always the single active entry, including before the first and after the last chapter.
+- Card perspective tilt and the rail's glowing fill/head follow continuous scroll progress. Hover does not change card tilt, borders, nodes, or timeline glow.
+- A faint full-length rail gradient keeps later-stage colors visible ahead of the active fill. The pink final segment continues below the last node into a soft fade instead of ending on a hard edge.
+- Scroll reveal applies only to the prominent intro card. The history heading and all four chapters render immediately without reveal animation.
+- History text remains visible in full. There are no accordions, carousels, tabs, or hidden-content controls. Only contextual text links and the inline FIRST clarification are interactive/content accents.
+- Desktop uses wide readable chapter panels. Mobile moves the rail toward the left edge, allows the terminal command and long URLs to wrap, and gives the chapter copy the remaining width.
+- `prefers-reduced-motion` disables the terminal cursor blink and card tilt, hides the moving rail head, and renders the rail fully filled.
 
 ### Project Cards
 
@@ -263,7 +276,7 @@ animation-range: entry min(20%, $scroll-reveal-max-delay) entry min(100%, $scrol
 | `$scroll-reveal-max-delay` | `40px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
 | `$scroll-reveal-max-distance` | `400px` | The reveal is always complete by this far into `entry` |
 
-The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px (under which 20% of the height is already less than 40px). Every subject on the page sits outside that 200–400px band — the filter bar, skills groups, and contact block are all under 150px; the project grid and About content are both over 400px — so **short subjects keep their original height-proportional timing**, which already completed as they became fully visible, and only the grid and About content are clamped. A subject landing between 200px and 400px would simply begin its fade slightly earlier than before, which is harmless.
+The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px (under which 20% of the height is already less than 40px). The filter bar, skills groups, contact block, and About intro are short subjects and retain their height-proportional timing. The project grid uses the cap so its reveal finishes within a practical scroll distance. About history chapters do not use `ScrollRevealDirective`; their motion is limited to the dedicated scroll-progress tilt described above.
 
 Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
 

@@ -41,15 +41,15 @@ The homepage is one scrolling route with five sections. Project cards can also o
 
 The earlier hero feature-card strip and CTA were intentionally removed because they duplicated the navbar and section navigation.
 
-### 2. Projects
+### 2. About
+
+An origin-story section led by a larger introductory card and followed by a four-stage, compiler-themed history timeline. Scroll progress advances the single active chapter and rail through cyan, blue, violet, and pink while tilting the cards; each stage uses one consistent accent for highlighted phrases and contextual links.
+
+### 3. Projects
 
 A filterable grid of five statically defined projects. Cards show a thumbnail, title, description, tags, and available demo/repository links. Each card links to `/projects/:slug`, and all five detail routes are prerendered.
 
 Current project content and URLs are placeholders. Each project has a themed placeholder thumbnail SVG under `public/assets/images/`; swapping in real screenshots is a file drop at the same paths.
-
-### 3. About
-
-A concise static bio focused on Tyler’s development interests and personality. A timeline remains deferred.
 
 ### 4. Skills
 

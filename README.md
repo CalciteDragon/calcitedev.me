@@ -30,7 +30,7 @@ On Windows systems that block PowerShell’s `npm.ps1`, use `npm.cmd` instead.
 ## Routes
 
 ```text
-/               Home page: Hero, Projects, About, Skills, Contact
+/               Home page: Hero, About, Projects, Skills, Contact
 /projects/:slug Prerendered project detail page
 /about           Redirects to /
 /contact         Redirects to /

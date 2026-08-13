@@ -43,7 +43,7 @@ Before starting any phase or feature:
 
 - **Static deployment:** prerendered output; no Node SSR process at runtime.
 - **No backend or CMS:** content is static TypeScript data in `src/app/data/`.
-- **Single-page core experience:** Hero, Projects, About, Skills, and Contact live on `/`; project details use `/projects/:slug`.
+- **Single-page core experience:** Hero, About, Projects, Skills, and Contact live on `/`; project details use `/projects/:slug`.
 - **Placeholder-first assets:** art and screenshots must be easy to replace through stable file paths or a data-file change.
 - **Easter eggs are non-load-bearing:** physics, a controllable rocket, a peelable corner, and sound effects layer on top of a complete, usable portfolio.
 - **Deferred:** blog, resume PDF, GitHub API, analytics, light mode, experience timeline, and contact form.
