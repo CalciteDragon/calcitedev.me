@@ -21,7 +21,7 @@ Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)**. It combines a
 ```bash
 npm install
 npm start       # development server at http://localhost:4200
-npm test        # 122 tests at the latest documentation audit
+npm test        # 125 tests at the latest documentation audit
 npm run build   # production bundles + static prerender → dist/portfolio/browser/
 ```
 
@@ -30,7 +30,7 @@ On Windows systems that block PowerShell’s `npm.ps1`, use `npm.cmd` instead.
 ## Routes
 
 ```text
-/               Home page: Hero, About, Projects, Skills, Contact
+/               Home page: Hero, About, Projects, Extras, Contact
 /about           Redirects to /
 /projects        Redirects to /
 /contact         Redirects to /

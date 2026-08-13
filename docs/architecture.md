@@ -15,7 +15,6 @@ src/
 │   ├── shared/
 │   │   ├── components/
 │   │   │   ├── section-header/
-│   │   │   ├── skill-chip/
 │   │   │   ├── social-links/
 │   │   │   └── tech-tag/
 │   │   ├── directives/
@@ -32,11 +31,13 @@ src/
 │   │       │   ├── projects-section/
 │   │       │   │   ├── project-focus-stage/ # Stable stacked detail panels
 │   │       │   │   └── project-selector/    # Compact button-based project index
-│   │       │   ├── skills-section/
+│   │       │   ├── extras-section/
+│   │       │   │   ├── extras-platformer/   # Physics, responsive mode, controls, island state
+│   │       │   │   └── extra-media-screen/  # Video/gallery monitor presentation
 │   │       │   └── contact-section/
 │   │       └── home.component.*        # Smart single-page container
 │   ├── data/                            # Static portfolio content
-│   ├── models/                          # Project, skill, bio, and social interfaces
+│   ├── models/                          # Project, Extras, bio, and social interfaces
 │   ├── app.config.ts                    # Router, hydration, scrolling configuration
 │   ├── app.config.server.ts             # Server-rendering providers
 │   ├── app.routes.ts                    # Browser route tree
@@ -86,8 +87,9 @@ LayoutComponent
 │       ├── ProjectsSectionComponent
 │       │   ├── ProjectFocusStageComponent → TechTagComponent
 │       │   └── ProjectSelectorComponent
-│       ├── SkillsSectionComponent
-│       │   └── SkillsGridComponent → SkillChipComponent
+│       ├── ExtrasSectionComponent
+│       │   └── ExtrasPlatformerComponent
+│       │       └── ExtraMediaScreenComponent
 │       └── ContactSectionComponent → SocialLinksComponent
 └── FooterComponent
 ```
@@ -95,6 +97,8 @@ LayoutComponent
 `HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives; the project showcase components are feature-local because no other route consumes them.
 
 `ProjectsSectionComponent` owns `selectedSlug`, resolves `selectedProject` with a safe first-entry fallback, and announces selection changes. It guards viewport and focus behavior with `isPlatformBrowser()`. `ProjectFocusStageComponent` renders all projects into the same CSS grid cell; inactive articles remain in sizing calculations but are `visibility: hidden`, `aria-hidden`, `inert`, and non-interactive. This makes the focus stage as tall as its largest record and prevents swaps from moving later content. `ProjectSelectorComponent` renders the unchanged data order as real buttons with `aria-pressed` and `aria-controls`. External links live only in the active focus article, so selector buttons never contain nested interactive elements.
+
+`ExtrasPlatformerComponent` owns a fixed 1800×700 desktop physics space, signal-backed player and responsive-layout state, requestAnimationFrame physics, platform collision, active-island state, gallery indices, and reduced-motion-aware auto-advance. The complete world scales uniformly into the available desktop width, keeping all three broad screen-islands visible without a camera or horizontal crop. Focused WASD/arrow input and holdable pointer/touch controls move the explorer, while clicking an inactive screen teleports the player onto it; all island copy remains visible and the active destination receives stronger emphasis. Below a 1080px component width, the template switches to three static stacked media panes and replaces game semantics/controls with the explorer's desktop-or-wider-window prompt. `ExtraMediaScreenComponent` supports this static presentation while continuing to create privacy-enhanced YouTube embeds only for the active topic; leaving a desktop island or activating another stacked pane destroys the previous iframe and stops playback. Image and video records without final assets render labeled slots from `extrasData`.
 
 `bioData.about` stores the About introduction and four history entries as typed text segments. Intro segments can select cyan or pink; history segments carry semantic emphasis while their parent entry supplies the single stage color. `AboutSectionComponent` coalesces passive scroll measurements into animation frames and applies frame-rate-independent damping to card tilt and continuous rail progress. The rail is measured from the first number's center to the last number's center; the active chapter follows the closest numbered stop. In development, `?aboutDebug=scroll` exposes a read-only tuning HUD.
 
@@ -114,7 +118,7 @@ section components
 feature-local/shared display components
 ```
 
-All portfolio content is compiled from static TypeScript. There is no backend, CMS, database, or runtime content API. `Project` contains display copy, status, ordered tags, stable preview path/alt text, optional external URLs, and a `GlowColor`. It has no route, category-filter, or featured-card state.
+All portfolio content is compiled from static TypeScript. There is no backend, CMS, database, or runtime content API. `Project` contains display copy, status, ordered tags, stable preview path/alt text, optional external URLs, and a `GlowColor`. `ExtraTopic` contains island labels, display copy, accent, and ordered image/YouTube media records. Neither model carries route state.
 
 ## State and Services
 
@@ -128,7 +132,7 @@ Angular signals hold component state and computed values. RxJS is reserved for g
 - Updates the URL fragment with `history.replaceState`.
 - Guards browser APIs for static rendering.
 
-Project selection is feature-local state and deliberately is not stored in a service or URL. SEO/meta and theme services are not currently implemented; light mode remains deferred.
+Project selection and Extras platformer/media state are feature-local and deliberately are not stored in a service or URL. SEO/meta and theme services are not currently implemented; light mode remains deferred.
 
 ## Rendering Strategy
 
@@ -157,4 +161,4 @@ dist/portfolio/browser/
 Render static-site publish directory (planned/externally configured)
 ```
 
-The August 13 verification passes 122 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.
+The August 13 verification passes 125 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.

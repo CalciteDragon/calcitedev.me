@@ -48,14 +48,14 @@ describe('NavbarComponent', () => {
     expect(brand.getAttribute('href')).toBe('/');
   });
 
-  it('should render 4 nav buttons in order: About, Projects, Skills, Contact', () => {
+  it('should render 4 nav buttons in order: About, Projects, Extras, Contact', () => {
     const buttons = Array.from(
       compiled.querySelectorAll('.navbar__links .navbar__link'),
     ) as HTMLButtonElement[];
     expect(buttons).toHaveLength(4);
     expect(buttons[0].textContent?.trim()).toBe('About');
     expect(buttons[1].textContent?.trim()).toBe('Projects');
-    expect(buttons[2].textContent?.trim()).toBe('Skills');
+    expect(buttons[2].textContent?.trim()).toBe('Extras');
     expect(buttons[3].textContent?.trim()).toBe('Contact');
   });
 

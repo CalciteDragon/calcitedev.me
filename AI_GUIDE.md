@@ -43,7 +43,7 @@ Before starting any phase or feature:
 
 - **Static deployment:** prerendered output; no Node SSR process at runtime.
 - **No backend or CMS:** content is static TypeScript data in `src/app/data/`.
-- **Single-page core experience:** Hero, About, Projects, Skills, and Contact live on `/`; projects swap inside one in-page showcase rather than opening detail routes.
+- **Single-page core experience:** Hero, About, Projects, Extras, and Contact live on `/`; projects swap inside one in-page showcase rather than opening detail routes, and Extras is a small accessible platformer/media gallery.
 - **Data-driven project showcase:** project content and preview assets remain easy to add, remove, reorder, or replace through `projects.data.ts` and stable public asset paths.
 - **Easter eggs are non-load-bearing:** physics, a controllable rocket, a peelable corner, and sound effects layer on top of a complete, usable portfolio.
 - **Deferred:** blog, resume PDF, GitHub API, analytics, light mode, experience timeline, and contact form.

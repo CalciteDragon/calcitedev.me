@@ -171,7 +171,7 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 ### Layout Note
 
-The page is a single-page scroll: Home hero → About → Projects → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
+The page is a single-page scroll: Home hero → About → Projects → Extras → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
 
 ### Background Scene (Canvas)
 
@@ -198,7 +198,7 @@ The page is a single-page scroll: Home hero → About → Projects → Skills �
 
 - Fixed to top, semi-transparent `#0B0F1A` with `backdrop-filter: blur(12px)`
 - Small pixel-style icons on the left (branding)
-- Nav links (left-to-right): About, Projects, Skills, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
+- Nav links (left-to-right): About, Projects, Extras, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
 - Hover: glow + color shift, underline animation or pixel highlight
 - Mobile: hamburger → slide-in drawer
 
@@ -240,9 +240,22 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 - Desktop/tablet previews include three curated keywords. The smallest layout suppresses them to protect title readability.
 - Selecting a preview updates the focus stage with no route change. If the updated stage is outside the viewport it scrolls beneath the fixed navbar; keyboard activation focuses the active article, and a polite live region announces the change.
 
+### Extras Platformer
+
+- The former Skills grid is intentionally removed. Project tags/descriptions retain the professional capability signal; Extras uses that space for personal, tactile evidence of making things.
+- An open 1800×700 DOM/CSS world places three broad monitors directly over the site's existing mountain-and-stars background: cyan Keyboard Cove, gold Capstone Summit, and pink Robotics Outpost. There is no enclosing game window, HUD bar, local sky, destination navigation, horizontal crop, or side-scrolling camera. The monitor top edges are the island collision surfaces, and a CSS pixel explorer stands and jumps directly on the screens.
+- Every monitor has rounded corners, a dark bezel, status header, caption footer, and non-interactive scanline overlay. The active island intensifies its accent border/glow and changes from `STANDBY` to `LIVE`.
+- Standing on an island activates its media. A real YouTube video is inserted only while its video record is active and starts muted through the privacy-enhanced embed; leaving the island destroys the iframe and stops playback. Multi-item photo/video topics slide to the next record every 5.2 seconds while active, with explicit previous/next buttons for manual control.
+- Capstone and robotics records currently render designed, clearly labeled media slots. Final images and match-video IDs can replace those records in `extras.data.ts` without changing the layout or platformer.
+- The game is enhancement, not a content gate. At desktop widths, users can move with focused WASD/arrow controls, hold the visible left/crouch/right/jump pointer controls, or click anywhere on an inactive monitor to teleport directly onto it. A subtle speech bubble beside the explorer says `try WASD` and disappears permanently for the component session after the first W, A, S, or D press.
+- All three island labels, titles, and descriptions remain visible above their monitors so the full horizontal composition reads at a glance. The active topic increases its copy opacity and monitor glow without hiding the other destinations.
+- The complete desktop level scales uniformly to the available content width, preserving the 1800px physics coordinate space while keeping every island visible at once. Falling below the world respawns at the last active island.
+- Below the 1080px component-width threshold, the game is replaced by three vertically stacked media panes. The explorer remains above the stack with the speech bubble `Try this on desktop — or make your window wider.`; the fallback exposes normal media/gallery controls but no application role, movement controls, camera, or horizontal scrolling.
+- `prefers-reduced-motion` disables player-step, speech-bubble entrance, copy emphasis transitions, and automatic gallery advancement. User-driven desktop movement, click-to-teleport, manual gallery controls, and video controls remain available.
+
 ### Buttons and Link CTAs
 
-- Project links, project selector buttons, and the contact email CTA use compact neon treatments.
+- Project links, project selector buttons, Extras game/gallery/teleport controls, and the contact email CTA use compact neon treatments.
 - Hover states should intensify borders/glow without overwhelming adjacent text.
 - Pressed state: motion-safe `scale(0.96–0.985)` compression on selector buttons, project links, and the email CTA.
 - Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; selector buttons use their project accent and social icons keep their bespoke treatment.
@@ -286,7 +299,7 @@ animation-range: entry min(20%, $scroll-reveal-max-delay) entry min(100%, $scrol
 | `$scroll-reveal-max-delay` | `40px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
 | `$scroll-reveal-max-distance` | `400px` | The reveal is always complete by this far into `entry` |
 
-The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px. Skills groups, the contact block, and About intro retain height-proportional timing; the full Projects showcase uses the cap. About history chapters do not use `ScrollRevealDirective`.
+The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px. The contact block and About intro retain height-proportional timing; the full Projects and Extras showcases use the cap. About history chapters do not use `ScrollRevealDirective`.
 
 Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
 
@@ -301,6 +314,7 @@ Note that `min()` must be written with Sass interpolation (`#{$token}`) so it co
 - Smooth, not overwhelming — prioritize clarity
 - Respect `prefers-reduced-motion` — CSS animations are disabled by media-query fallbacks, and the canvas scene renders a still frame (frozen twinkle/particles) that redraws only on scroll so parallax still tracks the user's own gesture
 - Project focus swaps become immediate under `prefers-reduced-motion`: no rise, image scale, or corner sweep. Viewport correction uses instant scrolling.
+- Extras keeps user-driven desktop platformer movement but removes decorative loops/copy emphasis transitions and automatic gallery advance under `prefers-reduced-motion`.
 - The canvas rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 - Use `transform` and `opacity` only (GPU-composited)
 - Reduce background complexity on small screens and low-power devices
@@ -314,4 +328,5 @@ Note that `min()` must be written with Sass interpolation (`#{$token}`) so it co
 - Background scene: simplify or disable heavy canvas elements
 - Navbar: hamburger menu with slide-in drawer
 - Projects: stacked 16:9 focus stage plus compact horizontal selector cards below 480px; two preview columns from 480px
+- Extras: the full three-island level scales into view without horizontal clipping at desktop widths; smaller widths use vertically stacked, readable media panes plus the explorer's desktop/wider-window prompt
 - Reduce glow intensity to save battery on OLED screens

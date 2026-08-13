@@ -1,0 +1,16 @@
+@use 'variables' as *;
+
+:host { display: block; }
+
+.extras-section {
+  padding: var(--section-padding-v) 0;
+
+  app-section-header {
+    display: block;
+    padding-inline: var(--section-padding-h);
+  }
+
+  &__content {
+    padding-inline: var(--section-padding-h);
+  }
+}

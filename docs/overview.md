@@ -23,7 +23,7 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** with a dark 
 | Build | Angular CLI / esbuild |
 | Rendering | Angular SSR tooling with static prerender output |
 | Testing | Vitest through `@angular/build:unit-test` |
-| Background | Canvas API plus an OffscreenCanvas mountain worker |
+| Background and play | Canvas API plus an OffscreenCanvas mountain worker; DOM/CSS Extras platformer |
 | Hosting target | Render static site |
 | Content | Typed static TypeScript data; no CMS or backend |
 
@@ -51,9 +51,9 @@ A data-driven showcase of seven real projects. One stable focus stage presents t
 
 All seven projects use original themed SVG previews under `public/assets/images/`. Pixel Quest is presented as a layered co-op dungeon run, while Minecraft Hide & Seek uses an isometric voxel arena with visible roles, cover, and a wormhole power-up. Content order and membership are controlled entirely by `projects.data.ts`.
 
-### 4. Skills
+### 4. Extras
 
-A category-based skills grid covering languages, frontend, backend, databases, DevOps, testing, Git workflows, and architecture concepts.
+A playful three-island platformer replaces the former résumé-style skills grid. Three broad rounded scanline media screens live directly over the site's mountain scene and double as the platforms for Keyboard Cove, Capstone Summit, and Robotics Outpost. The complete desktop level scales into view without a horizontal crop or side-scrolling camera; a pixel explorer moves between islands with WASD/arrow keys or holdable pointer/touch controls, and clicking an inactive screen teleports the character onto it. Smaller screens receive readable vertically stacked media panes and an explorer prompt to try the platformer on desktop or widen the window. The keyboard build starts as a muted YouTube embed, while galleries advance through capstone and robotics media. The latter two currently use labeled media slots until the final photos and competition clips are supplied.
 
 ### 5. Contact
 
@@ -91,4 +91,4 @@ Deferred for future versions:
 
 ## Content Strategy
 
-Portfolio copy, projects, skills, and social links live in `src/app/data/`. Updating the project list requires only editing one typed data array and adding or replacing an asset at a stable public path; no route or prerender configuration changes are needed. There is no database, backend, CMS, or runtime API dependency.
+Portfolio copy, projects, Extras topics/media, and social links live in `src/app/data/`. Updating the project or Extras lists requires only editing typed data and adding or replacing assets at stable public paths; no route or prerender configuration changes are needed. There is no database, backend, CMS, or runtime API dependency.

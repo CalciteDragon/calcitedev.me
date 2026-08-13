@@ -7,20 +7,21 @@
 - **Placeholder-first for assets.** All pixel art, images, and project screenshots use styled placeholders. Tyler creates art in parallel; swapping in is a file drop, not a code change.
 - **Easter eggs are last.** The core site works cleanly without them — they're layered on top, never load-bearing.
 
-## Current Status Audit — August 12, 2026
+## Current Status Audit — August 13, 2026
 
 - Phases 0–6 are functionally implemented. Projects now use a single-page focus stage and selector; the former project-detail routes were removed.
 - The August 13 Projects overhaul replaced four filler records with six real/current entries alongside Pixel Quest: Live Bingo, Pineapple Expense, Calcite Portfolio, Mochi 2026, Minecraft Hide & Seek, and an in-progress Roblox PvP world. Primary-source repository research informed the copy and original themed SVG previews. Pixel Quest and Hide & Seek later received denser scene-driven redraws: a co-op neon dungeon run and an isometric voxel hunt with role, cover, and power-up storytelling. A stable stacked focus stage, compact button index, accessible selection announcement, responsive viewport return, and reduced-motion behavior were visually validated at 1440×1000 and 390×844.
 - The project display order now leads with Live Bingo, Pineapple Expense, Calcite Portfolio, and Mochi 2026; Pixel Quest and the remaining builds follow. Each project-index card owns an individual scroll reveal while retaining its independent hover/press transform.
+- The former Skills grid has been replaced by an open Extras platformer covering the custom keyboard build, Pineapple Expense capstone presentation, and Mochi 2026 robotics competition. Three broad scanline monitors live directly over the site background and double as collision islands. The full 1800×700 level scales into the available desktop width with no camera, horizontal cutoff, or side scrolling; smaller widths switch to readable vertically stacked panes and an explorer prompt to try desktop or widen the window. WASD/arrow physics, pointer/touch controls, click-to-teleport screens, visible island copy, active-island video lifecycle, manual/automatic galleries, reduced-motion behavior, and labeled slots for the still-pending capstone/robotics assets are implemented.
 - The About section now follows the hero and presents Tyler's supplied copy as a compiler-themed origin story: a larger intro card, production-command heading, and four-stage cyan → blue → violet → pink timeline. Passive rAF-coalesced scroll measurement keeps exactly one chapter active while frame-rate-independent damping smooths card tilt and rail progress; the rail glow runs from -6.8% to 64.9% through the About section, independent of total page length and the section's document position. Its endpoints and color stops align to the numbered nodes, and number activation follows the same smoothed rail head. A development-only `?aboutDebug=scroll` HUD exposes live tuning values, and only the intro card uses scroll reveal. The content remains typed static data, and desktop/tablet/mobile renders were visually checked against the running site.
 - The `visual-and-ux-improvements` branch was reviewed and its eight commits cherry-picked into `layout-and-design-tweaks`: content-section min-height removal (hero-only `--full` modifier), footer `SocialLinksComponent` reuse, 3-column grid cap + popular-tag filter pruning, About card panel, project-detail card redesign with related projects, dynamic page titles via the Title service, and two cleanup commits. Its 1,343-line plan document was intentionally not ported — the work it planned is complete and recorded here.
 - The July 2026 polish pass added the original project-thumbnail treatment, hero UFO repositioning, mobile-local hero gradients, a global `:focus-visible` ring, skip-to-content link, drawer body-scroll lock with md auto-close, press-state compression, canvas reduced-motion still-frame + hidden-tab rAF pause, static head metadata, and a pixel-C SVG favicon. Its card routing/filter UI was superseded by the August 13 project showcase.
 - Phase 7 is now mostly complete: project focus/selector transitions, section scroll reveals, active navbar state, smooth scrolling, CSS reduced-motion fallbacks, button micro-interactions, gradient rendering across breakpoints, and a canvas reduced-motion policy. Optional pointer-following card tilt remains open.
 - Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, reduced mobile scene entity counts, skip link, hidden-tab canvas suspension, and baseline SEO metadata.
-- Static output is configured and verified: 122 tests pass and a production build prerenders four routes.
+- Static output is configured and verified: 125 tests pass and a production build prerenders four routes.
 - The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
 - The July 16 mountain-performance audit restored the original worker-rAF renderer, added opt-in real-scroll metrics (`?canvasPerf=scroll`), and tested scheduling, path reuse, projection-loop, and fog candidates independently. Only static fog precomposition was retained: three standard scroll traces reduced worker-draw cadence p95 from roughly 30–33 ms to 22–25 ms, end-to-end p95 from 19.8–21.4 ms to 18.1–19.8 ms, and draw median from 5.5–5.7 ms to 5.2–5.4 ms. Immediate worker tasks, repeated-path reuse, and projection-loop changes were discarded because they did not improve real scroll cadence consistently.
-- Known repository gaps: the hero (7.39 kB), About (7.75 kB), project focus (6.59 kB), and project selector (4.82 kB) stylesheets exceed the 4 kB warning budget but remain below the 8 kB error limit; mountain DPR scaling, the broader responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
+- Known repository gaps: the hero (7.39 kB), About (7.75 kB), project focus (6.59 kB), project selector (4.88 kB), Extras platformer (6.71 kB), and Extras media screen (4.56 kB) stylesheets exceed the 4 kB warning budget but remain below the 8 kB error limit; final capstone/robotics media, mountain DPR scaling, the broader responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
 
 ---
 
@@ -97,7 +98,7 @@ Phase 0: Scaffold & Global Styles
 - [x] `NavbarComponent`:
   - Fixed position, semi-transparent `#0B0F1A` background, `backdrop-filter: blur(12px)`
   - Logo/brand text on the left (placeholder pixel icon)
-  - Nav links: About, Projects, Skills, Contact — rendered as `<button>` elements that scroll to the matching section (not `<a>` router links); active state driven by `ScrollService.activeSection` signal
+  - Nav links: About, Projects, Extras, Contact — rendered as `<button>` elements that scroll to the matching section (not `<a>` router links); active state driven by `ScrollService.activeSection` signal
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer
 - [x] `FooterComponent`:
@@ -120,7 +121,7 @@ Phase 0: Scaffold & Global Styles
 
 **Tasks:**
 - [x] `SectionHeaderComponent` — gradient text heading with optional subtitle
-- [x] `SkillChipComponent` — category-colored skill pill
+- [x] `ExtraMediaScreenComponent` — feature-local rounded monitor for privacy-enhanced video and image/placeholder gallery records
 - [x] `TechTagComponent` — compact project technology tag
 - [x] `SocialLinksComponent` — typed social-link row with platform-specific presentation
 - [x] `ProjectFocusStageComponent` and `ProjectSelectorComponent` — feature-local project focus/index presentation; supersede and remove the former shared `CardComponent`/`ProjectCardComponent`
@@ -141,10 +142,10 @@ Phase 0: Scaffold & Global Styles
 
 **Tasks:**
 - [x] `project.model.ts` — readonly `Project` display contract (title, slug, eyebrow, status, descriptions, tags, image/alt, optional links, glow color); route/filter fields removed
-- [x] `skill.model.ts` — `Skill` interface (name, category, icon?)
+- [x] `extra.model.ts` — typed Extras topic and mixed image/YouTube media records
 - [x] `social-link.model.ts` — `SocialLink` interface (platform, url, icon, glowColor)
 - [x] `projects.data.ts` — seven ordered real/current projects with researched descriptions, truthful team/contribution language, links, keywords, and stable preview paths
-- [x] `skills.data.ts` — full skills list organized by the 8 categories Tyler provided
+- [x] `extras.data.ts` — keyboard, capstone, and robotics topics; keyboard uses the supplied YouTube build while the remaining records expose labeled asset slots
 - [x] `bio.data.ts` — typed identity fields plus structured About intro/history copy with emphasis, links, and side-note metadata
 - [x] `social-links.data.ts` — GitHub, Discord, and LinkedIn entries
 - [x] Seven original themed SVG previews under `public/assets/images/`, including polished scene-driven redraws for Pixel Quest and Minecraft Hide & Seek
@@ -172,7 +173,7 @@ Phase 0: Scaffold & Global Styles
   - ~~"Code · Create · Innovate" tagline~~ — removed in layout-and-design-tweaks
   - ~~"View My Work" CTA button~~ — removed in layout-and-design-tweaks
 - [x] `HomeComponent` — smart container; orchestrates Hero + all scroll sections; solid dark background (canvas comes next)
-- [x] Single-page refactor: `ProjectsSectionComponent`, `AboutSectionComponent`, `SkillsSectionComponent`, `ContactSectionComponent` created at `features/home/sections/`; old route stubs removed; `ScrollService` added for active section tracking; navbar updated to scroll buttons
+- [x] Single-page refactor: `ProjectsSectionComponent`, `AboutSectionComponent`, `ExtrasSectionComponent`, and `ContactSectionComponent` live at `features/home/sections/`; old route stubs and the superseded Skills section were removed; `ScrollService` tracks the current section and the navbar uses scroll buttons
 
 **Built:** `HeroComponent` (presentational, `bio` signal input), `HomeComponent` (smart container, reads `bioData`, hosts all sections). Canvas background deferred to Phase 5. `FeatureCardsComponent` was built then removed — it duplicated the navbar and added no value.
 
@@ -219,7 +220,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 
 ## Phase 6: Content Sections ✅ COMPLETE
 
-**Goal:** About, Projects, Skills, and Contact sections — fully functional with real content structure. All sections live inside `HomeComponent` at `features/home/sections/`.
+**Goal:** About, Projects, Extras, and Contact sections — fully functional with real content structure. All sections live inside `HomeComponent` at `features/home/sections/`.
 
 **Dependencies:** Phase 1 (layout), Phase 2 (shared components), Phase 3 (data)
 
@@ -235,10 +236,15 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] Scroll reveal retained on the intro card and removed from the history heading/chapters
 - [x] Responsive terminal command and readable desktop/tablet/mobile chapter layouts
 
-### Skills Section (`features/home/sections/skills-section/`)
-- [x] `SkillsGridComponent` — skills grouped by the 8 categories, displayed as a grid of `SkillChipComponent` groups
-- [x] Each category has a heading and a cluster of chips
-- [x] Scroll-reveal animation on skill groups
+### Extras Section (`features/home/sections/extras-section/`)
+- [x] Replaced the grouped Skills grid, data, model, and chip components; project tags/descriptions now carry the résumé-style skills signal
+- [x] `ExtrasPlatformerComponent` — open 1800×700 DOM/CSS desktop world with three broad screen-islands, collision physics, respawn, uniform fit-to-width scaling, and no horizontal camera/crop
+- [x] Focused WASD/arrow controls, holdable pointer/touch direction/crouch/jump controls, and full-island click-to-teleport overlays; no destination navigation bar
+- [x] Subtle `try WASD` desktop character speech bubble removed on the first WASD keypress; all island title/description copy remains visible with stronger active-topic emphasis
+- [x] Below 1080px component width, replace platformer semantics and controls with three vertically stacked media panes plus the explorer prompt `Try this on desktop — or make your window wider.`
+- [x] `ExtraMediaScreenComponent` — rounded scanline monitors with active/standby states, privacy-enhanced muted YouTube playback, placeholder/image states, captions, and manual gallery controls
+- [x] 5.2-second gallery advance only while the topic is active; auto-advance and decorative loops stop under reduced motion
+- [ ] Replace labeled Capstone Summit and Robotics Outpost slots with Tyler's final presentation photos, competition photos, and video IDs/files
 
 ### Projects Section (`features/home/sections/projects-section/`)
 - [x] `ProjectFocusStageComponent` — all focus panels share one grid cell; inactive content remains in sizing but is inert/hidden, preventing layout shift
@@ -251,7 +257,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] `SocialLinksComponent` reuse — GitHub, Discord, and LinkedIn with glow hover
 - [x] Clean, minimal layout — no form
 
-**Built:** `BackgroundSceneComponent` lives in `LayoutComponent`. `HomeComponent` reads `projectsData`, `skillsData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Skills → Contact. Projects use `ProjectsSectionComponent` selection state, an overlapping `ProjectFocusStageComponent`, and `ProjectSelectorComponent`; there is no project route or detail feature. The August 13 verification passes 122 tests and prerenders four routes.
+**Built:** `BackgroundSceneComponent` lives in `LayoutComponent`. `HomeComponent` reads `projectsData`, `extrasData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Extras → Contact. Projects use `ProjectsSectionComponent` selection state, an overlapping `ProjectFocusStageComponent`, and `ProjectSelectorComponent`; Extras owns local player, responsive mode, active-island, speech-prompt, and gallery state; there is no project or Extras route. The August 13 verification passes 125 tests and prerenders four routes.
 
 **Deliverable:** All five scroll sections are content-complete. The Projects section contains seven real/current entries in one accessible, responsive, in-page showcase.
 
@@ -267,7 +273,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] **Project hover/selection effects:** selector previews lift subtly; active state uses accent glow plus an explicit marker; focus panels crossfade/rise without reflow
 - [ ] **Card tilt:** subtle 3D tilt following mouse position on project cards (vanilla-tilt style via directive)
 - [x] **Button micro-interactions:** motion-safe press compression on selector buttons, project links, and the email CTA
-- [x] **Scroll reveals:** applied to the About intro card and the major Projects, Skills, and Contact content groups; About history intentionally renders without reveal animation
+- [x] **Scroll reveals:** applied to the About intro card and the major Projects, Extras, and Contact content groups; About history intentionally renders without reveal animation
   - [x] Reveal range capped to an absolute scroll distance. Tall groups such as the Projects showcase use `min()` caps from `_variables.scss`; short subjects retain their original timing.
 - [x] **Navbar active link indicator:** `ScrollService.activeSection` drives desktop and drawer active states
 - [x] **Smooth scroll:** `ScrollService.scrollToSection()` and router anchor scrolling are configured
@@ -416,7 +422,7 @@ These phases can be worked on simultaneously:
 ## Scope Notes
 
 **In scope for v1:**
-- 1 scrollable page with 5 sections (Home hero, About, Projects, Skills, Contact)
+- 1 scrollable page with 5 sections (Home hero, About, Projects, Extras, Contact)
 - Animated canvas background on hero
 - Neon glow design system
 - Placeholder-driven development (easy asset swap)
