@@ -4,11 +4,8 @@
       class="extra-game__viewport"
       tabindex="0"
       role="application"
-      aria-label="Extras island platformer. Use A and D to move, W to jump, and S to crouch. Click a screen to teleport to it."
+      aria-label="Extras island platformer. Use WASD or the arrow keys anywhere on the page to move, jump, and crouch. Click a screen to teleport to it."
       [style.height.px]="desktopViewportHeight()"
-      (keydown)="handleKeyDown($event)"
-      (keyup)="handleKeyUp($event)"
-      (blur)="clearInput()"
     >
       <div
         class="extra-game__world"
@@ -32,6 +29,7 @@
 
           <div
             class="extra-game__screen"
+            [class.extra-game__screen--active]="activeTopicId() === island.topicId"
             [style.left.px]="island.x"
             [style.top.px]="island.y"
             [style.width.px]="island.width"
@@ -70,35 +68,6 @@
         </div>
       </div>
 
-      <div class="extra-game__controls" aria-label="Platformer controls">
-        <button
-          type="button"
-          aria-label="Move left"
-          (pointerdown)="pressDirection(-1, $event)"
-          (pointerup)="releaseDirection($event)"
-          (pointercancel)="releaseDirection($event)"
-        >←</button>
-        <button
-          type="button"
-          aria-label="Crouch"
-          (pointerdown)="pressCrouch($event)"
-          (pointerup)="releaseCrouch()"
-          (pointercancel)="releaseCrouch()"
-        >↓</button>
-        <button
-          type="button"
-          aria-label="Move right"
-          (pointerdown)="pressDirection(1, $event)"
-          (pointerup)="releaseDirection($event)"
-          (pointercancel)="releaseDirection($event)"
-        >→</button>
-        <button
-          type="button"
-          class="extra-game__jump"
-          aria-label="Jump"
-          (pointerdown)="pressJump($event)"
-        >JUMP</button>
-      </div>
     </div>
   } @else {
     <div class="extra-game__stack" aria-label="Extras media">

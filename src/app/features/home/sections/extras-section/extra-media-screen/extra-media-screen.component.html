@@ -4,12 +4,6 @@
   [attr.data-accent]="topic().accent"
   [attr.aria-label]="topic().islandLabel + (staticLayout() ? ' media pane' : active() ? ', active' : ', inactive')"
 >
-  <header class="extra-screen__header">
-    <span class="extra-screen__signal" aria-hidden="true"></span>
-    <span>{{ topic().shortLabel }}</span>
-    <span class="extra-screen__status">{{ active() ? 'LIVE' : staticLayout() ? 'READY' : 'STANDBY' }}</span>
-  </header>
-
   <div class="extra-screen__viewport">
     @for (media of currentMediaList(); track media.caption) {
       <div class="extra-screen__media-slide">
@@ -19,6 +13,7 @@
             [title]="media.alt"
             allow="autoplay; encrypted-media; picture-in-picture"
             allowfullscreen
+            (load)="connectVideoPlayer($event)"
           ></iframe>
         } @else if (media.imageUrl; as imageUrl) {
           <img [src]="imageUrl" [alt]="media.alt" />
@@ -38,21 +33,13 @@
     }
 
     <span class="extra-screen__scanlines" aria-hidden="true"></span>
+    @if (hasMultipleMedia()) {
+      <div class="extra-screen__gallery-controls" [attr.aria-label]="topic().shortLabel + ' gallery controls'">
+        <button type="button" (click)="requestPrevious($event)" [attr.aria-label]="'Previous ' + topic().shortLabel + ' item'">‹</button>
+        <button type="button" (click)="requestNext($event)" [attr.aria-label]="'Next ' + topic().shortLabel + ' item'">›</button>
+      </div>
+    }
   </div>
-
-  <footer class="extra-screen__footer">
-    @if (hasMultipleMedia()) {
-      <button type="button" (click)="requestPrevious($event)" [attr.aria-label]="'Previous ' + topic().shortLabel + ' item'">‹</button>
-    }
-    <span>{{ currentMedia().caption }}</span>
-    @if (hasMultipleMedia()) {
-      <span class="extra-screen__counter">{{ mediaIndex() + 1 }}/{{ topic().media.length }}</span>
-      <button type="button" (click)="requestNext($event)" [attr.aria-label]="'Next ' + topic().shortLabel + ' item'">›</button>
-    }
-    @if (topic().externalUrl) {
-      <a [href]="topic().externalUrl" target="_blank" rel="noopener noreferrer" [attr.aria-label]="topic().externalLabel + ' (opens in a new tab)'">↗</a>
-    }
-  </footer>
 
   @if (!active() && !staticLayout()) {
     <button
@@ -60,8 +47,6 @@
       class="extra-screen__visit"
       (click)="requestVisit()"
       [attr.aria-label]="'Teleport to ' + topic().islandLabel"
-    >
-      <span>CLICK TO TELEPORT</span>
-    </button>
+    ></button>
   }
 </article>

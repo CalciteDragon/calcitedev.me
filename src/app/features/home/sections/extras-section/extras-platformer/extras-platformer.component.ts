@@ -42,18 +42,25 @@ const WORLD_HEIGHT = 700;
 const MIN_PLATFORMER_WIDTH = 1080;
 const PLAYER_WIDTH = 38;
 const PLAYER_HEIGHT = 48;
+const ACTIVE_PLATFORM_RISE = 8;
+const PLATFORM_DEACTIVATION_DELAY = 1000;
+const MOVEMENT_KEYS = ['a', 'd', 's', 'w', 'arrowleft', 'arrowright', 'arrowdown', 'arrowup'] as const;
 
 const PLATFORMS: readonly Platform[] = [
-  { id: 'keyboard-island', x: 30, y: 300, width: 556, height: 350, topicId: 'keyboard' },
-  { id: 'capstone-island', x: 622, y: 235, width: 556, height: 365, topicId: 'capstone' },
+  { id: 'capstone-island', x: 30, y: 300, width: 556, height: 350, topicId: 'capstone' },
+  { id: 'keyboard-island', x: 622, y: 235, width: 556, height: 365, topicId: 'keyboard' },
   { id: 'robotics-island', x: 1214, y: 300, width: 556, height: 350, topicId: 'robotics' },
 ];
 
 const ISLAND_GEOMETRY: readonly IslandGeometry[] = [
-  { topicId: 'keyboard', x: 30, y: 300, width: 556, height: 350 },
-  { topicId: 'capstone', x: 622, y: 235, width: 556, height: 365 },
+  { topicId: 'capstone', x: 30, y: 300, width: 556, height: 350 },
+  { topicId: 'keyboard', x: 622, y: 235, width: 556, height: 365 },
   { topicId: 'robotics', x: 1214, y: 300, width: 556, height: 350 },
 ];
+
+const STARTING_TOPIC_ID = 'keyboard';
+const STARTING_PLATFORM = PLATFORMS.find(platform => platform.topicId === STARTING_TOPIC_ID)!;
+const STARTING_PLATFORM_INSET = 58;
 
 @Component({
   selector: 'app-extras-platformer',
@@ -70,9 +77,12 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   protected readonly worldHeight = WORLD_HEIGHT;
   protected readonly playerWidth = PLAYER_WIDTH;
   protected readonly playerHeight = PLAYER_HEIGHT;
-  protected readonly playerPosition = signal<PlayerPosition>({ x: 88, y: 300 - PLAYER_HEIGHT });
-  protected readonly activeTopicId = signal<string | null>('keyboard');
-  protected readonly lastVisitedTopicId = signal('keyboard');
+  protected readonly playerPosition = signal<PlayerPosition>({
+    x: STARTING_PLATFORM.x + STARTING_PLATFORM_INSET,
+    y: STARTING_PLATFORM.y - PLAYER_HEIGHT,
+  });
+  protected readonly activeTopicId = signal<string | null>(null);
+  protected readonly lastVisitedTopicId = signal(STARTING_TOPIC_ID);
   protected readonly facing = signal<'left' | 'right'>('right');
   protected readonly moving = signal(false);
   protected readonly crouching = signal(false);
@@ -86,15 +96,16 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private readonly document = inject(DOCUMENT);
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
   private readonly pressedKeys = new Set<string>();
-  private pointerDirection = 0;
   private horizontalVelocity = 0;
   private verticalVelocity = 0;
   private grounded = true;
   private animationFrameId: number | null = null;
   private galleryTimerId: number | null = null;
+  private deactivationTimerId: number | null = null;
   private lastFrameTime = 0;
   private resizeObserver: ResizeObserver | null = null;
   private motionQuery: MediaQueryList | null = null;
+  private hasUsedWasd = false;
 
   protected readonly islands = computed(() => ISLAND_GEOMETRY.flatMap(geometry => {
     const topic = this.topics().find(candidate => candidate.id === geometry.topicId);
@@ -102,7 +113,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   }));
 
   protected readonly worldScale = computed(() => Math.min(1, this.viewportWidth() / WORLD_WIDTH));
-  protected readonly desktopViewportHeight = computed(() => WORLD_HEIGHT * this.worldScale() + 56);
+  protected readonly desktopViewportHeight = computed(() => WORLD_HEIGHT * this.worldScale());
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -117,6 +128,10 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.reducedMotion.set(this.motionQuery.matches);
     this.motionQuery.addEventListener?.('change', this.handleMotionPreference);
 
+    this.document.addEventListener('keydown', this.handleGlobalKeyDown);
+    this.document.addEventListener('keyup', this.handleGlobalKeyUp);
+    this.document.defaultView?.addEventListener('blur', this.handleWindowBlur);
+
     this.animationFrameId = window.requestAnimationFrame(this.tick);
     this.restartGalleryTimer();
   }
@@ -124,8 +139,12 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.animationFrameId !== null) window.cancelAnimationFrame(this.animationFrameId);
     if (this.galleryTimerId !== null) window.clearInterval(this.galleryTimerId);
+    if (this.deactivationTimerId !== null) window.clearTimeout(this.deactivationTimerId);
     this.resizeObserver?.disconnect();
     this.motionQuery?.removeEventListener?.('change', this.handleMotionPreference);
+    this.document.removeEventListener('keydown', this.handleGlobalKeyDown);
+    this.document.removeEventListener('keyup', this.handleGlobalKeyUp);
+    this.document.defaultView?.removeEventListener('blur', this.handleWindowBlur);
   }
 
   protected mediaIndex(topicId: string): number {
@@ -139,12 +158,15 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.horizontalVelocity = 0;
     this.verticalVelocity = 0;
     this.grounded = true;
+    if (this.hasUsedWasd) {
+      this.activateTopic(topicId);
+    } else {
+      this.lastVisitedTopicId.set(topicId);
+    }
     this.playerPosition.set({
       x: platform.x + platform.width / 2 - PLAYER_WIDTH / 2,
-      y: platform.y - PLAYER_HEIGHT,
+      y: this.platformTop(platform) - PLAYER_HEIGHT,
     });
-    this.setActiveTopic(topicId);
-    this.viewport().nativeElement.focus({ preventScroll: true });
   }
 
   protected changeMedia(topicId: string, direction: number): void {
@@ -159,10 +181,16 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   protected handleKeyDown(event: KeyboardEvent): void {
     const key = event.key.toLowerCase();
-    if (!['a', 'd', 's', 'w', 'arrowleft', 'arrowright', 'arrowdown', 'arrowup'].includes(key)) return;
+    if (!this.isMovementKey(key)) return;
 
     event.preventDefault();
-    if (['a', 'd', 's', 'w'].includes(key)) this.showWasdHint.set(false);
+    if (['a', 'd', 's', 'w'].includes(key)) {
+      this.showWasdHint.set(false);
+      if (!this.hasUsedWasd) {
+        this.hasUsedWasd = true;
+        this.activateStandingPlatform();
+      }
+    }
     this.pressedKeys.add(key);
     this.crouching.set(key === 's' || key === 'arrowdown' || this.crouching());
     if ((key === 'w' || key === 'arrowup') && !event.repeat) this.jump();
@@ -176,46 +204,30 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   protected clearInput(): void {
     this.pressedKeys.clear();
-    this.pointerDirection = 0;
     this.moving.set(false);
     this.crouching.set(false);
   }
 
-  protected pressDirection(direction: -1 | 1, event: PointerEvent): void {
-    event.preventDefault();
-    this.pointerDirection = direction;
-    this.facing.set(direction < 0 ? 'left' : 'right');
-    this.viewport().nativeElement.focus({ preventScroll: true });
-    (event.currentTarget as HTMLElement | null)?.setPointerCapture?.(event.pointerId);
-  }
-
-  protected releaseDirection(event: PointerEvent): void {
-    this.pointerDirection = 0;
-    (event.currentTarget as HTMLElement | null)?.releasePointerCapture?.(event.pointerId);
-  }
-
-  protected pressCrouch(event: PointerEvent): void {
-    event.preventDefault();
-    this.crouching.set(true);
-    this.viewport().nativeElement.focus({ preventScroll: true });
-  }
-
-  protected releaseCrouch(): void {
-    this.crouching.set(false);
-  }
-
-  protected pressJump(event: PointerEvent): void {
-    event.preventDefault();
-    this.viewport().nativeElement.focus({ preventScroll: true });
-    this.jump();
-  }
-
   protected activateStackedTopic(topicId: string): void {
-    this.setActiveTopic(topicId);
+    this.activateTopic(topicId);
   }
 
   private readonly handleMotionPreference = (event: MediaQueryListEvent): void => {
     this.reducedMotion.set(event.matches);
+  };
+
+  private readonly handleGlobalKeyDown = (event: KeyboardEvent): void => {
+    if (this.stackedLayout() || this.isEditableTarget(event.target)) return;
+    this.handleKeyDown(event);
+  };
+
+  private readonly handleGlobalKeyUp = (event: KeyboardEvent): void => {
+    if (this.stackedLayout()) return;
+    this.handleKeyUp(event);
+  };
+
+  private readonly handleWindowBlur = (): void => {
+    this.clearInput();
   };
 
   private readonly tick = (time: number): void => {
@@ -229,7 +241,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     const keyboardDirection =
       (this.pressedKeys.has('d') || this.pressedKeys.has('arrowright') ? 1 : 0) -
       (this.pressedKeys.has('a') || this.pressedKeys.has('arrowleft') ? 1 : 0);
-    const direction = this.pointerDirection || keyboardDirection;
+    const direction = keyboardDirection;
     const targetVelocity = direction * (this.crouching() ? 95 : 250);
     const acceleration = this.grounded ? 1850 : 1050;
     const velocityDifference = targetVelocity - this.horizontalVelocity;
@@ -244,27 +256,30 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.verticalVelocity += 1500 * deltaSeconds;
     let nextY = current.y + this.verticalVelocity * deltaSeconds;
     let landedPlatform: Platform | null = null;
+    let landedPlatformTop = 0;
 
     if (this.verticalVelocity >= 0) {
       const previousBottom = current.y + PLAYER_HEIGHT;
       const nextBottom = nextY + PLAYER_HEIGHT;
       for (const platform of PLATFORMS) {
+        const platformTop = this.platformTop(platform);
         const overlaps = nextX + PLAYER_WIDTH > platform.x + 5 && nextX < platform.x + platform.width - 5;
-        const crossesTop = previousBottom <= platform.y + 1 && nextBottom >= platform.y;
-        if (overlaps && crossesTop && (!landedPlatform || platform.y < landedPlatform.y)) {
+        const crossesTop = previousBottom <= platformTop + 1 && nextBottom >= platformTop;
+        if (overlaps && crossesTop && (!landedPlatform || platformTop < landedPlatformTop)) {
           landedPlatform = platform;
+          landedPlatformTop = platformTop;
         }
       }
     }
 
     if (landedPlatform) {
-      nextY = landedPlatform.y - PLAYER_HEIGHT;
       this.verticalVelocity = 0;
       this.grounded = true;
-      this.setActiveTopic(landedPlatform.topicId ?? null);
+      if (this.hasUsedWasd && landedPlatform.topicId) this.activateTopic(landedPlatform.topicId);
+      nextY = this.platformTop(landedPlatform) - PLAYER_HEIGHT;
     } else {
       this.grounded = false;
-      this.setActiveTopic(null);
+      this.scheduleActiveTopicDeactivation();
     }
 
     if (nextY > WORLD_HEIGHT + PLAYER_HEIGHT) {
@@ -283,6 +298,41 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   private respawn(): void {
     this.visitTopic(this.lastVisitedTopicId());
+  }
+
+  private activateStandingPlatform(): void {
+    if (!this.grounded) return;
+
+    const current = this.playerPosition();
+    const currentBottom = current.y + PLAYER_HEIGHT;
+    const platform = PLATFORMS.find(candidate => {
+      const overlaps = current.x + PLAYER_WIDTH > candidate.x + 5 && current.x < candidate.x + candidate.width - 5;
+      return candidate.topicId && overlaps && Math.abs(currentBottom - this.platformTop(candidate)) <= 1;
+    });
+    if (!platform?.topicId) return;
+
+    this.activateTopic(platform.topicId);
+    this.playerPosition.set({ x: current.x, y: this.platformTop(platform) - PLAYER_HEIGHT });
+  }
+
+  private activateTopic(topicId: string): void {
+    this.cancelActiveTopicDeactivation();
+    this.setActiveTopic(topicId);
+  }
+
+  private scheduleActiveTopicDeactivation(): void {
+    if (this.activeTopicId() === null || this.deactivationTimerId !== null) return;
+
+    this.deactivationTimerId = window.setTimeout(() => {
+      this.deactivationTimerId = null;
+      if (!this.grounded) this.setActiveTopic(null);
+    }, PLATFORM_DEACTIVATION_DELAY);
+  }
+
+  private cancelActiveTopicDeactivation(): void {
+    if (this.deactivationTimerId === null) return;
+    window.clearTimeout(this.deactivationTimerId);
+    this.deactivationTimerId = null;
   }
 
   private setActiveTopic(topicId: string | null): void {
@@ -309,6 +359,19 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
       this.horizontalVelocity = 0;
       this.verticalVelocity = 0;
     }
+  }
+
+  private platformTop(platform: Platform): number {
+    return platform.y - (platform.topicId === this.activeTopicId() ? ACTIVE_PLATFORM_RISE : 0);
+  }
+
+  private isMovementKey(key: string): key is typeof MOVEMENT_KEYS[number] {
+    return MOVEMENT_KEYS.includes(key as typeof MOVEMENT_KEYS[number]);
+  }
+
+  private isEditableTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
   }
 
   private restartGalleryTimer(): void {

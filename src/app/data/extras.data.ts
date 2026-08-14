@@ -2,24 +2,6 @@ import { ExtraTopic } from '../models/extra.model';
 
 export const extrasData: readonly ExtraTopic[] = [
   {
-    id: 'keyboard',
-    shortLabel: 'Keyboard',
-    islandLabel: 'Keyboard Cove',
-    title: 'A Custom Keyboard Build',
-    description: 'A tiny hardware side quest with a custom board, a build montage, and one very important duck.',
-    accent: 'cyan',
-    externalUrl: 'https://www.youtube.com/watch?v=xph8DTsWbxM',
-    externalLabel: 'Watch on YouTube',
-    media: [
-      {
-        type: 'youtube',
-        youtubeId: 'xph8DTsWbxM',
-        alt: 'Made a keyboard video player',
-        caption: 'Made a keyboard :) · 4:28',
-      },
-    ],
-  },
-  {
     id: 'capstone',
     shortLabel: 'Capstone',
     islandLabel: 'Capstone Summit',
@@ -44,6 +26,24 @@ export const extrasData: readonly ExtraTopic[] = [
         alt: 'Placeholder for a Pineapple Expense demo photo',
         caption: 'Demo in progress',
         placeholderLabel: 'CAPSTONE PHOTO 03',
+      },
+    ],
+  },
+  {
+    id: 'keyboard',
+    shortLabel: 'Keyboard',
+    islandLabel: 'Keyboard Cove',
+    title: 'A Custom Keyboard Build',
+    description: 'A tiny hardware side quest with a custom board, a build montage, and one very important duck.',
+    accent: 'cyan',
+    externalUrl: 'https://www.youtube.com/watch?v=xph8DTsWbxM',
+    externalLabel: 'Watch on YouTube',
+    media: [
+      {
+        type: 'youtube',
+        youtubeId: 'xph8DTsWbxM',
+        alt: 'Made a keyboard video player',
+        caption: 'Made a keyboard :) · 4:28',
       },
     ],
   },
