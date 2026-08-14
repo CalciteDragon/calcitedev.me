@@ -1,16 +1,53 @@
-<div #viewport class="extra-game" [class.extra-game--reduced-motion]="reducedMotion()">
+<div
+  #viewport
+  class="extra-game"
+  [class.extra-game--reduced-motion]="reducedMotion()"
+  [class.extra-game--editing]="editorEnabled() && editorMode() === 'edit'"
+>
+  @if (editorEnabled()) {
+    <app-extras-level-editor
+      [level]="level()"
+      [selectedElementId]="selectedElementId()"
+      [mode]="editorMode()"
+      [snapEnabled]="snapEnabled()"
+      [canUndo]="canUndo()"
+      [canRedo]="canRedo()"
+      [status]="editorStatus()"
+      (selectionChanged)="selectEditorElement($event)"
+      (modeChanged)="changeEditorMode($event)"
+      (snapChanged)="snapEnabled.set($event)"
+      (addRequested)="addEditorPlatform()"
+      (deleteRequested)="deleteSelectedElement()"
+      (duplicateRequested)="duplicateSelectedElement()"
+      (undoRequested)="undoEditorChange()"
+      (redoRequested)="redoEditorChange()"
+      (resetRequested)="resetEditorLevel()"
+      (copyRequested)="copyEditorSource()"
+      (downloadRequested)="downloadEditorSource()"
+      (propertyChanged)="updateEditorProperty($event)"
+    />
+    @if (stackedLayout()) {
+      <p class="extra-game__editor-width-notice" role="status">
+        Widen this section to at least 1080px to drag and playtest the level. Your draft is preserved.
+      </p>
+    }
+  }
+
   @if (!stackedLayout()) {
     <div
       class="extra-game__viewport"
       tabindex="0"
-      role="application"
-      aria-label="Extras island platformer. Use WASD or the arrow keys anywhere on the page to move, jump, and crouch. Click a screen to teleport to it."
+      [attr.role]="editorEnabled() && editorMode() === 'edit' ? 'region' : 'application'"
+      [attr.aria-label]="editorEnabled() && editorMode() === 'edit'
+        ? 'Extras level editor. Select and drag an island or jump platform.'
+        : 'Extras island platformer. Use WASD or the arrow keys anywhere on the page to move, jump, and crouch. Click a screen to teleport to it.'"
       [style.height.px]="desktopViewportHeight()"
     >
       <div
         class="extra-game__world"
-        [style.width.px]="worldWidth"
-        [style.height.px]="worldHeight"
+        [class.extra-game__world--editing]="editorEnabled() && editorMode() === 'edit'"
+        [style.width.px]="worldWidth()"
+        [style.height.px]="worldHeight()"
         [style.transform]="'scale(' + worldScale() + ')'"
       >
         @for (island of islands(); track island.topicId) {
@@ -30,6 +67,7 @@
           <div
             class="extra-game__screen"
             [class.extra-game__screen--active]="activeTopicId() === island.topicId"
+            [attr.inert]="editorEnabled() && editorMode() === 'edit' ? '' : null"
             [style.left.px]="island.x"
             [style.top.px]="island.y"
             [style.width.px]="island.width"
@@ -40,10 +78,44 @@
               [active]="activeTopicId() === island.topicId"
               [mediaIndex]="mediaIndex(island.topicId)"
               (visitRequested)="visitTopic(island.topicId)"
-              (previousRequested)="changeMedia(island.topicId, -1)"
-              (nextRequested)="changeMedia(island.topicId, 1)"
+              (previousRequested)="navigateMedia(island.topicId, -1)"
+              (nextRequested)="navigateMedia(island.topicId, 1)"
+              (videoPlaybackChanged)="handleVideoPlaybackChange(island.topicId, $event)"
             />
           </div>
+        }
+
+        @for (platform of jumpPlatforms(); track platform.id) {
+          <div
+            class="extra-game__jump-platform"
+            [style.left.px]="platform.x"
+            [style.top.px]="platform.y"
+            [style.width.px]="platform.width"
+            [style.height.px]="platform.height"
+            aria-hidden="true"
+          ></div>
+        }
+
+        @if (editorEnabled() && editorMode() === 'edit') {
+          @for (element of level().elements; track element.id) {
+            <button
+              type="button"
+              class="extra-game__editor-target"
+              [class.extra-game__editor-target--selected]="selectedElementId() === element.id"
+              [class.extra-game__editor-target--platform]="element.kind === 'platform'"
+              [style.left.px]="element.x"
+              [style.top.px]="element.y"
+              [style.width.px]="element.width"
+              [style.height.px]="element.height"
+              [attr.aria-label]="'Select and move ' + element.id"
+              (pointerdown)="startEditorDrag($event, element.id)"
+              (pointermove)="moveEditorDrag($event)"
+              (pointerup)="finishEditorDrag($event)"
+              (pointercancel)="cancelEditorDrag($event)"
+            >
+              <span>{{ element.id }} · {{ element.x }}, {{ element.y }}</span>
+            </button>
+          }
         }
 
         <div
@@ -108,8 +180,9 @@
               [active]="activeTopicId() === island.topicId"
               [staticLayout]="true"
               [mediaIndex]="mediaIndex(island.topicId)"
-              (previousRequested)="changeMedia(island.topicId, -1)"
-              (nextRequested)="changeMedia(island.topicId, 1)"
+              (previousRequested)="navigateMedia(island.topicId, -1)"
+              (nextRequested)="navigateMedia(island.topicId, 1)"
+              (videoPlaybackChanged)="handleVideoPlaybackChange(island.topicId, $event)"
             />
           </div>
         </article>

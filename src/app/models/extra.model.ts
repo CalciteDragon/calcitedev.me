@@ -8,6 +8,7 @@ export interface ExtraMediaItem {
   readonly caption: string;
   readonly imageUrl?: string;
   readonly youtubeId?: string;
+  readonly youtubeStartSeconds?: number;
   readonly placeholderLabel?: string;
 }
 

@@ -32,7 +32,8 @@ src/
 │   │       │   │   ├── project-focus-stage/ # Stable stacked detail panels
 │   │       │   │   └── project-selector/    # Compact button-based project index
 │   │       │   ├── extras-section/
-│   │       │   │   ├── extras-platformer/   # Physics, responsive mode, controls, island state
+│   │       │   │   ├── extras-level-editor/ # Development toolbar, drafts, validation, export
+│   │       │   │   ├── extras-platformer/   # Data-driven physics, rendering, editor integration
 │   │       │   │   └── extra-media-screen/  # Video/gallery monitor presentation
 │   │       │   └── contact-section/
 │   │       └── home.component.*        # Smart single-page container
@@ -56,7 +57,11 @@ public/
     └── pixel-art/                       # Current avatar and UFO placeholders
 ```
 
-Assets are served from `public/`, not `src/assets/`. All seven project visuals referenced by `projects.data.ts` are project-specific SVGs under `public/assets/images/`: Live Bingo, Pineapple Expense, Calcite Portfolio, Mochi 2026, Pixel Quest, Minecraft Hide & Seek, and the work-in-progress Roblox world. The recursive portfolio art is a finite SVG composition rather than an iframe or runtime recursion.
+Assets are served from `public/`, not `src/assets/`. All seven project visuals referenced by `projects.data.ts` are project-specific SVGs under `public/assets/images/`: Live Bingo, Pineapple Expense, Calcite Portfolio, Mochi 2026, Pixel Quest, Minecraft Hide & Seek, and the work-in-progress Roblox world. The recursive portfolio art is a finite SVG composition rather than an iframe or runtime recursion. Four web-sized Mochi competition JPEGs and five web-sized Pineapple Expense capstone JPEGs live under `public/assets/images/extras/`; the third Pineapple asset is a rendered image of the supplied project-poster PDF.
+
+The Extras feature also contains `extras-level-editor/` for its standalone development toolbar,
+draft validation/persistence helpers, and editor tests. Canonical geometry lives in
+`src/app/data/extras-level.data.ts`, with its schema in `src/app/models/extra-level.model.ts`.
 
 ## Routing
 
@@ -89,6 +94,7 @@ LayoutComponent
 │       │   └── ProjectSelectorComponent
 │       ├── ExtrasSectionComponent
 │       │   └── ExtrasPlatformerComponent
+│       │       ├── ExtrasLevelEditorComponent (development-only)
 │       │       └── ExtraMediaScreenComponent
 │       └── ContactSectionComponent → SocialLinksComponent
 └── FooterComponent
@@ -98,7 +104,7 @@ LayoutComponent
 
 `ProjectsSectionComponent` owns `selectedSlug`, resolves `selectedProject` with a safe first-entry fallback, and announces selection changes. It guards viewport and focus behavior with `isPlatformBrowser()`. `ProjectFocusStageComponent` renders all projects into the same CSS grid cell; inactive articles remain in sizing calculations but are `visibility: hidden`, `aria-hidden`, `inert`, and non-interactive. This makes the focus stage as tall as its largest record and prevents swaps from moving later content. `ProjectSelectorComponent` renders the unchanged data order as real buttons with `aria-pressed` and `aria-controls`. External links live only in the active focus article, so selector buttons never contain nested interactive elements.
 
-`ExtrasPlatformerComponent` owns a fixed 1800×700 desktop physics space, signal-backed player and responsive-layout state, requestAnimationFrame physics, platform collision, active-island state, gallery indices, and reduced-motion-aware auto-advance. The complete world scales uniformly into the available desktop width, keeping the Capstone, Keyboard, and Robotics screen-islands visible without a camera or horizontal crop. The explorer begins 58px inside the left edge of the middle Keyboard island with `activeTopicId` unset. Page-level WASD/arrow listeners move the explorer even after teleporting or clicking elsewhere on the page; editable controls are excluded, and the former pointer direction/jump controls have been removed. Arrow input alone leaves every island in standby. The first W/A/S/D press enables island activation and activates the platform currently supporting the explorer; subsequent landings and teleports activate normally. Clicking an inactive screen teleports without changing focus. Active screens rise 8px with matching collision geometry and deactivate only after a one-second airborne grace period; all island copy remains visible and the active destination receives stronger emphasis. Below a 1080px component width, the template switches to three static stacked media panes and replaces game semantics with the explorer's desktop-or-wider-window prompt. `ExtraMediaScreenComponent` supports this static presentation while continuing to create privacy-enhanced YouTube embeds only for the active topic. It records YouTube `infoDelivery` timestamps, destroys the iframe when inactive, and passes the saved time back through the embed's `start` parameter when reactivated. Image and video records without final assets render labeled slots from `extrasData`.
+`ExtrasPlatformerComponent` owns a fixed 1880×820 desktop physics space, signal-backed player and responsive-layout state, requestAnimationFrame physics, platform collision, active-island state, gallery indices, current video-playing state, and reduced-motion-aware auto-advance. The complete world scales uniformly into the available desktop width, keeping the Capstone, Keyboard, and Robotics screen-islands visible without a camera or horizontal crop. The explorer begins 58px inside the left edge of the middle Keyboard island with `activeTopicId` unset. Page-level WASD/arrow listeners move the explorer even after teleporting or clicking elsewhere on the page; editable controls are excluded, and the former pointer direction/jump controls have been removed. Arrow input alone leaves every island in standby. The first W/A/S/D press performs the keyboard-derived activation for the supporting island and dismisses the hint; subsequent landings activate normally. Clicking an inactive screen immediately teleports and activates without changing focus or dismissing that WASD hint. Active screens, collision geometry, and their visible copy rise together by 8px and deactivate only after a one-second airborne grace period. Gallery arrows sit above the inactive pane overlay; manually browsing an inactive island also teleports and activates it. Each topic's media array is its shared manual/automatic carousel order; Pineapple Expense uses the supplied IMG_1 → IMG_2 → rendered IMG_3 → IMG_4 → IMG_5 sequence, while Mochi's canonical source order is IMG_2, IMG_1, competition video, IMG_4, then IMG_3. Below a 1080px component width, the template switches to three static stacked media panes and replaces game semantics with the explorer's desktop-or-wider-window prompt. `ExtraMediaScreenComponent` supports this static presentation while continuing to create privacy-enhanced YouTube embeds only for the active topic. YouTube records may define an initial start time; the Robotics Outpost competition video begins at 3:03:36. The component records YouTube `infoDelivery` timestamps and playing state, destroys the iframe when inactive, and prefers saved progress over the initial time when reactivated. A playing video suspends the owning gallery's 5.2-second timer until playback pauses or ends. Image assets load lazily with asynchronous decoding, while records without final assets render labeled slots from `extrasData`.
 
 `bioData.about` stores the About introduction and four history entries as typed text segments. Intro segments can select cyan or pink; history segments carry semantic emphasis while their parent entry supplies the single stage color. `AboutSectionComponent` coalesces passive scroll measurements into animation frames and applies frame-rate-independent damping to card tilt and continuous rail progress. The rail is measured from the first number's center to the last number's center; the active chapter follows the closest numbered stop. In development, `?aboutDebug=scroll` exposes a read-only tuning HUD.
 
@@ -120,6 +126,10 @@ feature-local/shared display components
 
 All portfolio content is compiled from static TypeScript. There is no backend, CMS, database, or runtime content API. `Project` contains display copy, status, ordered tags, stable preview path/alt text, optional external URLs, and a `GlowColor`. `ExtraTopic` contains island labels, display copy, accent, and ordered image/YouTube media records. Neither model carries route state.
 
+`ExtrasLevelConfig` separates level geometry from `ExtraTopic` media content. It contains the schema
+version, source revision, world bounds, spawn anchor, and protected-island/supplemental-platform
+element union. Rendering, teleporting, respawn, and collision consume that one canonical model.
+
 ## State and Services
 
 Angular signals hold component state and computed values. RxJS is reserved for genuinely asynchronous streams.
@@ -133,6 +143,22 @@ Angular signals hold component state and computed values. RxJS is reserved for g
 - Guards browser APIs for static rendering.
 
 Project selection and Extras platformer/media state are feature-local and deliberately are not stored in a service or URL. SEO/meta and theme services are not currently implemented; light mode remains deferred.
+
+The development-only level editor is the one exception to ordinary Extras state being absent from
+the URL and browser storage. Angular must be in development mode and the local URL must be
+`http://localhost:4200/?extrasDebug=level#extras`. Valid drafts recover from a revision-keyed
+`localStorage` envelope and are ignored outside editor mode. Copy and Download serialize a complete
+`extras-level.data.ts`; replacing and committing that source file is the permanent publish step.
+
+In Edit mode, physics and pane interaction pause while the editor provides selection, scaled
+dragging, 10px snapping, numeric geometry fields, keyboard nudging, undo/redo, and supplemental
+platform add/duplicate/delete controls. Islands may move but retain protected identities and
+dimensions; supplemental platforms may move and resize. Playtest resets the explorer to the draft
+spawn and runs normal physics against draft geometry. Supplemental platforms support the explorer
+without activating media, and support-aware deactivation clears the previous island after its
+one-second grace period even when the explorer lands on a neutral platform. Below 1080px, the normal
+stacked fallback remains active and an editor notice asks the developer to widen the section before
+dragging or playtesting while preserving the draft.
 
 ## Rendering Strategy
 
@@ -161,4 +187,4 @@ dist/portfolio/browser/
 Render static-site publish directory (planned/externally configured)
 ```
 
-The August 14 verification passes 129 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.
+The August 14 verification passes 156 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.

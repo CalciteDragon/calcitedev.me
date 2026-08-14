@@ -49,6 +49,37 @@ describe('ExtraMediaScreenComponent', () => {
     expect(compiled.querySelector('iframe')?.getAttribute('src')).toContain('start=42');
   });
 
+  it('starts a YouTube item at its configured initial timestamp', () => {
+    fixture.componentRef.setInput('topic', extrasData[2]);
+    fixture.componentRef.setInput('mediaIndex', 2);
+    fixture.detectChanges();
+
+    const source = compiled.querySelector('iframe')?.getAttribute('src');
+    expect(source).toContain('youtube-nocookie.com/embed/XcQ8EndxcuM');
+    expect(source).toContain('autoplay=1');
+    expect(source).toContain('start=11016');
+  });
+
+  it('reports when the connected YouTube player starts and stops playing', () => {
+    const playbackChanged = vi.spyOn(fixture.componentInstance.videoPlaybackChanged, 'emit');
+    const frame = compiled.querySelector('iframe') as HTMLIFrameElement;
+    frame.dispatchEvent(new Event('load'));
+
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://www.youtube-nocookie.com',
+      source: frame.contentWindow,
+      data: JSON.stringify({ event: 'infoDelivery', info: { playerState: 1 } }),
+    }));
+    window.dispatchEvent(new MessageEvent('message', {
+      origin: 'https://www.youtube-nocookie.com',
+      source: frame.contentWindow,
+      data: JSON.stringify({ event: 'infoDelivery', info: { playerState: 2 } }),
+    }));
+
+    expect(playbackChanged).toHaveBeenNthCalledWith(1, true);
+    expect(playbackChanged).toHaveBeenNthCalledWith(2, false);
+  });
+
   it('shows only previous and next arrows as gallery chrome', () => {
     fixture.componentRef.setInput('topic', extrasData[0]);
     fixture.detectChanges();

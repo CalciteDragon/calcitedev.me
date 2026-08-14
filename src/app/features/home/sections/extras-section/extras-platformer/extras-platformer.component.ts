@@ -9,63 +9,89 @@ import {
   computed,
   inject,
   input,
+  isDevMode,
   signal,
   viewChild,
 } from '@angular/core';
+import { extrasLevelData } from '../../../../../data/extras-level.data';
+import {
+  ExtraLevelElement,
+  ExtraLevelIsland,
+  ExtraLevelPlatform,
+  ExtrasLevelConfig,
+} from '../../../../../models/extra-level.model';
 import { ExtraTopic } from '../../../../../models/extra.model';
 import { ExtraMediaScreenComponent } from '../extra-media-screen/extra-media-screen.component';
-
-interface Platform {
-  readonly id: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-  readonly topicId?: string;
-}
-
-interface IslandGeometry {
-  readonly topicId: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-}
+import {
+  ExtrasLevelEditorComponent,
+  ExtrasLevelEditorMode,
+  ExtrasLevelPropertyChange,
+} from '../extras-level-editor/extras-level-editor.component';
+import {
+  clampElementToWorld,
+  clearExtrasLevelDraft,
+  cloneExtrasLevel,
+  extrasLevelEditorEnabled,
+  loadExtrasLevelDraft,
+  nextPlatformId,
+  saveExtrasLevelDraft,
+  serializeExtrasLevelSource,
+  snapCoordinate,
+} from '../extras-level-editor/extras-level-editor-state';
 
 interface PlayerPosition {
   readonly x: number;
   readonly y: number;
 }
 
-const WORLD_WIDTH = 1800;
-const WORLD_HEIGHT = 700;
 const MIN_PLATFORMER_WIDTH = 1080;
 const PLAYER_WIDTH = 38;
 const PLAYER_HEIGHT = 48;
 const ACTIVE_PLATFORM_RISE = 8;
 const PLATFORM_DEACTIVATION_DELAY = 1000;
+const DEFAULT_PLATFORM_WIDTH = 180;
+const DEFAULT_PLATFORM_HEIGHT = 20;
+const EDITOR_GRID_SIZE = 10;
 const MOVEMENT_KEYS = ['a', 'd', 's', 'w', 'arrowleft', 'arrowright', 'arrowdown', 'arrowup'] as const;
 
-const PLATFORMS: readonly Platform[] = [
-  { id: 'capstone-island', x: 30, y: 300, width: 556, height: 350, topicId: 'capstone' },
-  { id: 'keyboard-island', x: 622, y: 235, width: 556, height: 365, topicId: 'keyboard' },
-  { id: 'robotics-island', x: 1214, y: 300, width: 556, height: 350, topicId: 'robotics' },
-];
+interface EditorDragState {
+  readonly pointerId: number;
+  readonly elementId: string;
+  readonly startClientX: number;
+  readonly startClientY: number;
+  readonly originX: number;
+  readonly originY: number;
+  readonly startingLevel: ExtrasLevelConfig;
+  moved: boolean;
+}
 
-const ISLAND_GEOMETRY: readonly IslandGeometry[] = [
-  { topicId: 'capstone', x: 30, y: 300, width: 556, height: 350 },
-  { topicId: 'keyboard', x: 622, y: 235, width: 556, height: 365 },
-  { topicId: 'robotics', x: 1214, y: 300, width: 556, height: 350 },
-];
+function findElement(level: ExtrasLevelConfig, elementId: string): ExtraLevelElement | undefined {
+  return level.elements.find(element => element.id === elementId);
+}
 
-const STARTING_TOPIC_ID = 'keyboard';
-const STARTING_PLATFORM = PLATFORMS.find(platform => platform.topicId === STARTING_TOPIC_ID)!;
-const STARTING_PLATFORM_INSET = 58;
+function findIslandByTopic(level: ExtrasLevelConfig, topicId: string): ExtraLevelIsland | undefined {
+  return level.elements.find(
+    (element): element is ExtraLevelIsland => element.kind === 'island' && element.topicId === topicId,
+  );
+}
+
+function spawnPosition(level: ExtrasLevelConfig): PlayerPosition {
+  const spawn = findElement(level, level.spawn.elementId) ?? level.elements[0];
+  if (!spawn) return { x: 0, y: 0 };
+
+  const inset = Math.max(0, Math.min(level.spawn.offsetX, spawn.width - PLAYER_WIDTH));
+  return { x: spawn.x + inset, y: spawn.y - PLAYER_HEIGHT };
+}
+
+function spawnTopicId(level: ExtrasLevelConfig): string {
+  const spawn = findElement(level, level.spawn.elementId);
+  return spawn?.kind === 'island' ? spawn.topicId : 'keyboard';
+}
 
 @Component({
   selector: 'app-extras-platformer',
   standalone: true,
-  imports: [ExtraMediaScreenComponent],
+  imports: [ExtraMediaScreenComponent, ExtrasLevelEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './extras-platformer.component.html',
   styleUrl: './extras-platformer.component.scss',
@@ -73,24 +99,30 @@ const STARTING_PLATFORM_INSET = 58;
 export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   readonly topics = input.required<readonly ExtraTopic[]>();
 
-  protected readonly worldWidth = WORLD_WIDTH;
-  protected readonly worldHeight = WORLD_HEIGHT;
+  protected readonly level = signal<ExtrasLevelConfig>(cloneExtrasLevel(extrasLevelData));
+  protected readonly worldWidth = computed(() => this.level().world.width);
+  protected readonly worldHeight = computed(() => this.level().world.height);
   protected readonly playerWidth = PLAYER_WIDTH;
   protected readonly playerHeight = PLAYER_HEIGHT;
-  protected readonly playerPosition = signal<PlayerPosition>({
-    x: STARTING_PLATFORM.x + STARTING_PLATFORM_INSET,
-    y: STARTING_PLATFORM.y - PLAYER_HEIGHT,
-  });
+  protected readonly playerPosition = signal<PlayerPosition>(spawnPosition(extrasLevelData));
   protected readonly activeTopicId = signal<string | null>(null);
-  protected readonly lastVisitedTopicId = signal(STARTING_TOPIC_ID);
+  protected readonly lastVisitedTopicId = signal(spawnTopicId(extrasLevelData));
   protected readonly facing = signal<'left' | 'right'>('right');
   protected readonly moving = signal(false);
   protected readonly crouching = signal(false);
   protected readonly showWasdHint = signal(true);
-  protected readonly viewportWidth = signal(WORLD_WIDTH);
+  protected readonly viewportWidth = signal<number>(extrasLevelData.world.width);
   protected readonly stackedLayout = signal(false);
   protected readonly mediaIndexes = signal<Record<string, number>>({ keyboard: 0, capstone: 0, robotics: 0 });
+  protected readonly playingVideoTopicId = signal<string | null>(null);
   protected readonly reducedMotion = signal(false);
+  protected readonly editorEnabled = signal(false);
+  protected readonly editorMode = signal<ExtrasLevelEditorMode>('edit');
+  protected readonly selectedElementId = signal<string | null>(null);
+  protected readonly snapEnabled = signal(true);
+  protected readonly editorStatus = signal('Committed layout loaded');
+  protected readonly canUndo = signal(false);
+  protected readonly canRedo = signal(false);
 
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
@@ -106,17 +138,42 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private resizeObserver: ResizeObserver | null = null;
   private motionQuery: MediaQueryList | null = null;
   private hasUsedWasd = false;
+  private supportingElementId: string | null = extrasLevelData.spawn.elementId;
+  private editorDragState: EditorDragState | null = null;
+  private readonly undoStack: ExtrasLevelConfig[] = [];
+  private readonly redoStack: ExtrasLevelConfig[] = [];
 
-  protected readonly islands = computed(() => ISLAND_GEOMETRY.flatMap(geometry => {
-    const topic = this.topics().find(candidate => candidate.id === geometry.topicId);
-    return topic ? [{ ...geometry, topic }] : [];
+  protected readonly islands = computed(() => this.level().elements.flatMap(element => {
+    if (element.kind !== 'island') return [];
+    const topic = this.topics().find(candidate => candidate.id === element.topicId);
+    return topic ? [{ ...element, topic }] : [];
   }));
+  protected readonly jumpPlatforms = computed(() => this.level().elements.filter(
+    (element): element is ExtraLevelPlatform => element.kind === 'platform',
+  ));
 
-  protected readonly worldScale = computed(() => Math.min(1, this.viewportWidth() / WORLD_WIDTH));
-  protected readonly desktopViewportHeight = computed(() => WORLD_HEIGHT * this.worldScale());
+  protected readonly worldScale = computed(() => Math.min(1, this.viewportWidth() / this.worldWidth()));
+  protected readonly desktopViewportHeight = computed(() => this.worldHeight() * this.worldScale());
 
   ngAfterViewInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
+
+    const enableEditor = isDevMode() && extrasLevelEditorEnabled(window.location.search);
+    this.editorEnabled.set(enableEditor);
+    if (enableEditor) {
+      const draft = loadExtrasLevelDraft(
+        window.localStorage,
+        extrasLevelData.revision,
+        this.topics().map(topic => topic.id),
+      );
+      if (draft) {
+        this.level.set(draft.level);
+        this.editorStatus.set(`Draft restored from ${new Date(draft.savedAt).toLocaleString()}`);
+      } else {
+        this.editorStatus.set('Edit mode · committed layout loaded');
+      }
+      this.resetPlayerToSpawn();
+    }
 
     this.updateViewportWidth();
     if (typeof ResizeObserver !== 'undefined') {
@@ -152,17 +209,15 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   }
 
   protected visitTopic(topicId: string): void {
-    const platform = PLATFORMS.find(candidate => candidate.topicId === topicId);
+    if (this.editorEnabled() && this.editorMode() === 'edit') return;
+    const platform = findIslandByTopic(this.level(), topicId);
     if (!platform) return;
 
     this.horizontalVelocity = 0;
     this.verticalVelocity = 0;
     this.grounded = true;
-    if (this.hasUsedWasd) {
-      this.activateTopic(topicId);
-    } else {
-      this.lastVisitedTopicId.set(topicId);
-    }
+    this.supportingElementId = platform.id;
+    this.activateTopic(topicId);
     this.playerPosition.set({
       x: platform.x + platform.width / 2 - PLAYER_WIDTH / 2,
       y: this.platformTop(platform) - PLAYER_HEIGHT,
@@ -170,13 +225,41 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   }
 
   protected changeMedia(topicId: string, direction: number): void {
+    if (this.editorEnabled() && this.editorMode() === 'edit') return;
     const topic = this.topics().find(candidate => candidate.id === topicId);
     if (!topic || topic.media.length < 2) return;
 
+    this.stopTrackingPlayingVideo(topicId);
     this.mediaIndexes.update(indexes => ({
       ...indexes,
       [topicId]: (this.mediaIndex(topicId) + direction + topic.media.length) % topic.media.length,
     }));
+  }
+
+  protected navigateMedia(topicId: string, direction: number): void {
+    if (this.editorEnabled() && this.editorMode() === 'edit') return;
+    const shouldVisit = this.activeTopicId() !== topicId;
+    this.changeMedia(topicId, direction);
+
+    if (!shouldVisit) return;
+    if (this.stackedLayout()) {
+      this.activateTopic(topicId);
+    } else {
+      this.visitTopic(topicId);
+    }
+  }
+
+  protected handleVideoPlaybackChange(topicId: string, playing: boolean): void {
+    if (topicId !== this.activeTopicId()) return;
+
+    if (playing) {
+      this.playingVideoTopicId.set(topicId);
+    } else if (this.playingVideoTopicId() === topicId) {
+      this.playingVideoTopicId.set(null);
+    } else {
+      return;
+    }
+    this.restartGalleryTimer();
   }
 
   protected handleKeyDown(event: KeyboardEvent): void {
@@ -209,7 +292,310 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   }
 
   protected activateStackedTopic(topicId: string): void {
+    if (this.editorEnabled() && this.editorMode() === 'edit') return;
     this.activateTopic(topicId);
+  }
+
+  protected selectEditorElement(elementId: string): void {
+    if (!findElement(this.level(), elementId)) return;
+    this.selectedElementId.set(elementId);
+    this.editorStatus.set(`${elementId} selected`);
+  }
+
+  protected changeEditorMode(mode: ExtrasLevelEditorMode): void {
+    if (mode === this.editorMode()) return;
+    if (mode === 'playtest' && this.stackedLayout()) {
+      this.editorStatus.set('Widen the viewport to at least 1080px before playtesting');
+      return;
+    }
+
+    this.editorMode.set(mode);
+    this.clearInput();
+    this.horizontalVelocity = 0;
+    this.verticalVelocity = 0;
+    this.setActiveTopic(null);
+    this.resetPlayerToSpawn();
+    this.editorStatus.set(mode === 'edit' ? 'Edit mode · physics paused' : 'Playtest mode · draft geometry active');
+  }
+
+  protected addEditorPlatform(): void {
+    if (!this.editorCanMutate()) return;
+    const current = this.playerPosition();
+    const platform: ExtraLevelPlatform = {
+      kind: 'platform',
+      id: nextPlatformId(this.level().elements),
+      x: Math.round(current.x + PLAYER_WIDTH + 80),
+      y: Math.round(Math.max(20, current.y - 70)),
+      width: DEFAULT_PLATFORM_WIDTH,
+      height: DEFAULT_PLATFORM_HEIGHT,
+    };
+    const clamped = clampElementToWorld(platform, this.level().world, this.snapEnabled() ? EDITOR_GRID_SIZE : 1);
+    this.commitEditorLevel(
+      { ...this.level(), elements: [...this.level().elements, clamped] },
+      `Added ${platform.id}`,
+    );
+    this.selectedElementId.set(platform.id);
+  }
+
+  protected deleteSelectedElement(): void {
+    if (!this.editorCanMutate()) return;
+    const selected = this.selectedEditorElement();
+    if (!selected || selected.kind === 'island') return;
+
+    this.commitEditorLevel(
+      { ...this.level(), elements: this.level().elements.filter(element => element.id !== selected.id) },
+      `Deleted ${selected.id}`,
+    );
+    this.selectedElementId.set(null);
+  }
+
+  protected duplicateSelectedElement(): void {
+    if (!this.editorCanMutate()) return;
+    const selected = this.selectedEditorElement();
+    if (!selected || selected.kind !== 'platform') return;
+
+    const duplicate = clampElementToWorld(
+      {
+        ...selected,
+        id: nextPlatformId(this.level().elements),
+        x: selected.x + 20,
+        y: selected.y + 20,
+      },
+      this.level().world,
+      this.snapEnabled() ? EDITOR_GRID_SIZE : 1,
+    ) as ExtraLevelPlatform;
+    this.commitEditorLevel(
+      { ...this.level(), elements: [...this.level().elements, duplicate] },
+      `Duplicated ${selected.id} as ${duplicate.id}`,
+    );
+    this.selectedElementId.set(duplicate.id);
+  }
+
+  protected updateEditorProperty(change: ExtrasLevelPropertyChange): void {
+    if (!this.editorCanMutate()) return;
+    const selected = findElement(this.level(), change.id);
+    if (!selected || (selected.kind === 'island' && ['width', 'height'].includes(change.property))) return;
+
+    const changed = { ...selected, [change.property]: Math.round(change.value) } as ExtraLevelElement;
+    const clamped = clampElementToWorld(changed, this.level().world);
+    this.commitEditorLevel(
+      this.replaceLevelElement(this.level(), clamped),
+      `Updated ${change.id} ${change.property} to ${clamped[change.property]}`,
+    );
+  }
+
+  protected undoEditorChange(): void {
+    if (!this.editorCanMutate()) return;
+    const previous = this.undoStack.pop();
+    if (!previous) return;
+
+    this.redoStack.push(cloneExtrasLevel(this.level()));
+    this.level.set(previous);
+    this.finishHistoryChange('Undid last level change');
+  }
+
+  protected redoEditorChange(): void {
+    if (!this.editorCanMutate()) return;
+    const next = this.redoStack.pop();
+    if (!next) return;
+
+    this.undoStack.push(cloneExtrasLevel(this.level()));
+    this.level.set(next);
+    this.finishHistoryChange('Redid level change');
+  }
+
+  protected resetEditorLevel(): void {
+    if (!this.editorCanMutate()) return;
+    this.level.set(cloneExtrasLevel(extrasLevelData));
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.selectedElementId.set(null);
+    clearExtrasLevelDraft(window.localStorage, extrasLevelData.revision);
+    this.updateHistoryAvailability();
+    this.resetPlayerToSpawn();
+    this.editorStatus.set('Draft reset to the committed layout');
+  }
+
+  protected async copyEditorSource(): Promise<void> {
+    const source = this.publishableEditorSource();
+    try {
+      await navigator.clipboard.writeText(source);
+      this.editorStatus.set('Publish config copied · replace extras-level.data.ts and commit it');
+    } catch {
+      this.editorStatus.set('Clipboard unavailable · use Download instead');
+    }
+  }
+
+  protected downloadEditorSource(): void {
+    const blob = new Blob([this.publishableEditorSource()], { type: 'text/typescript;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = this.document.createElement('a');
+    link.href = url;
+    link.download = 'extras-level.data.ts';
+    link.click();
+    URL.revokeObjectURL(url);
+    this.editorStatus.set('Downloaded extras-level.data.ts for source-controlled publishing');
+  }
+
+  protected startEditorDrag(event: PointerEvent, elementId: string): void {
+    if (!this.editorCanMutate()) return;
+    const element = findElement(this.level(), elementId);
+    if (!element) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+    this.selectedElementId.set(elementId);
+    if (event.currentTarget instanceof HTMLElement) event.currentTarget.setPointerCapture(event.pointerId);
+    this.editorDragState = {
+      pointerId: event.pointerId,
+      elementId,
+      startClientX: event.clientX,
+      startClientY: event.clientY,
+      originX: element.x,
+      originY: element.y,
+      startingLevel: cloneExtrasLevel(this.level()),
+      moved: false,
+    };
+  }
+
+  protected moveEditorDrag(event: PointerEvent): void {
+    const drag = this.editorDragState;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const element = findElement(drag.startingLevel, drag.elementId);
+    if (!element) return;
+
+    const scale = Math.max(this.worldScale(), 0.001);
+    const grid = this.snapEnabled() && !event.altKey ? EDITOR_GRID_SIZE : 1;
+    const x = snapCoordinate(drag.originX + (event.clientX - drag.startClientX) / scale, grid);
+    const y = snapCoordinate(drag.originY + (event.clientY - drag.startClientY) / scale, grid);
+    const clamped = clampElementToWorld({ ...element, x, y }, drag.startingLevel.world);
+    if (clamped.x === element.x && clamped.y === element.y) return;
+
+    drag.moved = true;
+    this.level.set(this.replaceLevelElement(drag.startingLevel, clamped));
+    this.editorStatus.set(`Moving ${drag.elementId} · ${clamped.x}, ${clamped.y}`);
+  }
+
+  protected finishEditorDrag(event: PointerEvent): void {
+    const drag = this.editorDragState;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (event.currentTarget instanceof HTMLElement && event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    this.editorDragState = null;
+    if (!drag.moved) return;
+
+    this.undoStack.push(drag.startingLevel);
+    this.redoStack.length = 0;
+    this.finishHistoryChange(`Moved ${drag.elementId}`);
+  }
+
+  protected cancelEditorDrag(event: PointerEvent): void {
+    const drag = this.editorDragState;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    this.editorDragState = null;
+    if (drag.moved) this.level.set(drag.startingLevel);
+    this.editorStatus.set(`Cancelled moving ${drag.elementId}`);
+  }
+
+  private handleEditorKeyDown(event: KeyboardEvent): void {
+    const key = event.key.toLowerCase();
+    if ((event.ctrlKey || event.metaKey) && key === 'z') {
+      event.preventDefault();
+      if (event.shiftKey) this.redoEditorChange(); else this.undoEditorChange();
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && key === 'd') {
+      event.preventDefault();
+      this.duplicateSelectedElement();
+      return;
+    }
+    if (key === 'insert') {
+      event.preventDefault();
+      this.addEditorPlatform();
+      return;
+    }
+    if (key === 'delete' || key === 'backspace') {
+      event.preventDefault();
+      this.deleteSelectedElement();
+      return;
+    }
+    if (!['arrowleft', 'arrowright', 'arrowup', 'arrowdown'].includes(key)) return;
+
+    event.preventDefault();
+    const distance = event.shiftKey ? 10 : 1;
+    const deltaX = key === 'arrowleft' ? -distance : key === 'arrowright' ? distance : 0;
+    const deltaY = key === 'arrowup' ? -distance : key === 'arrowdown' ? distance : 0;
+    this.nudgeSelectedElement(deltaX, deltaY);
+  }
+
+  private nudgeSelectedElement(deltaX: number, deltaY: number): void {
+    const selected = this.selectedEditorElement();
+    if (!selected) return;
+    const changed = clampElementToWorld(
+      { ...selected, x: selected.x + deltaX, y: selected.y + deltaY },
+      this.level().world,
+    );
+    this.commitEditorLevel(
+      this.replaceLevelElement(this.level(), changed),
+      `Moved ${selected.id} to ${changed.x}, ${changed.y}`,
+    );
+  }
+
+  private editorCanMutate(): boolean {
+    return this.editorEnabled() && this.editorMode() === 'edit';
+  }
+
+  private selectedEditorElement(): ExtraLevelElement | undefined {
+    const selectedId = this.selectedElementId();
+    return selectedId ? findElement(this.level(), selectedId) : undefined;
+  }
+
+  private replaceLevelElement(
+    level: ExtrasLevelConfig,
+    replacement: ExtraLevelElement,
+  ): ExtrasLevelConfig {
+    return {
+      ...level,
+      elements: level.elements.map(element => element.id === replacement.id ? replacement : element),
+    };
+  }
+
+  private commitEditorLevel(nextLevel: ExtrasLevelConfig, status: string): void {
+    this.undoStack.push(cloneExtrasLevel(this.level()));
+    if (this.undoStack.length > 50) this.undoStack.shift();
+    this.redoStack.length = 0;
+    this.level.set(nextLevel);
+    this.finishHistoryChange(status);
+  }
+
+  private finishHistoryChange(status: string): void {
+    this.updateHistoryAvailability();
+    const saved = saveExtrasLevelDraft(window.localStorage, this.level(), extrasLevelData.revision);
+    this.editorStatus.set(saved ? `${status} · draft saved locally` : `${status} · local draft unavailable`);
+  }
+
+  private updateHistoryAvailability(): void {
+    this.canUndo.set(this.undoStack.length > 0);
+    this.canRedo.set(this.redoStack.length > 0);
+  }
+
+  private resetPlayerToSpawn(): void {
+    this.playerPosition.set(spawnPosition(this.level()));
+    this.lastVisitedTopicId.set(spawnTopicId(this.level()));
+    this.supportingElementId = this.level().spawn.elementId;
+    this.horizontalVelocity = 0;
+    this.verticalVelocity = 0;
+    this.grounded = true;
+    this.hasUsedWasd = false;
+    this.showWasdHint.set(!this.editorEnabled() || this.editorMode() === 'playtest');
+  }
+
+  private publishableEditorSource(): string {
+    return serializeExtrasLevelSource({
+      ...this.level(),
+      revision: Math.max(extrasLevelData.revision + 1, this.level().revision),
+    });
   }
 
   private readonly handleMotionPreference = (event: MediaQueryListEvent): void => {
@@ -217,7 +603,17 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   };
 
   private readonly handleGlobalKeyDown = (event: KeyboardEvent): void => {
-    if (this.stackedLayout() || this.isEditableTarget(event.target)) return;
+    if (this.isEditableTarget(event.target)) return;
+    if (this.editorEnabled() && event.key.toLowerCase() === 'p') {
+      event.preventDefault();
+      this.changeEditorMode(this.editorMode() === 'edit' ? 'playtest' : 'edit');
+      return;
+    }
+    if (this.editorEnabled() && this.editorMode() === 'edit') {
+      this.handleEditorKeyDown(event);
+      return;
+    }
+    if (this.stackedLayout()) return;
     this.handleKeyDown(event);
   };
 
@@ -233,7 +629,8 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private readonly tick = (time: number): void => {
     const deltaSeconds = this.lastFrameTime === 0 ? 0 : Math.min((time - this.lastFrameTime) / 1000, 0.032);
     this.lastFrameTime = time;
-    if (deltaSeconds > 0 && !this.stackedLayout()) this.updatePhysics(deltaSeconds);
+    const physicsEnabled = !this.editorEnabled() || this.editorMode() === 'playtest';
+    if (deltaSeconds > 0 && !this.stackedLayout() && physicsEnabled) this.updatePhysics(deltaSeconds);
     this.animationFrameId = window.requestAnimationFrame(this.tick);
   };
 
@@ -252,16 +649,19 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.moving.set(direction !== 0 && !this.crouching());
 
     const current = this.playerPosition();
-    const nextX = Math.max(0, Math.min(WORLD_WIDTH - PLAYER_WIDTH, current.x + this.horizontalVelocity * deltaSeconds));
+    const nextX = Math.max(
+      0,
+      Math.min(this.worldWidth() - PLAYER_WIDTH, current.x + this.horizontalVelocity * deltaSeconds),
+    );
     this.verticalVelocity += 1500 * deltaSeconds;
     let nextY = current.y + this.verticalVelocity * deltaSeconds;
-    let landedPlatform: Platform | null = null;
+    let landedPlatform: ExtraLevelElement | null = null;
     let landedPlatformTop = 0;
 
     if (this.verticalVelocity >= 0) {
       const previousBottom = current.y + PLAYER_HEIGHT;
       const nextBottom = nextY + PLAYER_HEIGHT;
-      for (const platform of PLATFORMS) {
+      for (const platform of this.level().elements) {
         const platformTop = this.platformTop(platform);
         const overlaps = nextX + PLAYER_WIDTH > platform.x + 5 && nextX < platform.x + platform.width - 5;
         const crossesTop = previousBottom <= platformTop + 1 && nextBottom >= platformTop;
@@ -275,14 +675,20 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     if (landedPlatform) {
       this.verticalVelocity = 0;
       this.grounded = true;
-      if (this.hasUsedWasd && landedPlatform.topicId) this.activateTopic(landedPlatform.topicId);
+      this.supportingElementId = landedPlatform.id;
+      if (landedPlatform.kind === 'island' && this.hasUsedWasd) {
+        this.activateTopic(landedPlatform.topicId);
+      } else {
+        this.scheduleActiveTopicDeactivation();
+      }
       nextY = this.platformTop(landedPlatform) - PLAYER_HEIGHT;
     } else {
       this.grounded = false;
+      this.supportingElementId = null;
       this.scheduleActiveTopicDeactivation();
     }
 
-    if (nextY > WORLD_HEIGHT + PLAYER_HEIGHT) {
+    if (nextY > this.worldHeight() + PLAYER_HEIGHT) {
       this.respawn();
       return;
     }
@@ -294,6 +700,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     if (!this.grounded || this.crouching()) return;
     this.verticalVelocity = -620;
     this.grounded = false;
+    this.supportingElementId = null;
   }
 
   private respawn(): void {
@@ -305,13 +712,14 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
     const current = this.playerPosition();
     const currentBottom = current.y + PLAYER_HEIGHT;
-    const platform = PLATFORMS.find(candidate => {
+    const platform = this.level().elements.find(candidate => {
       const overlaps = current.x + PLAYER_WIDTH > candidate.x + 5 && current.x < candidate.x + candidate.width - 5;
-      return candidate.topicId && overlaps && Math.abs(currentBottom - this.platformTop(candidate)) <= 1;
+      return candidate.kind === 'island' && overlaps && Math.abs(currentBottom - this.platformTop(candidate)) <= 1;
     });
-    if (!platform?.topicId) return;
+    if (!platform || platform.kind !== 'island') return;
 
     this.activateTopic(platform.topicId);
+    this.supportingElementId = platform.id;
     this.playerPosition.set({ x: current.x, y: this.platformTop(platform) - PLAYER_HEIGHT });
   }
 
@@ -325,7 +733,12 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
     this.deactivationTimerId = window.setTimeout(() => {
       this.deactivationTimerId = null;
-      if (!this.grounded) this.setActiveTopic(null);
+      const support = this.supportingElementId
+        ? findElement(this.level(), this.supportingElementId)
+        : undefined;
+      if (support?.kind !== 'island' || support.topicId !== this.activeTopicId()) {
+        this.setActiveTopic(null);
+      }
     }, PLATFORM_DEACTIVATION_DELAY);
   }
 
@@ -337,19 +750,20 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   private setActiveTopic(topicId: string | null): void {
     if (this.activeTopicId() === topicId) return;
+    this.playingVideoTopicId.set(null);
     this.activeTopicId.set(topicId);
     if (topicId) this.lastVisitedTopicId.set(topicId);
     this.restartGalleryTimer();
   }
 
   private advanceActiveGallery(): void {
-    if (this.reducedMotion() || this.document.hidden) return;
+    if (this.reducedMotion() || this.document.hidden || this.playingVideoTopicId() !== null) return;
     const topicId = this.activeTopicId();
     if (topicId) this.changeMedia(topicId, 1);
   }
 
   private updateViewportWidth(): void {
-    const width = this.viewport().nativeElement.clientWidth || WORLD_WIDTH;
+    const width = this.viewport().nativeElement.clientWidth || this.worldWidth();
     const useStackedLayout = width < MIN_PLATFORMER_WIDTH;
 
     this.viewportWidth.set(width);
@@ -358,11 +772,21 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
       this.clearInput();
       this.horizontalVelocity = 0;
       this.verticalVelocity = 0;
+      if (useStackedLayout && this.editorEnabled() && this.editorMode() === 'playtest') {
+        this.editorMode.set('edit');
+        this.setActiveTopic(null);
+        this.resetPlayerToSpawn();
+        this.editorStatus.set('Edit mode restored · widen to at least 1080px for playtesting');
+      }
     }
   }
 
-  private platformTop(platform: Platform): number {
-    return platform.y - (platform.topicId === this.activeTopicId() ? ACTIVE_PLATFORM_RISE : 0);
+  private platformTop(platform: ExtraLevelElement): number {
+    return platform.y - (
+      platform.kind === 'island' && platform.topicId === this.activeTopicId()
+        ? ACTIVE_PLATFORM_RISE
+        : 0
+    );
   }
 
   private isMovementKey(key: string): key is typeof MOVEMENT_KEYS[number] {
@@ -376,7 +800,19 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   private restartGalleryTimer(): void {
     if (!isPlatformBrowser(this.platformId)) return;
-    if (this.galleryTimerId !== null) window.clearInterval(this.galleryTimerId);
+    if (this.galleryTimerId !== null) {
+      window.clearInterval(this.galleryTimerId);
+      this.galleryTimerId = null;
+    }
+
+    const topic = this.topics().find(candidate => candidate.id === this.activeTopicId());
+    if (!topic || topic.media.length < 2 || this.playingVideoTopicId() === topic.id) return;
     this.galleryTimerId = window.setInterval(() => this.advanceActiveGallery(), 5200);
+  }
+
+  private stopTrackingPlayingVideo(topicId: string): void {
+    if (this.playingVideoTopicId() !== topicId) return;
+    this.playingVideoTopicId.set(null);
+    this.restartGalleryTimer();
   }
 }

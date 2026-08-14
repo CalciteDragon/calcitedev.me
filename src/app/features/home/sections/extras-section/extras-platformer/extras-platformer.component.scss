@@ -23,6 +23,14 @@
   position: absolute;
   inset: 0 auto auto 0;
   transform-origin: left top;
+
+  &--editing {
+    background-image:
+      linear-gradient(rgba(var(--accent-cyan-rgb), 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--accent-cyan-rgb), 0.08) 1px, transparent 1px);
+    background-size: 10px 10px;
+    outline: 1px solid rgba(var(--accent-cyan-rgb), 0.28);
+  }
 }
 
 .extra-game__island-copy {
@@ -38,13 +46,16 @@
   text-align: center;
   text-shadow: 0 2px 15px var(--bg-primary);
   transform: translateY(0);
-  transition: opacity 700ms ease-out, transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 700ms ease-out, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 
   &[data-accent='gold'] { --copy-accent: var(--accent-gold); }
   &[data-accent='pink'] { --copy-accent: var(--accent-pink); }
 
-  &--active { opacity: 0.94; }
+  &--active {
+    opacity: 0.94;
+    transform: translateY(-8px);
+  }
 
   p {
     color: var(--copy-accent);
@@ -80,6 +91,59 @@
 
   &--active { transform: translateY(-8px); }
 }
+
+.extra-game__jump-platform {
+  position: absolute;
+  z-index: 4;
+  min-height: 8px;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+  border: 2px solid var(--accent-cyan);
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(var(--accent-cyan-rgb), 0.34);
+}
+
+.extra-game__editor-target {
+  position: absolute;
+  z-index: 12;
+  display: grid;
+  place-items: start center;
+  padding: 0;
+  color: var(--text-primary);
+  background: rgba(var(--accent-cyan-rgb), 0.04);
+  border: 2px dashed rgba(var(--accent-cyan-rgb), 0.72);
+  cursor: grab;
+  touch-action: none;
+
+  &:active { cursor: grabbing; }
+
+  &--platform { border-color: var(--accent-gold); }
+  &--selected {
+    border-style: solid;
+    box-shadow: 0 0 0 3px rgba(var(--accent-pink-rgb), 0.34), 0 0 20px rgba(var(--accent-cyan-rgb), 0.42);
+  }
+
+  span {
+    padding: 0.18rem 0.35rem;
+    color: var(--text-primary);
+    background: rgba(5, 8, 18, 0.9);
+    border-radius: 0 0 4px 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.25;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
+
+.extra-game__editor-width-notice {
+  margin: 0 0 $space-2;
+  color: var(--accent-gold);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.extra-game--editing .extra-game__player { opacity: 0.72; }
 
 .extra-game__player {
   position: absolute;

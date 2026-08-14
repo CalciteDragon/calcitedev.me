@@ -29,6 +29,7 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
   readonly visitRequested = output<void>();
   readonly previousRequested = output<void>();
   readonly nextRequested = output<void>();
+  readonly videoPlaybackChanged = output<boolean>();
 
   private readonly sanitizer = inject(DomSanitizer);
   private readonly document = inject(DOCUMENT);
@@ -36,6 +37,7 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
   private readonly savedPlaybackSeconds = new Map<string, number>();
   private activePlayerWindow: Window | null = null;
   private activeYoutubeId: string | null = null;
+  private videoPlaying = false;
 
   protected readonly currentMedia = computed<ExtraMediaItem>(() => {
     const media = this.topic().media;
@@ -48,7 +50,10 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
     const item = this.currentMedia();
     if (!this.active() || item.type !== 'youtube' || !item.youtubeId) return null;
 
-    const resumeAt = Math.max(0, Math.floor(this.savedPlaybackSeconds.get(item.youtubeId) ?? 0));
+    const resumeAt = Math.max(
+      0,
+      Math.floor(this.savedPlaybackSeconds.get(item.youtubeId) ?? item.youtubeStartSeconds ?? 0),
+    );
     const startParameter = resumeAt > 0 ? `&start=${resumeAt}` : '';
     const pageOrigin = this.document.location?.origin;
     const originParameter = pageOrigin && pageOrigin !== 'null' ? `&origin=${encodeURIComponent(pageOrigin)}` : '';
@@ -109,9 +114,19 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
     if (!payload || payload.event !== 'infoDelivery' || !payload.info || !this.activeYoutubeId) return;
 
     const currentTime = payload.info.currentTime;
-    if (typeof currentTime !== 'number' || !Number.isFinite(currentTime) || currentTime < 0) return;
-    this.savedPlaybackSeconds.set(this.activeYoutubeId, currentTime);
+    if (typeof currentTime === 'number' && Number.isFinite(currentTime) && currentTime >= 0) {
+      this.savedPlaybackSeconds.set(this.activeYoutubeId, currentTime);
+    }
+
+    const playerState = payload.info.playerState;
+    if (typeof playerState === 'number') this.setVideoPlaying(playerState === 1);
   };
+
+  private setVideoPlaying(playing: boolean): void {
+    if (this.videoPlaying === playing) return;
+    this.videoPlaying = playing;
+    this.videoPlaybackChanged.emit(playing);
+  }
 
   private parsePlayerMessage(data: unknown): YouTubePlayerMessage | null {
     let parsed: unknown = data;
@@ -132,5 +147,6 @@ interface YouTubePlayerMessage {
   readonly event?: unknown;
   readonly info?: {
     readonly currentTime?: unknown;
+    readonly playerState?: unknown;
   };
 }

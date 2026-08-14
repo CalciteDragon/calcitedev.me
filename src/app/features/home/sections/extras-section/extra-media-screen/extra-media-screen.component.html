@@ -16,7 +16,7 @@
             (load)="connectVideoPlayer($event)"
           ></iframe>
         } @else if (media.imageUrl; as imageUrl) {
-          <img [src]="imageUrl" [alt]="media.alt" />
+          <img [src]="imageUrl" [alt]="media.alt" loading="lazy" decoding="async" />
         } @else if (thumbnailUrl(); as thumbnail) {
           <img [src]="thumbnail" [alt]="active() ? media.alt : ''" />
           @if (!active()) {

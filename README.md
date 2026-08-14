@@ -21,11 +21,24 @@ Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)**. It combines a
 ```bash
 npm install
 npm start       # development server at http://localhost:4200
-npm test        # 129 tests at the latest documentation audit
+npm test        # 156 tests at the latest documentation audit
 npm run build   # production bundles + static prerender → dist/portfolio/browser/
 ```
 
 On Windows systems that block PowerShell’s `npm.ps1`, use `npm.cmd` instead.
+
+### Extras level editor
+
+During local development, open `http://localhost:4200/?extrasDebug=level#extras` to enable the
+Extras level editor. The query is gated by Angular development mode and does not expose editor UI
+in a production build. Edit mode can move the three protected media islands and add, move, resize,
+duplicate, or delete supplemental jump platforms; Playtest mode runs the normal platformer physics
+against the draft layout.
+
+Edits recover from versioned browser `localStorage`. Use **Copy config** or **Download** to export a
+complete `extras-level.data.ts`, then replace `src/app/data/extras-level.data.ts` and commit that file
+to publish the layout permanently. Reset draft clears the local recovery copy and reloads the
+committed level.
 
 ## Routes
 
