@@ -122,5 +122,6 @@ describe('ExtraMediaScreenComponent', () => {
     fixture.detectChanges();
 
     expect(compiled.querySelector('.extra-screen__popout')).toBeNull();
+    expect(compiled.querySelector('.extra-screen--popout')).not.toBeNull();
   });
 });

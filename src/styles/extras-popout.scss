@@ -116,7 +116,9 @@ html.extra-game--popout-open {
 .extra-game__popout-media .extra-screen--popout .extra-screen__media-slide {
   iframe,
   img {
-    object-fit: contain;
+    // The media component's scoped cover rule is emitted after this global
+    // modal rule with equal specificity; contain is the pop-out contract.
+    object-fit: contain !important;
   }
 }
 
