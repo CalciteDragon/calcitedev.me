@@ -21,6 +21,7 @@ import {
   ExtrasLevelConfig,
 } from '../../../../../models/extra-level.model';
 import { ExtraTopic } from '../../../../../models/extra.model';
+import { ExtraMediaPadComponent } from '../extra-media-pad/extra-media-pad.component';
 import { ExtraMediaScreenComponent } from '../extra-media-screen/extra-media-screen.component';
 import {
   ExtrasLevelEditorComponent,
@@ -52,7 +53,33 @@ const PLATFORM_DEACTIVATION_DELAY = 1000;
 const DEFAULT_PLATFORM_WIDTH = 180;
 const DEFAULT_PLATFORM_HEIGHT = 20;
 const EDITOR_GRID_SIZE = 10;
+const MEDIA_PAD_WIDTH = 76;
+const MEDIA_PAD_HEIGHT = 26;
+const MEDIA_PAD_SPLIT = 48;
+// Must stay in sync with --pad-travel in extra-media-pad.component.scss, which sinks the
+// cap by the same amount so the explorer rides it down.
+const MEDIA_PAD_PRESS_DEPTH = 7;
+const MEDIA_PAD_CLICK_PRESS = 180;
 const MOVEMENT_KEYS = ['a', 'd', 's', 'w', 'arrowleft', 'arrowright', 'arrowdown', 'arrowup'] as const;
+
+/**
+ * A prev/next slide pad floating above a multi-slide island. Pads are derived from island
+ * geometry rather than stored in the level data, so the editor never has to manage them.
+ */
+interface ExtraMediaPad {
+  readonly kind: 'media-pad';
+  readonly id: string;
+  readonly topicId: string;
+  readonly accent: string;
+  readonly direction: 1 | -1;
+  readonly glyph: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+type ExtraCollisionTarget = ExtraLevelElement | ExtraMediaPad;
 
 interface EditorDragState {
   readonly pointerId: number;
@@ -91,7 +118,7 @@ function spawnTopicId(level: ExtrasLevelConfig): string {
 @Component({
   selector: 'app-extras-platformer',
   standalone: true,
-  imports: [ExtraMediaScreenComponent, ExtrasLevelEditorComponent],
+  imports: [ExtraMediaPadComponent, ExtraMediaScreenComponent, ExtrasLevelEditorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './extras-platformer.component.html',
   styleUrl: './extras-platformer.component.scss',
@@ -115,8 +142,8 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   protected readonly viewportWidth = signal<number>(extrasLevelData.world.width);
   protected readonly stackedLayout = signal(false);
   protected readonly mediaIndexes = signal<Record<string, number>>({ keyboard: 0, capstone: 0, robotics: 0 });
-  protected readonly playingVideoTopicId = signal<string | null>(null);
-  protected readonly galleryAutoAdvancePaused = signal(false);
+  protected readonly restingPadId = signal<string | null>(null);
+  protected readonly clickedPadId = signal<string | null>(null);
   protected readonly popoutTopicId = signal<string | null>(null);
   protected readonly reducedMotion = signal(false);
   protected readonly editorEnabled = signal(false);
@@ -135,7 +162,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private verticalVelocity = 0;
   private grounded = true;
   private animationFrameId: number | null = null;
-  private galleryTimerId: number | null = null;
+  private clickedPadTimerId: number | null = null;
   private deactivationTimerId: number | null = null;
   private lastFrameTime = 0;
   private resizeObserver: ResizeObserver | null = null;
@@ -159,6 +186,40 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   protected readonly jumpPlatforms = computed(() => this.level().elements.filter(
     (element): element is ExtraLevelPlatform => element.kind === 'platform',
   ));
+  protected readonly mediaPads = computed<readonly ExtraMediaPad[]>(() => this.islands().flatMap(island => {
+    if (island.topic.media.length < 2) return [];
+
+    const centerX = island.x + island.width / 2;
+    // Pads rest flush on the island's top edge, so their base sits exactly on the collision surface.
+    const top = island.y - MEDIA_PAD_HEIGHT;
+    const base = {
+      kind: 'media-pad',
+      topicId: island.topicId,
+      accent: island.topic.accent,
+      y: top,
+      width: MEDIA_PAD_WIDTH,
+      height: MEDIA_PAD_HEIGHT,
+    } as const;
+    return [
+      {
+        ...base,
+        id: `${island.topicId}-pad-previous`,
+        direction: -1,
+        glyph: '‹',
+        x: Math.round(centerX - MEDIA_PAD_SPLIT / 2 - MEDIA_PAD_WIDTH),
+      },
+      {
+        ...base,
+        id: `${island.topicId}-pad-next`,
+        direction: 1,
+        glyph: '›',
+        x: Math.round(centerX + MEDIA_PAD_SPLIT / 2),
+      },
+    ] satisfies readonly ExtraMediaPad[];
+  }));
+  private readonly collisionTargets = computed<readonly ExtraCollisionTarget[]>(
+    () => [...this.level().elements, ...this.mediaPads()],
+  );
 
   protected readonly worldScale = computed(() => Math.min(1, this.viewportWidth() / this.worldWidth()));
   protected readonly desktopViewportHeight = computed(() => this.worldHeight() * this.worldScale());
@@ -201,13 +262,12 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.document.defaultView?.addEventListener('blur', this.handleWindowBlur);
 
     this.animationFrameId = window.requestAnimationFrame(this.tick);
-    this.restartGalleryTimer();
   }
 
   ngOnDestroy(): void {
     this.setPopoutPageState(false);
     if (this.animationFrameId !== null) window.cancelAnimationFrame(this.animationFrameId);
-    if (this.galleryTimerId !== null) window.clearInterval(this.galleryTimerId);
+    if (this.clickedPadTimerId !== null) window.clearTimeout(this.clickedPadTimerId);
     if (this.deactivationTimerId !== null) window.clearTimeout(this.deactivationTimerId);
     this.resizeObserver?.disconnect();
     this.motionQuery?.removeEventListener?.('change', this.handleMotionPreference);
@@ -232,6 +292,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.verticalVelocity = 0;
     this.grounded = true;
     this.airborne.set(false);
+    this.restingPadId.set(null);
     this.supportingElementId = platform.id;
     this.activateTopic(topicId);
     this.playerPosition.set({
@@ -240,17 +301,31 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  protected changeMedia(topicId: string, direction: number, manual = true): void {
+  protected changeMedia(topicId: string, direction: number): void {
     if (this.editorEnabled() && this.editorMode() === 'edit') return;
     const topic = this.topics().find(candidate => candidate.id === topicId);
     if (!topic || topic.media.length < 2) return;
 
-    if (manual) this.pauseGalleryAutoAdvance();
-    this.stopTrackingPlayingVideo(topicId);
     this.mediaIndexes.update(indexes => ({
       ...indexes,
       [topicId]: (this.mediaIndex(topicId) + direction + topic.media.length) % topic.media.length,
     }));
+  }
+
+  protected padPressed(padId: string): boolean {
+    return this.restingPadId() === padId || this.clickedPadId() === padId;
+  }
+
+  protected pressMediaPad(pad: ExtraMediaPad): void {
+    if (this.editorEnabled() && this.editorMode() === 'edit') return;
+
+    this.clickedPadId.set(pad.id);
+    if (this.clickedPadTimerId !== null) window.clearTimeout(this.clickedPadTimerId);
+    this.clickedPadTimerId = window.setTimeout(() => {
+      this.clickedPadTimerId = null;
+      this.clickedPadId.set(null);
+    }, MEDIA_PAD_CLICK_PRESS);
+    this.navigateMedia(pad.topicId, pad.direction);
   }
 
   protected openPopout(topicId: string): void {
@@ -263,15 +338,11 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     }
     this.popoutTopicId.set(topicId);
     this.setPopoutPageState(true);
-    this.restartGalleryTimer();
   }
 
   protected closePopout(): void {
-    const topicId = this.popoutTopicId();
     this.popoutTopicId.set(null);
     this.setPopoutPageState(false);
-    if (topicId && this.playingVideoTopicId() === topicId) this.playingVideoTopicId.set(null);
-    this.restartGalleryTimer();
   }
 
   protected navigateMedia(topicId: string, direction: number): void {
@@ -287,29 +358,12 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  protected handleVideoPlaybackChange(topicId: string, playing: boolean): void {
-    if (topicId !== this.activeTopicId()) return;
-
-    if (playing) {
-      this.playingVideoTopicId.set(topicId);
-    } else if (this.playingVideoTopicId() === topicId) {
-      this.playingVideoTopicId.set(null);
-    } else {
-      return;
-    }
-    this.restartGalleryTimer();
-  }
-
   protected handleKeyDown(event: KeyboardEvent): void {
     const key = event.key.toLowerCase();
     if (!this.isMovementKey(key)) return;
 
     event.preventDefault();
     if (['a', 'd', 's', 'w'].includes(key)) {
-      if (this.galleryAutoAdvancePaused()) {
-        this.galleryAutoAdvancePaused.set(false);
-        this.restartGalleryTimer();
-      }
       this.showWasdHint.set(false);
       if (!this.hasUsedWasd) {
         this.hasUsedWasd = true;
@@ -630,6 +684,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.verticalVelocity = 0;
     this.grounded = true;
     this.airborne.set(false);
+    this.restingPadId.set(null);
     this.hasUsedWasd = false;
     this.showWasdHint.set(!this.editorEnabled() || this.editorMode() === 'playtest');
   }
@@ -669,13 +724,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
       this.handleEditorKeyDown(event);
       return;
     }
-    if (this.stackedLayout()) {
-      if (['a', 'd', 's', 'w'].includes(event.key.toLowerCase())) {
-        this.galleryAutoAdvancePaused.set(false);
-        this.restartGalleryTimer();
-      }
-      return;
-    }
+    if (this.stackedLayout()) return;
     this.handleKeyDown(event);
   };
 
@@ -741,13 +790,13 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     );
     this.verticalVelocity += 1500 * deltaSeconds;
     let nextY = current.y + this.verticalVelocity * deltaSeconds;
-    let landedPlatform: ExtraLevelElement | null = null;
+    let landedPlatform: ExtraCollisionTarget | null = null;
     let landedPlatformTop = 0;
 
     if (this.verticalVelocity >= 0) {
       const previousBottom = current.y + PLAYER_HEIGHT;
       const nextBottom = nextY + PLAYER_HEIGHT;
-      for (const platform of this.level().elements) {
+      for (const platform of this.collisionTargets()) {
         const platformTop = this.platformTop(platform);
         const overlaps = nextX + PLAYER_WIDTH > platform.x + 5 && nextX < platform.x + platform.width - 5;
         const crossesTop = previousBottom <= platformTop + 1 && nextBottom >= platformTop;
@@ -759,19 +808,28 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     }
 
     if (landedPlatform) {
+      // A pad only fires on the landing frame; resting on it must not advance the gallery again.
+      const isNewSupport = this.supportingElementId !== landedPlatform.id;
       this.verticalVelocity = 0;
       this.grounded = true;
       this.airborne.set(false);
       this.supportingElementId = landedPlatform.id;
-      if (landedPlatform.kind === 'island' && this.hasUsedWasd) {
+      this.restingPadId.set(landedPlatform.kind === 'media-pad' ? landedPlatform.id : null);
+
+      if (landedPlatform.kind !== 'platform' && this.hasUsedWasd) {
         this.activateTopic(landedPlatform.topicId);
       } else {
         this.scheduleActiveTopicDeactivation();
       }
+      if (landedPlatform.kind === 'media-pad' && isNewSupport) {
+        this.changeMedia(landedPlatform.topicId, landedPlatform.direction);
+      }
+      // Re-read the top so the active-island rise and the pad's press depth both move the player.
       nextY = this.platformTop(landedPlatform) - PLAYER_HEIGHT;
     } else {
       this.grounded = false;
       this.airborne.set(true);
+      this.restingPadId.set(null);
       this.supportingElementId = null;
       this.scheduleActiveTopicDeactivation();
     }
@@ -801,11 +859,11 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
     const current = this.playerPosition();
     const currentBottom = current.y + PLAYER_HEIGHT;
-    const platform = this.level().elements.find(candidate => {
+    const platform = this.collisionTargets().find(candidate => {
       const overlaps = current.x + PLAYER_WIDTH > candidate.x + 5 && current.x < candidate.x + candidate.width - 5;
-      return candidate.kind === 'island' && overlaps && Math.abs(currentBottom - this.platformTop(candidate)) <= 1;
+      return candidate.kind !== 'platform' && overlaps && Math.abs(currentBottom - this.platformTop(candidate)) <= 1;
     });
-    if (!platform || platform.kind !== 'island') return;
+    if (!platform || platform.kind === 'platform') return;
 
     this.activateTopic(platform.topicId);
     this.supportingElementId = platform.id;
@@ -822,10 +880,12 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
     this.deactivationTimerId = window.setTimeout(() => {
       this.deactivationTimerId = null;
-      const support = this.supportingElementId
-        ? findElement(this.level(), this.supportingElementId)
+      const supportId = this.supportingElementId;
+      // A topic's own slide pads count as support, so resting on one keeps its island active.
+      const support = supportId
+        ? this.collisionTargets().find(target => target.id === supportId)
         : undefined;
-      if (support?.kind !== 'island' || support.topicId !== this.activeTopicId()) {
+      if (!support || support.kind === 'platform' || support.topicId !== this.activeTopicId()) {
         this.setActiveTopic(null);
       }
     }, PLATFORM_DEACTIVATION_DELAY);
@@ -839,23 +899,8 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   private setActiveTopic(topicId: string | null): void {
     if (this.activeTopicId() === topicId) return;
-    this.galleryAutoAdvancePaused.set(false);
-    this.playingVideoTopicId.set(null);
     this.activeTopicId.set(topicId);
     if (topicId) this.lastVisitedTopicId.set(topicId);
-    this.restartGalleryTimer();
-  }
-
-  private advanceActiveGallery(): void {
-    if (
-      this.reducedMotion()
-      || this.document.hidden
-      || this.playingVideoTopicId() !== null
-      || this.galleryAutoAdvancePaused()
-      || this.popoutTopicId() !== null
-    ) return;
-    const topicId = this.activeTopicId();
-    if (topicId) this.changeMedia(topicId, 1, false);
   }
 
   private updateViewportWidth(): void {
@@ -877,12 +922,14 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private platformTop(platform: ExtraLevelElement): number {
-    return platform.y - (
-      platform.kind === 'island' && platform.topicId === this.activeTopicId()
-        ? ACTIVE_PLATFORM_RISE
-        : 0
-    );
+  private platformTop(platform: ExtraCollisionTarget): number {
+    if (platform.kind === 'platform') return platform.y;
+
+    const rise = platform.topicId === this.activeTopicId() ? ACTIVE_PLATFORM_RISE : 0;
+    const press = platform.kind === 'media-pad' && this.restingPadId() === platform.id
+      ? MEDIA_PAD_PRESS_DEPTH
+      : 0;
+    return platform.y - rise + press;
   }
 
   private isMovementKey(key: string): key is typeof MOVEMENT_KEYS[number] {
@@ -892,34 +939,6 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private isEditableTarget(target: EventTarget | null): boolean {
     if (!(target instanceof HTMLElement)) return false;
     return target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName);
-  }
-
-  private restartGalleryTimer(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (this.galleryTimerId !== null) {
-      window.clearInterval(this.galleryTimerId);
-      this.galleryTimerId = null;
-    }
-
-    if (this.galleryAutoAdvancePaused() || this.popoutTopicId() !== null) return;
-
-    const topic = this.topics().find(candidate => candidate.id === this.activeTopicId());
-    if (!topic || topic.media.length < 2 || this.playingVideoTopicId() === topic.id) return;
-    this.galleryTimerId = window.setInterval(() => this.advanceActiveGallery(), 5200);
-  }
-
-  private stopTrackingPlayingVideo(topicId: string): void {
-    if (this.playingVideoTopicId() !== topicId) return;
-    this.playingVideoTopicId.set(null);
-    this.restartGalleryTimer();
-  }
-
-  private pauseGalleryAutoAdvance(): void {
-    this.galleryAutoAdvancePaused.set(true);
-    if (this.galleryTimerId !== null) {
-      window.clearInterval(this.galleryTimerId);
-      this.galleryTimerId = null;
-    }
   }
 
   private setPopoutPageState(open: boolean): void {

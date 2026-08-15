@@ -81,9 +81,24 @@
               (popoutRequested)="openPopout(island.topicId)"
               (previousRequested)="navigateMedia(island.topicId, -1)"
               (nextRequested)="navigateMedia(island.topicId, 1)"
-              (videoPlaybackChanged)="handleVideoPlaybackChange(island.topicId, $event)"
             />
           </div>
+        }
+
+        @for (pad of mediaPads(); track pad.id) {
+          <app-extra-media-pad
+            class="extra-game__media-pad"
+            [accent]="pad.accent"
+            [glyph]="pad.glyph"
+            [active]="activeTopicId() === pad.topicId"
+            [pressed]="padPressed(pad.id)"
+            [attr.inert]="editorEnabled() && editorMode() === 'edit' ? '' : null"
+            [style.left.px]="pad.x"
+            [style.top.px]="pad.y"
+            [style.width.px]="pad.width"
+            [style.height.px]="pad.height"
+            (pressRequested)="pressMediaPad(pad)"
+          />
         }
 
         @for (platform of jumpPlatforms(); track platform.id) {
@@ -177,7 +192,6 @@
               (popoutRequested)="openPopout(island.topicId)"
               (previousRequested)="navigateMedia(island.topicId, -1)"
               (nextRequested)="navigateMedia(island.topicId, 1)"
-              (videoPlaybackChanged)="handleVideoPlaybackChange(island.topicId, $event)"
             />
           </div>
         </article>
@@ -216,7 +230,6 @@
             [mediaIndex]="mediaIndex(topic.id)"
             (previousRequested)="navigateMedia(topic.id, -1)"
             (nextRequested)="navigateMedia(topic.id, 1)"
-            (videoPlaybackChanged)="handleVideoPlaybackChange(topic.id, $event)"
           />
         </div>
       </section>

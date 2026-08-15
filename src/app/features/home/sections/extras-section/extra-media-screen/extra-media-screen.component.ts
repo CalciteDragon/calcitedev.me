@@ -31,7 +31,6 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
   readonly previousRequested = output<void>();
   readonly nextRequested = output<void>();
   readonly popoutRequested = output<void>();
-  readonly videoPlaybackChanged = output<boolean>();
 
   private readonly sanitizer = inject(DomSanitizer);
   private readonly document = inject(DOCUMENT);
@@ -39,7 +38,6 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
   private readonly savedPlaybackSeconds = new Map<string, number>();
   private activePlayerWindow: Window | null = null;
   private activeYoutubeId: string | null = null;
-  private videoPlaying = false;
 
   protected readonly currentMedia = computed<ExtraMediaItem>(() => {
     const media = this.topic().media;
@@ -131,16 +129,7 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
     if (typeof currentTime === 'number' && Number.isFinite(currentTime) && currentTime >= 0) {
       this.savedPlaybackSeconds.set(this.activeYoutubeId, currentTime);
     }
-
-    const playerState = payload.info.playerState;
-    if (typeof playerState === 'number') this.setVideoPlaying(playerState === 1);
   };
-
-  private setVideoPlaying(playing: boolean): void {
-    if (this.videoPlaying === playing) return;
-    this.videoPlaying = playing;
-    this.videoPlaybackChanged.emit(playing);
-  }
 
   private parsePlayerMessage(data: unknown): YouTubePlayerMessage | null {
     let parsed: unknown = data;
@@ -161,6 +150,5 @@ interface YouTubePlayerMessage {
   readonly event?: unknown;
   readonly info?: {
     readonly currentTime?: unknown;
-    readonly playerState?: unknown;
   };
 }

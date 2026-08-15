@@ -92,10 +92,15 @@
   &--active { transform: translateY(-8px); }
 }
 
+// Placement only; ExtraMediaPadComponent owns the housing, cap, and press states.
+.extra-game__media-pad {
+  position: absolute;
+  z-index: 5;
+}
+
 .extra-game__jump-platform {
   position: absolute;
   z-index: 4;
-  min-height: 8px;
   background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
   border: 2px solid var(--accent-cyan);
   border-radius: 4px;
@@ -124,12 +129,9 @@
 
   span {
     padding: 0.18rem 0.35rem;
-    color: var(--text-primary);
     background: rgba(5, 8, 18, 0.9);
     border-radius: 0 0 4px 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    line-height: 1.25;
+    font: 11px/1.25 'JetBrains Mono', monospace;
     white-space: nowrap;
     pointer-events: none;
   }
@@ -185,6 +187,21 @@
   letter-spacing: 0.04em;
 }
 
+// One shared speech-bubble tail for both the in-world hint and the stacked-layout prompt.
+.extra-game__wasd-hint::after,
+.extra-game__desktop-hint::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -0.36rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  background: rgba(11, 15, 26, 0.84);
+  border-left: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
+  border-bottom: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
+  transform: translateY(-50%) rotate(45deg);
+}
+
 .extra-game__wasd-hint {
   position: absolute;
   bottom: 0.75rem;
@@ -195,19 +212,6 @@
   text-align: center;
   white-space: nowrap;
   animation: hint-arrive 500ms ease-out both;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -0.35rem;
-    width: 0.6rem;
-    height: 0.6rem;
-    background: rgba(11, 15, 26, 0.84);
-    border-left: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
-    border-bottom: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
-    transform: translateY(-50%) rotate(45deg);
-  }
 }
 
 .extra-game__player-sprite {
@@ -239,19 +243,6 @@
   padding: 0.75rem 0.9rem;
   font-size: 0.72rem;
   line-height: 1.55;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: -0.38rem;
-    width: 0.65rem;
-    height: 0.65rem;
-    background: rgba(11, 15, 26, 0.84);
-    border-left: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
-    border-bottom: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
-    transform: translateY(-50%) rotate(45deg);
-  }
 }
 
 .extra-game__stack-pane {

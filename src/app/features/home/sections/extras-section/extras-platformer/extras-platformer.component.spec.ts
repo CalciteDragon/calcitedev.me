@@ -325,82 +325,117 @@ describe('ExtrasPlatformerComponent', () => {
     }
   });
 
-  it('pauses gallery auto-advance while the active YouTube video is playing', () => {
+  it('never advances an activated gallery on its own', () => {
     const component = fixture.componentInstance as unknown as {
-      mediaIndex(topicId: string): number;
-      playingVideoTopicId(): string | null;
-    };
-    const roboticsPane = compiled.querySelector(
-      '[aria-label="Teleport to Robotics Outpost"]',
-    ) as HTMLButtonElement;
-    const roboticsNext = compiled.querySelectorAll<HTMLButtonElement>(
-      '.extra-screen__gallery-controls button',
-    )[3]!;
-
-    roboticsPane.click();
-    roboticsNext.click();
-    roboticsNext.click();
-    fixture.detectChanges();
-
-    const frame = compiled.querySelector('iframe') as HTMLIFrameElement;
-    frame.dispatchEvent(new Event('load'));
-    window.dispatchEvent(new MessageEvent('message', {
-      origin: 'https://www.youtube-nocookie.com',
-      source: frame.contentWindow,
-      data: JSON.stringify({ event: 'infoDelivery', info: { currentTime: 11018, playerState: 1 } }),
-    }));
-
-    expect(component.mediaIndex('robotics')).toBe(2);
-    expect(component.playingVideoTopicId()).toBe('robotics');
-    vi.advanceTimersByTime(5200);
-    expect(component.mediaIndex('robotics')).toBe(2);
-
-    window.dispatchEvent(new MessageEvent('message', {
-      origin: 'https://www.youtube-nocookie.com',
-      source: frame.contentWindow,
-      data: JSON.stringify({ event: 'infoDelivery', info: { currentTime: 11020, playerState: 2 } }),
-    }));
-    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', bubbles: true }));
-    vi.advanceTimersByTime(5200);
-
-    expect(component.playingVideoTopicId()).toBeNull();
-    expect(component.mediaIndex('robotics')).toBe(3);
-    document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'd', bubbles: true }));
-  });
-
-  it('pauses manual gallery navigation until WASD or a new island activation', () => {
-    const component = fixture.componentInstance as unknown as {
-      activeTopicId(): string | null;
-      changeMedia(topicId: string, direction: number): void;
-      galleryAutoAdvancePaused(): boolean;
       mediaIndex(topicId: string): number;
       visitTopic(topicId: string): void;
     };
 
     component.visitTopic('capstone');
     fixture.detectChanges();
-    component.changeMedia('capstone', 1);
-    fixture.detectChanges();
-    expect(component.galleryAutoAdvancePaused()).toBe(true);
-    expect(component.mediaIndex('capstone')).toBe(1);
+    expect(component.mediaIndex('capstone')).toBe(0);
 
-    vi.advanceTimersByTime(5200);
-    expect(component.mediaIndex('capstone')).toBe(1);
-
-    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', bubbles: true }));
+    vi.advanceTimersByTime(60_000);
     fixture.detectChanges();
-    expect(component.galleryAutoAdvancePaused()).toBe(false);
-    vi.advanceTimersByTime(5200);
+    expect(component.mediaIndex('capstone')).toBe(0);
+    expect(compiled.querySelector('.extra-game__island-copy--active')?.textContent)
+      .toContain('Pineapple Expense in Seattle');
+  });
+
+  it('renders paired slide pads only above islands with more than one slide', () => {
+    const pads = compiled.querySelectorAll<HTMLElement>('.extra-game__media-pad');
+    const capstone = extrasLevelData.elements.find(element => element.id === 'capstone-island')!;
+
+    expect(pads).toHaveLength(4);
+    expect(Array.from(pads).map(pad => pad.textContent?.trim())).toEqual(['‹', '›', '‹', '›']);
+    expect(Array.from(pads).map(pad => pad.getAttribute('data-accent'))).toEqual([
+      'gold',
+      'gold',
+      'pink',
+      'pink',
+    ]);
+    // Keyboard Cove holds a single video, so it gets no pads.
+    expect(compiled.querySelectorAll('[data-accent="cyan"].extra-game__media-pad')).toHaveLength(0);
+    // Flush: the pad's base sits exactly on the island's top collision edge.
+    expect(pads[0]!.style.top).toBe(`${capstone.y - 26}px`);
+    expect(pads[0]!.style.left).toBe(`${capstone.x + capstone.width / 2 - 24 - 76}px`);
+    expect(pads[1]!.style.left).toBe(`${capstone.x + capstone.width / 2 + 24}px`);
+    expect(pads[0]!.style.width).toBe('76px');
+    expect(pads[0]!.style.height).toBe('26px');
+    // The on-screen cursor arrows stay alongside the pads.
+    expect(compiled.querySelectorAll('.extra-screen__gallery-controls button')).toHaveLength(4);
+  });
+
+  it('advances a slide once per landing when the explorer jumps onto a pad', () => {
+    const component = fixture.componentInstance as unknown as {
+      grounded: boolean;
+      jump(): void;
+      mediaIndex(topicId: string): number;
+      playerHeight: number;
+      playerPosition: {
+        (): { x: number; y: number };
+        set(position: { x: number; y: number }): void;
+      };
+      restingPadId(): string | null;
+      supportingElementId: string | null;
+      updatePhysics(deltaSeconds: number): void;
+      visitTopic(topicId: string): void;
+    };
+    const capstone = extrasLevelData.elements.find(element => element.id === 'capstone-island')!;
+    const padTop = capstone.y - 26 - 8;
+
+    component.visitTopic('capstone');
+    component.playerPosition.set({ x: 320, y: capstone.y - 8 - component.playerHeight });
+    component.grounded = true;
+    component.supportingElementId = 'capstone-island';
+    expect(component.mediaIndex('capstone')).toBe(0);
+
+    component.jump();
+    for (let frame = 0; frame < 60; frame += 1) component.updatePhysics(0.016);
+    fixture.detectChanges();
+
+    expect(component.supportingElementId).toBe('capstone-pad-next');
+    expect(component.restingPadId()).toBe('capstone-pad-next');
+    expect(component.mediaIndex('capstone')).toBe(1);
+    // The pad sinks 7px and carries the explorer down with it.
+    expect(component.playerPosition().y).toBe(padTop + 7 - component.playerHeight);
+    expect(compiled.querySelectorAll('.extra-game__media-pad .extra-pad')[1]!.classList)
+      .toContain('extra-pad--pressed');
+
+    // Resting on the pad must not keep advancing, and must not deactivate the island.
+    for (let frame = 0; frame < 60; frame += 1) component.updatePhysics(0.016);
+    vi.advanceTimersByTime(2000);
+    fixture.detectChanges();
+    expect(component.mediaIndex('capstone')).toBe(1);
+    expect(compiled.querySelector('.extra-game__screen--active')).not.toBeNull();
+
+    // Jumping off releases the pad; landing on it again advances one more slide.
+    component.jump();
+    for (let frame = 0; frame < 60; frame += 1) component.updatePhysics(0.016);
+    fixture.detectChanges();
     expect(component.mediaIndex('capstone')).toBe(2);
-    document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'd', bubbles: true }));
+  });
 
-    component.changeMedia('capstone', 1);
+  it('advances a slide and depresses the pad when it is clicked with a pointer', () => {
+    const component = fixture.componentInstance as unknown as {
+      activeTopicId(): string | null;
+      mediaIndex(topicId: string): number;
+    };
+    const roboticsPrevious = compiled.querySelectorAll<HTMLButtonElement>('.extra-game__media-pad .extra-pad')[2]!;
+
+    expect(roboticsPrevious.getAttribute('aria-hidden')).toBe('true');
+    expect(roboticsPrevious.tabIndex).toBe(-1);
+
+    roboticsPrevious.click();
     fixture.detectChanges();
-    expect(component.galleryAutoAdvancePaused()).toBe(true);
-    component.visitTopic('robotics');
-    fixture.detectChanges();
+
+    expect(component.mediaIndex('robotics')).toBe(4);
     expect(component.activeTopicId()).toBe('robotics');
-    expect(component.galleryAutoAdvancePaused()).toBe(false);
+    expect(roboticsPrevious.classList).toContain('extra-pad--pressed');
+
+    vi.advanceTimersByTime(180);
+    fixture.detectChanges();
+    expect(roboticsPrevious.classList).not.toContain('extra-pad--pressed');
   });
 
   it('opens an activated topic in a centered pop-out and closes it', () => {
