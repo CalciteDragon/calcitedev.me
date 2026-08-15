@@ -154,12 +154,16 @@
   transform-origin: center bottom;
   will-change: transform;
 
-  &--left .extra-game__player-head,
-  &--left .extra-game__player-body { transform: scaleX(-1); }
-  &--moving .extra-game__player-foot--left { animation: player-step 180ms steps(2) infinite; }
-  &--moving .extra-game__player-foot--right { animation: player-step 180ms steps(2) infinite reverse; }
-  &--crouching .extra-game__player-head { top: 13px; }
-  &--crouching .extra-game__player-body { top: 28px; height: 13px; }
+  &--left .extra-game__player-sprite { transform: scaleX(-1); }
+  &--moving .extra-game__player-sprite { animation: player-step 480ms steps(4) infinite; }
+  &--crouching .extra-game__player-sprite {
+    background-position-x: -152px;
+    animation: none;
+  }
+  &--airborne .extra-game__player-sprite {
+    background-position-x: -190px;
+    animation: none;
+  }
 
   &--fallback {
     position: relative;
@@ -206,58 +210,12 @@
   }
 }
 
-.extra-game__player-antenna {
+.extra-game__player-sprite {
   position: absolute;
-  top: 0;
-  left: 17px;
-  width: 4px;
-  height: 8px;
-  background: var(--accent-pink);
-  box-shadow: 0 0 5px var(--accent-pink);
-}
-
-.extra-game__player-head {
-  position: absolute;
-  top: 6px;
-  left: 5px;
-  width: 28px;
-  height: 20px;
-  background: var(--text-primary);
-  border: 3px solid #111827;
-  border-radius: 6px;
-
-  i {
-    position: absolute;
-    top: 5px;
-    width: 4px;
-    height: 5px;
-    background: var(--accent-cyan);
-    box-shadow: 0 0 4px var(--accent-cyan);
-    &:first-child { left: 5px; }
-    &:last-child { right: 5px; }
-  }
-}
-
-.extra-game__player-body {
-  position: absolute;
-  top: 27px;
-  left: 9px;
-  width: 20px;
-  height: 15px;
-  background: var(--accent-blue);
-  border: 3px solid #111827;
-  border-radius: 3px 3px 6px 6px;
-}
-
-.extra-game__player-foot {
-  position: absolute;
-  top: 42px;
-  width: 11px;
-  height: 6px;
-  background: var(--accent-pink);
-  border-radius: 2px;
-  &--left { left: 6px; }
-  &--right { right: 6px; }
+  inset: 0;
+  background: url('/assets/pixel-art/extras-explorer.svg') 0 0 / 228px 48px no-repeat;
+  image-rendering: pixelated;
+  transform-origin: center bottom;
 }
 
 .extra-game__stack {
@@ -348,7 +306,7 @@
     drop-shadow(0 0 16px color-mix(in srgb, var(--pane-accent) 18%, transparent));
 }
 
-@keyframes player-step { to { transform: translateY(-3px); } }
+@keyframes player-step { to { background-position-x: -152px; } }
 @keyframes hint-arrive { from { opacity: 0; transform: translateY(4px) scale(0.96); } }
 
 @media (max-width: $bp-sm) {
@@ -359,7 +317,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .extra-game__player-foot,
+  .extra-game__player-sprite,
   .extra-game__wasd-hint { animation: none !important; }
   .extra-game__screen,
   .extra-game__island-copy,

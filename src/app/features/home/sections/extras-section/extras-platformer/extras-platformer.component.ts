@@ -110,6 +110,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   protected readonly facing = signal<'left' | 'right'>('right');
   protected readonly moving = signal(false);
   protected readonly crouching = signal(false);
+  protected readonly airborne = signal(false);
   protected readonly showWasdHint = signal(true);
   protected readonly viewportWidth = signal<number>(extrasLevelData.world.width);
   protected readonly stackedLayout = signal(false);
@@ -230,6 +231,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.horizontalVelocity = 0;
     this.verticalVelocity = 0;
     this.grounded = true;
+    this.airborne.set(false);
     this.supportingElementId = platform.id;
     this.activateTopic(topicId);
     this.playerPosition.set({
@@ -627,6 +629,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.horizontalVelocity = 0;
     this.verticalVelocity = 0;
     this.grounded = true;
+    this.airborne.set(false);
     this.hasUsedWasd = false;
     this.showWasdHint.set(!this.editorEnabled() || this.editorMode() === 'playtest');
   }
@@ -758,6 +761,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     if (landedPlatform) {
       this.verticalVelocity = 0;
       this.grounded = true;
+      this.airborne.set(false);
       this.supportingElementId = landedPlatform.id;
       if (landedPlatform.kind === 'island' && this.hasUsedWasd) {
         this.activateTopic(landedPlatform.topicId);
@@ -767,6 +771,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
       nextY = this.platformTop(landedPlatform) - PLAYER_HEIGHT;
     } else {
       this.grounded = false;
+      this.airborne.set(true);
       this.supportingElementId = null;
       this.scheduleActiveTopicDeactivation();
     }
@@ -783,6 +788,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     if (!this.grounded || this.crouching()) return;
     this.verticalVelocity = -620;
     this.grounded = false;
+    this.airborne.set(true);
     this.supportingElementId = null;
   }
 

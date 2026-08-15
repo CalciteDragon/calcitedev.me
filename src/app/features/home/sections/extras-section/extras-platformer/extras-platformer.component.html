@@ -124,20 +124,17 @@
           [class.extra-game__player--left]="facing() === 'left'"
           [class.extra-game__player--moving]="moving()"
           [class.extra-game__player--crouching]="crouching()"
+          [class.extra-game__player--airborne]="airborne()"
           [style.width.px]="playerWidth"
           [style.height.px]="playerHeight"
           [style.transform]="'translate3d(' + playerPosition().x + 'px, ' + playerPosition().y + 'px, 0)'"
           role="img"
-          aria-label="Pixel explorer character"
+          aria-label="8-bit pixel art avatar of Tyler Hawthorn"
         >
           @if (showWasdHint()) {
             <span class="extra-game__wasd-hint" aria-hidden="true">try WASD</span>
           }
-          <span class="extra-game__player-antenna" aria-hidden="true"></span>
-          <span class="extra-game__player-head" aria-hidden="true"><i></i><i></i></span>
-          <span class="extra-game__player-body" aria-hidden="true"></span>
-          <span class="extra-game__player-foot extra-game__player-foot--left" aria-hidden="true"></span>
-          <span class="extra-game__player-foot extra-game__player-foot--right" aria-hidden="true"></span>
+          <span class="extra-game__player-sprite" aria-hidden="true"></span>
         </div>
       </div>
 
@@ -150,13 +147,9 @@
           [style.width.px]="playerWidth"
           [style.height.px]="playerHeight"
           role="img"
-          aria-label="Pixel explorer character"
+          aria-label="8-bit pixel art avatar of Tyler Hawthorn"
         >
-          <span class="extra-game__player-antenna" aria-hidden="true"></span>
-          <span class="extra-game__player-head" aria-hidden="true"><i></i><i></i></span>
-          <span class="extra-game__player-body" aria-hidden="true"></span>
-          <span class="extra-game__player-foot extra-game__player-foot--left" aria-hidden="true"></span>
-          <span class="extra-game__player-foot extra-game__player-foot--right" aria-hidden="true"></span>
+          <span class="extra-game__player-sprite" aria-hidden="true"></span>
         </div>
         <p class="extra-game__desktop-hint">Try this on desktop — or make your window wider.</p>
       </div>

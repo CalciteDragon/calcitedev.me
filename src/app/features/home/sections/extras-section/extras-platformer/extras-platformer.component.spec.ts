@@ -477,6 +477,33 @@ describe('ExtrasPlatformerComponent', () => {
     document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowRight', bubbles: true }));
   });
 
+  it('renders and poses the hero-inspired explorer sprite without changing its collision box', () => {
+    const component = fixture.componentInstance as unknown as {
+      updatePhysics(deltaSeconds: number): void;
+    };
+    const player = compiled.querySelector<HTMLElement>('.extra-game__player')!;
+
+    expect(player.style.width).toBe('38px');
+    expect(player.style.height).toBe('48px');
+    expect(player.getAttribute('aria-label')).toBe('8-bit pixel art avatar of Tyler Hawthorn');
+    expect(player.querySelector('.extra-game__player-sprite')).not.toBeNull();
+    expect(player.querySelector('.extra-game__player-head')).toBeNull();
+
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true }));
+    component.updatePhysics(0.032);
+    fixture.detectChanges();
+
+    expect(player.classList.contains('extra-game__player--left')).toBe(true);
+    expect(player.classList.contains('extra-game__player--moving')).toBe(true);
+
+    document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'a', bubbles: true }));
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+    fixture.detectChanges();
+
+    expect(player.classList.contains('extra-game__player--airborne')).toBe(true);
+    document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'ArrowUp', bubbles: true }));
+  });
+
   it('keeps a platform active for one second after the player leaves it', () => {
     const component = fixture.componentInstance as unknown as { updatePhysics(deltaSeconds: number): void };
 
