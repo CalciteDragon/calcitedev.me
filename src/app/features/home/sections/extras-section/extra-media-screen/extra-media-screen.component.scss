@@ -114,6 +114,33 @@
   cursor: pointer;
 }
 
+.extra-screen__popout {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  z-index: 8;
+  display: grid;
+  width: 1.8rem;
+  height: 1.8rem;
+  place-items: center;
+  padding: 0;
+  color: var(--screen-accent);
+  background: rgba(5, 9, 18, 0.82);
+  border: 1px solid color-mix(in srgb, var(--screen-accent) 62%, transparent);
+  border-radius: 0.35rem;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.48);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bg-primary);
+    background: var(--screen-accent);
+  }
+}
+
 .extra-screen__scanlines {
   position: absolute;
   inset: 0;
@@ -127,6 +154,10 @@
   );
   border-radius: inherit;
   pointer-events: none;
+}
+
+.extra-screen--popout .extra-screen__scanlines {
+  opacity: 0.45;
 }
 
 .extra-screen__gallery-controls {

@@ -90,4 +90,37 @@ describe('ExtraMediaScreenComponent', () => {
     expect(compiled.textContent).not.toContain('Presentation day');
     expect(compiled.textContent).not.toContain('1/3');
   });
+
+  it('emits a popout request from the bottom-right button', () => {
+    const popoutRequested = vi.spyOn(fixture.componentInstance.popoutRequested, 'emit');
+    const button = compiled.querySelector('.extra-screen__popout') as HTMLButtonElement;
+
+    expect(button).not.toBeNull();
+    button.click();
+
+    expect(popoutRequested).toHaveBeenCalledOnce();
+  });
+
+  it('clears pointer focus from carousel arrows without removing keyboard focus', () => {
+    fixture.componentRef.setInput('topic', extrasData[0]);
+    fixture.detectChanges();
+    const button = compiled.querySelector(
+      '.extra-screen__gallery-controls button:last-child',
+    ) as HTMLButtonElement;
+
+    button.focus();
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    expect(document.activeElement).not.toBe(button);
+
+    button.focus();
+    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('hides the popout button when disabled', () => {
+    fixture.componentRef.setInput('showPopoutButton', false);
+    fixture.detectChanges();
+
+    expect(compiled.querySelector('.extra-screen__popout')).toBeNull();
+  });
 });

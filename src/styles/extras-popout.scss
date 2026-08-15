@@ -1,0 +1,132 @@
+@use 'variables' as *;
+
+.extras-section__content:has(.extra-game__popout-backdrop) {
+  animation: none;
+  transform: none;
+}
+
+.main-page .main-page__section:has(.extra-game__popout-backdrop) {
+  z-index: 1300;
+}
+
+html.extra-game--popout-open,
+html.extra-game--popout-open body {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+html.extra-game--popout-open {
+  scrollbar-gutter: stable;
+}
+
+.extra-game__popout-backdrop {
+  position: fixed;
+  z-index: 1300;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  --popout-outline: rgba(var(--accent-cyan-rgb), 0.28);
+  background: rgba(3, 6, 16, 0.82);
+}
+
+.extra-game__popout-dialog {
+  position: relative;
+  display: grid;
+  gap: 1rem;
+  width: min(100%, calc(64vw + 4rem), 88rem);
+  max-height: min(92vh, 58rem);
+  margin: 0;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: var(--bg-surface);
+  border: 1px solid var(--popout-outline);
+  border-radius: 1rem;
+}
+
+.extra-game__popout-close {
+  position: absolute;
+  z-index: 2;
+  top: 0.65rem;
+  right: 0.65rem;
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  padding: 0;
+  color: var(--popout-outline);
+  background: rgba(5, 8, 18, 0.74);
+  border: 1px solid var(--popout-outline);
+  border-radius: 999px;
+  font-size: 1.7rem;
+  line-height: 1;
+  cursor: pointer;
+
+  span {
+    display: block;
+    line-height: 1;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+  }
+}
+
+.extra-game__popout-header {
+  padding-right: 3rem;
+
+  p {
+    color: var(--accent-cyan);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    color: var(--text-primary);
+    font-size: clamp(1.45rem, 3vw, 2.5rem);
+    line-height: 1.08;
+  }
+
+  > span {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+}
+
+.extra-game__popout-media {
+  width: min(100%, 64vw);
+  height: auto;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  overflow: hidden;
+  justify-self: center;
+
+  app-extra-media-screen {
+    display: block;
+    height: 100%;
+  }
+}
+
+.extra-game__popout-media .extra-screen--popout .extra-screen__media-slide {
+  iframe,
+  img {
+    object-fit: contain;
+  }
+}
+
+@media (max-width: $bp-sm) {
+  .extra-game__popout-backdrop { padding: 0.65rem; }
+  .extra-game__popout-dialog {
+    width: 100%;
+    max-height: 96vh;
+    padding: 1rem;
+    border-radius: 0.7rem;
+  }
+  .extra-game__popout-media { width: 100%; }
+}

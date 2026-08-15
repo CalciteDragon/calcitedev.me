@@ -66,7 +66,7 @@
 
           <div
             class="extra-game__screen"
-            [class.extra-game__screen--active]="activeTopicId() === island.topicId"
+            [class.extra-game__screen--active]="activeTopicId() === island.topicId && popoutTopicId() !== island.topicId"
             [attr.inert]="editorEnabled() && editorMode() === 'edit' ? '' : null"
             [style.left.px]="island.x"
             [style.top.px]="island.y"
@@ -75,9 +75,10 @@
           >
             <app-extra-media-screen
               [topic]="island.topic"
-              [active]="activeTopicId() === island.topicId"
+              [active]="activeTopicId() === island.topicId && popoutTopicId() !== island.topicId"
               [mediaIndex]="mediaIndex(island.topicId)"
               (visitRequested)="visitTopic(island.topicId)"
+              (popoutRequested)="openPopout(island.topicId)"
               (previousRequested)="navigateMedia(island.topicId, -1)"
               (nextRequested)="navigateMedia(island.topicId, 1)"
               (videoPlaybackChanged)="handleVideoPlaybackChange(island.topicId, $event)"
@@ -177,9 +178,10 @@
           <div class="extra-game__stack-screen">
             <app-extra-media-screen
               [topic]="island.topic"
-              [active]="activeTopicId() === island.topicId"
+              [active]="activeTopicId() === island.topicId && popoutTopicId() !== island.topicId"
               [staticLayout]="true"
               [mediaIndex]="mediaIndex(island.topicId)"
+              (popoutRequested)="openPopout(island.topicId)"
               (previousRequested)="navigateMedia(island.topicId, -1)"
               (nextRequested)="navigateMedia(island.topicId, 1)"
               (videoPlaybackChanged)="handleVideoPlaybackChange(island.topicId, $event)"
@@ -187,6 +189,44 @@
           </div>
         </article>
       }
+    </div>
+  }
+
+  @if (popoutTopic(); as topic) {
+    <div class="extra-game__popout-backdrop" (click)="closePopout()">
+      <section
+        class="extra-game__popout-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="extras-popout-title"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          class="extra-game__popout-close"
+          aria-label="Close pop-out"
+          (click)="closePopout()"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <header class="extra-game__popout-header">
+          <p><span aria-hidden="true">//</span> {{ topic.islandLabel }}</p>
+          <h2 id="extras-popout-title">{{ topic.title }}</h2>
+          <span>{{ topic.description }}</span>
+        </header>
+        <div class="extra-game__popout-media">
+          <app-extra-media-screen
+            [topic]="topic"
+            [active]="true"
+            [staticLayout]="true"
+            [showPopoutButton]="false"
+            [mediaIndex]="mediaIndex(topic.id)"
+            (previousRequested)="navigateMedia(topic.id, -1)"
+            (nextRequested)="navigateMedia(topic.id, 1)"
+            (videoPlaybackChanged)="handleVideoPlaybackChange(topic.id, $event)"
+          />
+        </div>
+      </section>
     </div>
   }
 </div>

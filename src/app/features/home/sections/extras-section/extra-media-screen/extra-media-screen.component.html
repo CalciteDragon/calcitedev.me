@@ -1,5 +1,6 @@
 <article
   class="extra-screen"
+  [class.extra-screen--popout]="!showPopoutButton()"
   [class.extra-screen--active]="active() || staticLayout()"
   [attr.data-accent]="topic().accent"
   [attr.aria-label]="topic().islandLabel + (staticLayout() ? ' media pane' : active() ? ', active' : ', inactive')"
@@ -48,5 +49,17 @@
       (click)="requestVisit()"
       [attr.aria-label]="'Teleport to ' + topic().islandLabel"
     ></button>
+  }
+
+  @if (showPopoutButton()) {
+    <button
+      type="button"
+      class="extra-screen__popout"
+      (click)="requestPopout($event)"
+      [attr.aria-label]="'Open ' + topic().shortLabel + ' media in a larger window'"
+      title="Open media in a larger window"
+    >
+      <span aria-hidden="true">⤢</span>
+    </button>
   }
 </article>

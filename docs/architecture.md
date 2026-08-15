@@ -175,6 +175,8 @@ Hydration uses event replay. Browser-only behavior must be guarded with `isPlatf
 
 The component runs its animation loop outside Angular's zone and reduces scene entity counts below 768px. `scroll-perf-metrics.ts` provides opt-in production-path measurements through `?canvasPerf=scroll`. High-DPR mountain rendering remains a Phase 9 task.
 
+The Extras parent also tracks a manual-gallery pause signal and a pop-out topic signal. Manual previous/next navigation pauses the active 5.2-second timer until the next W/A/S/D press or an actual island-activation change; pointer arrow clicks clear their native focus highlight while keyboard activation retains focus. Each island's expand trigger activates/teleports before opening a large viewport-centered modal that reuses `ExtraMediaScreenComponent` with its carousel arrows and a close control; the page-wide scrim is released from the scroll-reveal containing block and the active Extras section is raised above later sections, while the open modal applies an overflow-only document scroll lock that preserves the existing scroll position, pauses auto-advance, and prevents a duplicate active video behind it.
+
 ## Build and Deployment
 
 ```text
@@ -187,4 +189,4 @@ dist/portfolio/browser/
 Render static-site publish directory (planned/externally configured)
 ```
 
-The August 14 verification passes 156 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.
+The August 14 verification passes 163 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.

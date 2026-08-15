@@ -275,10 +275,7 @@ describe('ExtrasPlatformerComponent', () => {
       playerPosition(): { x: number; y: number };
       playerWidth: number;
     };
-    const capstoneNext = compiled.querySelectorAll<HTMLButtonElement>(
-      '.extra-screen__gallery-controls button',
-    )[1]!;
-
+    const capstoneNext = compiled.querySelectorAll<HTMLButtonElement>('.extra-screen__gallery-controls button')[1]!;
     capstoneNext.click();
     fixture.detectChanges();
 
@@ -363,10 +360,98 @@ describe('ExtrasPlatformerComponent', () => {
       source: frame.contentWindow,
       data: JSON.stringify({ event: 'infoDelivery', info: { currentTime: 11020, playerState: 2 } }),
     }));
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', bubbles: true }));
     vi.advanceTimersByTime(5200);
 
     expect(component.playingVideoTopicId()).toBeNull();
     expect(component.mediaIndex('robotics')).toBe(3);
+    document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'd', bubbles: true }));
+  });
+
+  it('pauses manual gallery navigation until WASD or a new island activation', () => {
+    const component = fixture.componentInstance as unknown as {
+      activeTopicId(): string | null;
+      changeMedia(topicId: string, direction: number): void;
+      galleryAutoAdvancePaused(): boolean;
+      mediaIndex(topicId: string): number;
+      visitTopic(topicId: string): void;
+    };
+
+    component.visitTopic('capstone');
+    fixture.detectChanges();
+    component.changeMedia('capstone', 1);
+    fixture.detectChanges();
+    expect(component.galleryAutoAdvancePaused()).toBe(true);
+    expect(component.mediaIndex('capstone')).toBe(1);
+
+    vi.advanceTimersByTime(5200);
+    expect(component.mediaIndex('capstone')).toBe(1);
+
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'd', bubbles: true }));
+    fixture.detectChanges();
+    expect(component.galleryAutoAdvancePaused()).toBe(false);
+    vi.advanceTimersByTime(5200);
+    expect(component.mediaIndex('capstone')).toBe(2);
+    document.body.dispatchEvent(new KeyboardEvent('keyup', { key: 'd', bubbles: true }));
+
+    component.changeMedia('capstone', 1);
+    fixture.detectChanges();
+    expect(component.galleryAutoAdvancePaused()).toBe(true);
+    component.visitTopic('robotics');
+    fixture.detectChanges();
+    expect(component.activeTopicId()).toBe('robotics');
+    expect(component.galleryAutoAdvancePaused()).toBe(false);
+  });
+
+  it('opens an activated topic in a centered pop-out and closes it', () => {
+    const component = fixture.componentInstance as unknown as {
+      activeTopicId(): string | null;
+      closePopout(): void;
+      openPopout(topicId: string): void;
+      popoutTopicId(): string | null;
+    };
+
+    component.openPopout('capstone');
+    fixture.detectChanges();
+
+    expect(component.activeTopicId()).toBe('capstone');
+    expect(component.popoutTopicId()).toBe('capstone');
+    expect(compiled.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(compiled.querySelector('#extras-popout-title')?.textContent).toContain('Pineapple Expense');
+    expect(compiled.querySelectorAll('[role="dialog"] .extra-screen__gallery-controls button')).toHaveLength(2);
+    expect(compiled.querySelector('[aria-label="Close pop-out"]')).not.toBeNull();
+    expect(compiled.querySelector('.extra-game__screen--active')).toBeNull();
+    expect(document.documentElement.classList.contains('extra-game--popout-open')).toBe(true);
+    expect(document.body.style.position).toBe('');
+    expect(document.documentElement.style.getPropertyValue('--extra-game-scroll-lock-top')).toBe('');
+
+    (compiled.querySelector('[aria-label="Close pop-out"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    expect(component.popoutTopicId()).toBeNull();
+    expect(compiled.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.documentElement.classList.contains('extra-game--popout-open')).toBe(false);
+  });
+
+  it('renders the pop-out above stacked media panes too', () => {
+    recreateAt('/');
+    const game = compiled.querySelector('.extra-game') as HTMLElement;
+    Object.defineProperty(game, 'clientWidth', { configurable: true, value: 720 });
+    resizeCallback([], {} as ResizeObserver);
+    fixture.detectChanges();
+
+    const component = fixture.componentInstance as unknown as {
+      activeTopicId(): string | null;
+      openPopout(topicId: string): void;
+      popoutTopicId(): string | null;
+    };
+    component.openPopout('robotics');
+    fixture.detectChanges();
+
+    expect(component.activeTopicId()).toBe('robotics');
+    expect(component.popoutTopicId()).toBe('robotics');
+    expect(compiled.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(compiled.querySelector('#extras-popout-title')?.textContent).toContain('Mochi at Competition');
   });
 
   it('handles arrow input dispatched outside the platformer', () => {

@@ -115,6 +115,8 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   protected readonly stackedLayout = signal(false);
   protected readonly mediaIndexes = signal<Record<string, number>>({ keyboard: 0, capstone: 0, robotics: 0 });
   protected readonly playingVideoTopicId = signal<string | null>(null);
+  protected readonly galleryAutoAdvancePaused = signal(false);
+  protected readonly popoutTopicId = signal<string | null>(null);
   protected readonly reducedMotion = signal(false);
   protected readonly editorEnabled = signal(false);
   protected readonly editorMode = signal<ExtrasLevelEditorMode>('edit');
@@ -140,6 +142,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private hasUsedWasd = false;
   private supportingElementId: string | null = extrasLevelData.spawn.elementId;
   private editorDragState: EditorDragState | null = null;
+  private popoutScrollTop: number | null = null;
   private readonly undoStack: ExtrasLevelConfig[] = [];
   private readonly redoStack: ExtrasLevelConfig[] = [];
 
@@ -148,6 +151,10 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     const topic = this.topics().find(candidate => candidate.id === element.topicId);
     return topic ? [{ ...element, topic }] : [];
   }));
+  protected readonly popoutTopic = computed(() => {
+    const topicId = this.popoutTopicId();
+    return topicId ? this.topics().find(topic => topic.id === topicId) ?? null : null;
+  });
   protected readonly jumpPlatforms = computed(() => this.level().elements.filter(
     (element): element is ExtraLevelPlatform => element.kind === 'platform',
   ));
@@ -187,6 +194,9 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
     this.document.addEventListener('keydown', this.handleGlobalKeyDown);
     this.document.addEventListener('keyup', this.handleGlobalKeyUp);
+    this.document.addEventListener('wheel', this.handlePopoutWheel, { passive: false });
+    this.document.addEventListener('touchmove', this.handlePopoutTouchMove, { passive: false });
+    this.document.defaultView?.addEventListener('scroll', this.handlePopoutScroll, { passive: true });
     this.document.defaultView?.addEventListener('blur', this.handleWindowBlur);
 
     this.animationFrameId = window.requestAnimationFrame(this.tick);
@@ -194,6 +204,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.setPopoutPageState(false);
     if (this.animationFrameId !== null) window.cancelAnimationFrame(this.animationFrameId);
     if (this.galleryTimerId !== null) window.clearInterval(this.galleryTimerId);
     if (this.deactivationTimerId !== null) window.clearTimeout(this.deactivationTimerId);
@@ -201,6 +212,9 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     this.motionQuery?.removeEventListener?.('change', this.handleMotionPreference);
     this.document.removeEventListener('keydown', this.handleGlobalKeyDown);
     this.document.removeEventListener('keyup', this.handleGlobalKeyUp);
+    this.document.removeEventListener('wheel', this.handlePopoutWheel);
+    this.document.removeEventListener('touchmove', this.handlePopoutTouchMove);
+    this.document.defaultView?.removeEventListener('scroll', this.handlePopoutScroll);
     this.document.defaultView?.removeEventListener('blur', this.handleWindowBlur);
   }
 
@@ -224,16 +238,38 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  protected changeMedia(topicId: string, direction: number): void {
+  protected changeMedia(topicId: string, direction: number, manual = true): void {
     if (this.editorEnabled() && this.editorMode() === 'edit') return;
     const topic = this.topics().find(candidate => candidate.id === topicId);
     if (!topic || topic.media.length < 2) return;
 
+    if (manual) this.pauseGalleryAutoAdvance();
     this.stopTrackingPlayingVideo(topicId);
     this.mediaIndexes.update(indexes => ({
       ...indexes,
       [topicId]: (this.mediaIndex(topicId) + direction + topic.media.length) % topic.media.length,
     }));
+  }
+
+  protected openPopout(topicId: string): void {
+    if (this.editorEnabled() && this.editorMode() === 'edit') return;
+
+    if (this.stackedLayout()) {
+      this.activateStackedTopic(topicId);
+    } else {
+      this.visitTopic(topicId);
+    }
+    this.popoutTopicId.set(topicId);
+    this.setPopoutPageState(true);
+    this.restartGalleryTimer();
+  }
+
+  protected closePopout(): void {
+    const topicId = this.popoutTopicId();
+    this.popoutTopicId.set(null);
+    this.setPopoutPageState(false);
+    if (topicId && this.playingVideoTopicId() === topicId) this.playingVideoTopicId.set(null);
+    this.restartGalleryTimer();
   }
 
   protected navigateMedia(topicId: string, direction: number): void {
@@ -268,6 +304,10 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
     event.preventDefault();
     if (['a', 'd', 's', 'w'].includes(key)) {
+      if (this.galleryAutoAdvancePaused()) {
+        this.galleryAutoAdvancePaused.set(false);
+        this.restartGalleryTimer();
+      }
       this.showWasdHint.set(false);
       if (!this.hasUsedWasd) {
         this.hasUsedWasd = true;
@@ -604,6 +644,19 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   private readonly handleGlobalKeyDown = (event: KeyboardEvent): void => {
     if (this.isEditableTarget(event.target)) return;
+    if (event.key === 'Escape' && this.popoutTopicId() !== null) {
+      event.preventDefault();
+      this.closePopout();
+      return;
+    }
+    if (
+      this.popoutTopicId() !== null
+      && [' ', 'ArrowDown', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp'].includes(event.key)
+      && !this.isPopoutDialogEvent(event)
+    ) {
+      event.preventDefault();
+      return;
+    }
     if (this.editorEnabled() && event.key.toLowerCase() === 'p') {
       event.preventDefault();
       this.changeEditorMode(this.editorMode() === 'edit' ? 'playtest' : 'edit');
@@ -613,7 +666,13 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
       this.handleEditorKeyDown(event);
       return;
     }
-    if (this.stackedLayout()) return;
+    if (this.stackedLayout()) {
+      if (['a', 'd', 's', 'w'].includes(event.key.toLowerCase())) {
+        this.galleryAutoAdvancePaused.set(false);
+        this.restartGalleryTimer();
+      }
+      return;
+    }
     this.handleKeyDown(event);
   };
 
@@ -625,6 +684,30 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   private readonly handleWindowBlur = (): void => {
     this.clearInput();
   };
+
+  private readonly handlePopoutWheel = (event: WheelEvent): void => {
+    if (this.popoutTopicId() !== null && !this.isPopoutDialogEvent(event)) event.preventDefault();
+  };
+
+  private readonly handlePopoutTouchMove = (event: TouchEvent): void => {
+    if (this.popoutTopicId() !== null && !this.isPopoutDialogEvent(event)) event.preventDefault();
+  };
+
+  private readonly handlePopoutScroll = (): void => {
+    const view = this.document.defaultView;
+    if (this.popoutTopicId() === null || this.popoutScrollTop === null || !view) return;
+    if (view.scrollY === this.popoutScrollTop) return;
+
+    const root = this.document.documentElement;
+    const previousScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = 'auto';
+    view.scrollTo(0, this.popoutScrollTop);
+    root.style.scrollBehavior = previousScrollBehavior;
+  };
+
+  private isPopoutDialogEvent(event: Event): boolean {
+    return event.target instanceof Element && event.target.closest('.extra-game__popout-dialog') !== null;
+  }
 
   private readonly tick = (time: number): void => {
     const deltaSeconds = this.lastFrameTime === 0 ? 0 : Math.min((time - this.lastFrameTime) / 1000, 0.032);
@@ -750,6 +833,7 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
 
   private setActiveTopic(topicId: string | null): void {
     if (this.activeTopicId() === topicId) return;
+    this.galleryAutoAdvancePaused.set(false);
     this.playingVideoTopicId.set(null);
     this.activeTopicId.set(topicId);
     if (topicId) this.lastVisitedTopicId.set(topicId);
@@ -757,9 +841,15 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
   }
 
   private advanceActiveGallery(): void {
-    if (this.reducedMotion() || this.document.hidden || this.playingVideoTopicId() !== null) return;
+    if (
+      this.reducedMotion()
+      || this.document.hidden
+      || this.playingVideoTopicId() !== null
+      || this.galleryAutoAdvancePaused()
+      || this.popoutTopicId() !== null
+    ) return;
     const topicId = this.activeTopicId();
-    if (topicId) this.changeMedia(topicId, 1);
+    if (topicId) this.changeMedia(topicId, 1, false);
   }
 
   private updateViewportWidth(): void {
@@ -805,6 +895,8 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
       this.galleryTimerId = null;
     }
 
+    if (this.galleryAutoAdvancePaused() || this.popoutTopicId() !== null) return;
+
     const topic = this.topics().find(candidate => candidate.id === this.activeTopicId());
     if (!topic || topic.media.length < 2 || this.playingVideoTopicId() === topic.id) return;
     this.galleryTimerId = window.setInterval(() => this.advanceActiveGallery(), 5200);
@@ -814,5 +906,28 @@ export class ExtrasPlatformerComponent implements AfterViewInit, OnDestroy {
     if (this.playingVideoTopicId() !== topicId) return;
     this.playingVideoTopicId.set(null);
     this.restartGalleryTimer();
+  }
+
+  private pauseGalleryAutoAdvance(): void {
+    this.galleryAutoAdvancePaused.set(true);
+    if (this.galleryTimerId !== null) {
+      window.clearInterval(this.galleryTimerId);
+      this.galleryTimerId = null;
+    }
+  }
+
+  private setPopoutPageState(open: boolean): void {
+    const root = this.document.documentElement;
+    const view = this.document.defaultView;
+    if (!root) return;
+
+    if (open) {
+      this.popoutScrollTop = view?.scrollY ?? 0;
+      root.classList.add('extra-game--popout-open');
+      return;
+    }
+
+    this.popoutScrollTop = null;
+    root.classList.remove('extra-game--popout-open');
   }
 }

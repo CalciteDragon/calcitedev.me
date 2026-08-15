@@ -25,10 +25,12 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
   readonly active = input(false);
   readonly staticLayout = input(false);
   readonly mediaIndex = input(0);
+  readonly showPopoutButton = input(true);
 
   readonly visitRequested = output<void>();
   readonly previousRequested = output<void>();
   readonly nextRequested = output<void>();
+  readonly popoutRequested = output<void>();
   readonly videoPlaybackChanged = output<boolean>();
 
   private readonly sanitizer = inject(DomSanitizer);
@@ -99,12 +101,24 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
 
   protected requestPrevious(event: Event): void {
     event.stopPropagation();
+    this.clearPointerFocus(event);
     this.previousRequested.emit();
   }
 
   protected requestNext(event: Event): void {
     event.stopPropagation();
+    this.clearPointerFocus(event);
     this.nextRequested.emit();
+  }
+
+  protected requestPopout(event: Event): void {
+    event.stopPropagation();
+    this.popoutRequested.emit();
+  }
+
+  private clearPointerFocus(event: Event): void {
+    if (!(event instanceof MouseEvent) || event.detail === 0) return;
+    if (event.currentTarget instanceof HTMLButtonElement) event.currentTarget.blur();
   }
 
   private readonly handlePlayerMessage = (event: MessageEvent<unknown>): void => {

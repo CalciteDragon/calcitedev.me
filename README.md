@@ -21,7 +21,7 @@ Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)**. It combines a
 ```bash
 npm install
 npm start       # development server at http://localhost:4200
-npm test        # 156 tests at the latest documentation audit
+npm test        # 163 tests at the latest documentation audit
 npm run build   # production bundles + static prerender → dist/portfolio/browser/
 ```
 
