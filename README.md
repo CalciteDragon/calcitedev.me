@@ -21,18 +21,31 @@ Personal developer portfolio for **Tyler Hawthorn (AKA Calcite)**. It combines a
 ```bash
 npm install
 npm start       # development server at http://localhost:4200
-npm test        # 106 tests at the latest documentation audit
+npm test        # 163 tests at the latest documentation audit
 npm run build   # production bundles + static prerender → dist/portfolio/browser/
 ```
 
 On Windows systems that block PowerShell’s `npm.ps1`, use `npm.cmd` instead.
 
+### Extras level editor
+
+During local development, open `http://localhost:4200/?extrasDebug=level#extras` to enable the
+Extras level editor. The query is gated by Angular development mode and does not expose editor UI
+in a production build. Edit mode can move the three protected media islands and add, move, resize,
+duplicate, or delete supplemental jump platforms; Playtest mode runs the normal platformer physics
+against the draft layout.
+
+Edits recover from versioned browser `localStorage`. Use **Copy config** or **Download** to export a
+complete `extras-level.data.ts`, then replace `src/app/data/extras-level.data.ts` and commit that file
+to publish the layout permanently. Reset draft clears the local recovery copy and reloads the
+committed level.
+
 ## Routes
 
 ```text
-/               Home page: Hero, Projects, About, Skills, Contact
-/projects/:slug Prerendered project detail page
+/               Home page: Hero, About, Projects, Extras, Contact
 /about           Redirects to /
+/projects        Redirects to /
 /contact         Redirects to /
 ```
 
@@ -44,7 +57,7 @@ src/
 │   ├── core/             Singleton services
 │   ├── layout/           Navbar, fixed background, footer shell
 │   ├── shared/           Reusable components, directives, and types
-│   ├── features/         Homepage sections and project detail route
+│   ├── features/         Homepage sections and interactive project showcase
 │   ├── models/           TypeScript interfaces
 │   └── data/             Static portfolio content
 ├── styles/               Global SCSS partials

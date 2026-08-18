@@ -1,5 +1,7 @@
 # Phase 5: Home Page — Background Scene (Canvas) Implementation Plan
 
+> **Historical plan notice (August 13, 2026):** References below to project filters, shared project cards, `/projects/:slug`, or `ProjectDetailComponent` describe the architecture at the time this phase was implemented. The current Projects experience is the single-page focus stage and selector documented in `docs/architecture.md`; those routes/components no longer exist.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Implement `BackgroundSceneComponent` — a `position: fixed` full-viewport canvas that renders a cyberpunk scene behind the entire site: a twinkling star field with subtle per-star parallax visible everywhere, plus hero-only elements (low-poly neon mountains with scroll parallax, floating UFO with glow beam, pixel rocket with animated flame, drifting particles) that render only while the hero section is in view. A CSS scanline overlay completes the CRT aesthetic.

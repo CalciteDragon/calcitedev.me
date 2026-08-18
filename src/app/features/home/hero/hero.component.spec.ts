@@ -9,8 +9,10 @@ const mockBio: Bio = {
   title: 'Full Stack Developer & Game Enthusiast',
   tagline: 'Code · Create · Innovate',
   email: 'tyler@calcitedev.me',
-  shortBio: 'Short bio.',
-  extendedBio: 'Extended bio.',
+  about: {
+    intro: [{ text: 'Short bio.' }],
+    history: [],
+  },
 };
 
 describe('HeroComponent', () => {
@@ -34,9 +36,11 @@ describe('HeroComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the name uppercased in the h1', () => {
-    const h1 = compiled.querySelector('.hero__name');
-    expect(h1?.textContent).toContain('TYLER HAWTHORN');
+  it('should render the name as the neon title image with the name as alt text', () => {
+    const img = compiled.querySelector('h1.hero__name .hero__name-img') as HTMLImageElement;
+    expect(img).toBeTruthy();
+    expect(img.src).toContain('hero-title.webp');
+    expect(img.alt).toBe('Tyler Hawthorn');
   });
 
   it('should render the alias uppercased', () => {

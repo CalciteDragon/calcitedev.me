@@ -68,22 +68,22 @@ describe('HomeComponent', () => {
   });
 
   it('should pass bioData name to the hero', () => {
-    const h1 = compiled.querySelector('.hero__name');
-    expect(h1?.textContent).toContain('TYLER HAWTHORN');
+    const img = compiled.querySelector('.hero__name-img') as HTMLImageElement;
+    expect(img?.alt).toBe('Tyler Hawthorn');
   });
 
   it('should render five sections with correct ids', () => {
     const sections = compiled.querySelectorAll('.main-page > section');
     const ids = Array.from(sections).map((s) => s.id);
-    expect(ids).toEqual(['home', 'projects', 'about', 'skills', 'contact']);
+    expect(ids).toEqual(['home', 'about', 'projects', 'extras', 'contact']);
   });
 
   it('should call ScrollService.initSectionObserver with all section ids in ngAfterViewInit', () => {
     expect(mockScrollService.initSectionObserver).toHaveBeenCalledWith([
       'home',
-      'projects',
       'about',
-      'skills',
+      'projects',
+      'extras',
       'contact',
     ]);
   });

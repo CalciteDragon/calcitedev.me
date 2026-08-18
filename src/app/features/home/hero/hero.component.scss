@@ -2,29 +2,26 @@
 @use 'mixins' as *;
 @use 'glow' as *;
 
-// Clip declarations must follow every background shorthand — the shorthand
-// resets background-clip, so each gradient mixin re-applies the text fill.
-@mixin hero-text-fill {
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
+// Lit-tube text. The subtext used to be gradient-clipped, which was there to
+// rhyme with the old gradient-text name — but the name is now a photographic
+// neon sign, and `-webkit-text-fill-color: transparent` makes a glow
+// impossible (there is no painted glyph for `text-shadow` to bloom off).
+// Solid color plus a three-stop halo matches how the sign's own tubes read:
+// a hot core, a tight bloom, and a wide, faint spill.
+// Two stops, both low: enough bloom to read as lit next to the sign, not
+// enough to compete with it. The sign is the only element in the hero that
+// should look like it is actually emitting light.
+@mixin hero-neon-text($color) {
+  color: $color;
+  text-shadow:
+    0 0 8px rgba($color, 0.32),
+    0 0 22px rgba($color, 0.12);
 
-// Mobile base: gradient spans the text element itself so the full
-// cyan→pink range stays vivid on small viewports (viewport-fixed
-// attachment leaves mobile text sitting in the muddy mid-blend, and
-// iOS Safari doesn't support fixed attachment at all).
-@mixin hero-gradient($direction: to bottom) {
-  background: linear-gradient($direction, $accent-cyan 15%, $accent-pink 85%);
-  @include hero-text-fill;
-}
-
-// Desktop enhancement: viewport-fixed gradient — text picks its color
-// from screen position and shifts subtly while scrolling.
-@mixin hero-gradient-fixed {
-  background: linear-gradient(to bottom, $accent-cyan 0%, $accent-cyan 30%, $accent-pink 70%, $accent-pink 100%);
-  background-attachment: fixed;
-  @include hero-text-fill;
+  // The halo is decoration, not legibility — drop it where the user has asked
+  // for less visual noise and keep the solid glyph.
+  @media (prefers-reduced-motion: reduce) {
+    text-shadow: none;
+  }
 }
 
 :host {
@@ -34,6 +31,12 @@
 .hero {
   @include content-container;
   min-height: calc(100svh - 64px);
+
+  // The hero is the one showpiece section that outgrows the 1200px content
+  // rail — the neon sign needs the extra column width beside the avatar.
+  @include xl {
+    max-width: 1400px;
+  }
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -154,40 +157,92 @@
     }
   }
 
+  // The name is a neon-sign raster that already carries its own cyan→pink
+  // lighting, so the h1 is a plain layout box — no gradient text fill here.
   &__name {
-    font-size: clamp(3rem, 8vw, 7rem);
-    font-weight: 700;
-    line-height: 1.05;
     margin: 0;
-    // Two-line mobile name reads cyan top line, pink bottom line.
-    @include hero-gradient(to bottom);
+    line-height: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
 
     @include lg {
-      @include hero-gradient-fixed;
+      justify-content: flex-start;
     }
   }
 
+  &__name-img {
+    // The sign art bleeds glow to its own edges; negative margins pull the
+    // surrounding copy back toward the visible neon tubing.
+    // min(100%, …) is the overflow guard: the sign is free to ask for more
+    // width than the flex column has, and simply takes whatever is available.
+    display: block;
+    width: min(100%, 560px);
+    height: auto;
+    margin-block: -$space-3;
+
+    @include lg {
+      width: min(100%, clamp(560px, 60vw, 930px));
+    }
+  }
+
+  // Subtext panel — deliberately built from the same parts as `&__platform`
+  // (cyan edge rule, LED accent stripe, faint vertical panel seams, outer
+  // bloom) so the hero reads as one lit set rather than a sign, a platform,
+  // and an unrelated content card.
+  &__tagline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $space-1;
+
+    @include lg {
+      align-items: flex-start;
+      margin-left: $space-6;
+      padding-left: $space-3;
+    }
+
+    // The only chrome the subtext gets: a hairline rule that fades out at both
+    // ends, so it reads as an edge the copy hangs off rather than as a drawn
+    // graphic. Generated only from lg up — below that the copy is centered and
+    // a left rule would have nothing to align to.
+    &::before {
+      @include lg {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 2px;
+        background: linear-gradient(
+          to bottom,
+          transparent,
+          rgba(34, 211, 238, 0.5) 20%,
+          rgba(34, 211, 238, 0.5) 80%,
+          transparent
+        );
+      }
+    }
+  }
+
+  // Alias cyan over subtitle pink repeats the sign's own two-line split —
+  // cyan TYLER above, pink HAWTHORN below — so the panel reads as the third
+  // and fourth lines of the same sign rather than as caption text under it.
   &__alias {
     font-size: clamp(1rem, 2.5vw, 1.75rem);
     font-weight: 600;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     margin: 0;
-    @include hero-gradient(to right);
-
-    @include lg {
-      @include hero-gradient-fixed;
-    }
+    @include hero-neon-text($accent-cyan);
   }
 
   &__subtitle {
     font-size: clamp(1rem, 2vw, 1.375rem);
     letter-spacing: 0.03em;
-    margin: $space-1 0 0;
-    @include hero-gradient(to right);
-
-    @include lg {
-      @include hero-gradient-fixed;
-    }
+    // Vertical rhythm inside the panel is the flex gap's job.
+    margin: 0;
+    @include hero-neon-text($accent-pink);
   }
 
   &__ufo {

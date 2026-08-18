@@ -1,0 +1,65 @@
+<article
+  class="extra-screen"
+  [class.extra-screen--popout]="!showPopoutButton()"
+  [class.extra-screen--active]="active() || staticLayout()"
+  [attr.data-accent]="topic().accent"
+  [attr.aria-label]="topic().islandLabel + (staticLayout() ? ' media pane' : active() ? ', active' : ', inactive')"
+>
+  <div class="extra-screen__viewport">
+    @for (media of currentMediaList(); track media.caption) {
+      <div class="extra-screen__media-slide">
+        @if (active() && videoUrl(); as trustedVideoUrl) {
+          <iframe
+            [src]="trustedVideoUrl"
+            [title]="media.alt"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen
+            (load)="connectVideoPlayer($event)"
+          ></iframe>
+        } @else if (media.imageUrl; as imageUrl) {
+          <img [src]="imageUrl" [alt]="media.alt" loading="lazy" decoding="async" />
+        } @else if (thumbnailUrl(); as thumbnail) {
+          <img [src]="thumbnail" [alt]="active() ? media.alt : ''" />
+          @if (!active()) {
+            <span class="extra-screen__play" aria-hidden="true">▶</span>
+          }
+        } @else {
+          <div class="extra-screen__placeholder" [attr.data-kind]="media.type">
+            <span aria-hidden="true">{{ media.type === 'youtube' ? '▶' : '▧' }}</span>
+            <strong>{{ media.placeholderLabel }}</strong>
+            <small>MEDIA SLOT READY</small>
+          </div>
+        }
+      </div>
+    }
+
+    <span class="extra-screen__scanlines" aria-hidden="true"></span>
+    @if (hasMultipleMedia()) {
+      <div class="extra-screen__gallery-controls" [attr.aria-label]="topic().shortLabel + ' gallery controls'">
+        <button type="button" (click)="requestPrevious($event)" [attr.aria-label]="'Previous ' + topic().shortLabel + ' item'">‹</button>
+        <button type="button" (click)="requestNext($event)" [attr.aria-label]="'Next ' + topic().shortLabel + ' item'">›</button>
+      </div>
+    }
+  </div>
+
+  @if (!active() && !staticLayout()) {
+    <button
+      type="button"
+      class="extra-screen__visit"
+      (click)="requestVisit()"
+      [attr.aria-label]="'Teleport to ' + topic().islandLabel"
+    ></button>
+  }
+
+  @if (showPopoutButton()) {
+    <button
+      type="button"
+      class="extra-screen__popout"
+      (click)="requestPopout($event)"
+      [attr.aria-label]="'Open ' + topic().shortLabel + ' media in a larger window'"
+      title="Open media in a larger window"
+    >
+      <span aria-hidden="true">⤢</span>
+    </button>
+  }
+</article>

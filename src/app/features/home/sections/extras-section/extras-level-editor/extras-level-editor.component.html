@@ -1,0 +1,121 @@
+<aside class="level-editor" aria-label="Extras level editor">
+  <div class="level-editor__heading">
+    <div>
+      <span>DEBUG TOOL</span>
+      <h3>Level editor</h3>
+    </div>
+    <div class="level-editor__modes" role="group" aria-label="Editor mode">
+      <button
+        type="button"
+        [class.level-editor__button--active]="mode() === 'edit'"
+        [attr.aria-pressed]="mode() === 'edit'"
+        (click)="setMode('edit')"
+      >
+        Edit
+      </button>
+      <button
+        type="button"
+        [class.level-editor__button--active]="mode() === 'playtest'"
+        [attr.aria-pressed]="mode() === 'playtest'"
+        (click)="setMode('playtest')"
+      >
+        Playtest
+      </button>
+    </div>
+  </div>
+
+  <div class="level-editor__actions" role="group" aria-label="Level actions">
+    <button type="button" [disabled]="editingLocked()" (click)="addRequested.emit()">Add platform</button>
+    <button type="button" [disabled]="!canDuplicateSelection()" (click)="duplicateRequested.emit()">Duplicate</button>
+    <button type="button" [disabled]="!canDeleteSelection()" (click)="deleteRequested.emit()">Delete</button>
+    <button type="button" [disabled]="editingLocked() || !canUndo()" (click)="undoRequested.emit()">Undo</button>
+    <button type="button" [disabled]="editingLocked() || !canRedo()" (click)="redoRequested.emit()">Redo</button>
+    <button
+      type="button"
+      [class.level-editor__button--active]="snapEnabled()"
+      [attr.aria-pressed]="snapEnabled()"
+      [disabled]="editingLocked()"
+      (click)="toggleSnap()"
+    >
+      Snap 10px
+    </button>
+  </div>
+
+  <div class="level-editor__selection">
+    <label for="level-editor-element">Element</label>
+    <select
+      id="level-editor-element"
+      [value]="selectedElementId() ?? ''"
+      (change)="selectElement($event)"
+    >
+      <option value="" disabled>Select an element</option>
+      @for (element of level().elements; track element.id) {
+        <option [value]="element.id" [selected]="selectedElementId() === element.id">
+          {{ elementLabel(element) }}
+        </option>
+      }
+    </select>
+  </div>
+
+  @if (selectedElement(); as element) {
+    <fieldset class="level-editor__inspector" [disabled]="editingLocked()">
+      <legend>{{ elementLabel(element) }}</legend>
+      <label>
+        X
+        <input
+          type="number"
+          min="0"
+          step="1"
+          [value]="element.x"
+          [disabled]="editingLocked()"
+          (input)="updateProperty('x', $event)"
+        />
+      </label>
+      <label>
+        Y
+        <input
+          type="number"
+          min="0"
+          step="1"
+          [value]="element.y"
+          [disabled]="editingLocked()"
+          (input)="updateProperty('y', $event)"
+        />
+      </label>
+      <label>
+        Width
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [value]="element.width"
+          [disabled]="editingLocked() || selectedIsIsland()"
+          (input)="updateProperty('width', $event)"
+        />
+      </label>
+      <label>
+        Height
+        <input
+          type="number"
+          min="1"
+          step="1"
+          [value]="element.height"
+          [disabled]="editingLocked() || selectedIsIsland()"
+          (input)="updateProperty('height', $event)"
+        />
+      </label>
+    </fieldset>
+  } @else {
+    <p class="level-editor__empty">Select an island or platform to inspect its geometry.</p>
+  }
+
+  <div class="level-editor__publish" role="group" aria-label="Level persistence">
+    <button type="button" [disabled]="editingLocked()" (click)="resetRequested.emit()">Reset draft</button>
+    <button type="button" (click)="copyRequested.emit()">Copy config</button>
+    <button type="button" (click)="downloadRequested.emit()">Download</button>
+  </div>
+
+  <p class="level-editor__status" role="status" aria-live="polite" aria-atomic="true">
+    {{ status() }}
+  </p>
+</aside>

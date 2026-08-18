@@ -11,12 +11,12 @@ import { Title } from '@angular/platform-browser';
 import { HeroComponent } from './hero/hero.component';
 import { ProjectsSectionComponent } from './sections/projects-section/projects-section.component';
 import { AboutSectionComponent } from './sections/about-section/about-section.component';
-import { SkillsSectionComponent } from './sections/skills-section/skills-section.component';
+import { ExtrasSectionComponent } from './sections/extras-section/extras-section.component';
 import { ContactSectionComponent } from './sections/contact-section/contact-section.component';
 import { ScrollService } from '../../core/services/scroll.service';
 import { bioData } from '../../data/bio.data';
 import { projectsData } from '../../data/projects.data';
-import { skillsData } from '../../data/skills.data';
+import { extrasData } from '../../data/extras.data';
 import { socialLinksData } from '../../data/social-links.data';
 
 @Component({
@@ -27,7 +27,7 @@ import { socialLinksData } from '../../data/social-links.data';
     HeroComponent,
     ProjectsSectionComponent,
     AboutSectionComponent,
-    SkillsSectionComponent,
+    ExtrasSectionComponent,
     ContactSectionComponent,
   ],
   templateUrl: './home.component.html',
@@ -36,7 +36,7 @@ import { socialLinksData } from '../../data/social-links.data';
 export class HomeComponent implements AfterViewInit, OnDestroy {
   readonly bio = bioData;
   readonly projects = projectsData;
-  readonly skills = skillsData;
+  readonly extras = extrasData;
   readonly socialLinks = socialLinksData;
   private readonly scrollService = inject(ScrollService);
   private readonly platformId = inject(PLATFORM_ID);
@@ -44,7 +44,7 @@ export class HomeComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.titleService.setTitle('Tyler Hawthorn — Calcite | Full Stack Developer');
-    this.scrollService.initSectionObserver(['home', 'projects', 'about', 'skills', 'contact']);
+    this.scrollService.initSectionObserver(['home', 'about', 'projects', 'extras', 'contact']);
     if (isPlatformBrowser(this.platformId)) {
       const hash = window.location.hash.replace('#', '');
       if (hash) this.scrollService.scrollToSection(hash);

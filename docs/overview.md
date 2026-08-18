@@ -23,13 +23,13 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** with a dark 
 | Build | Angular CLI / esbuild |
 | Rendering | Angular SSR tooling with static prerender output |
 | Testing | Vitest through `@angular/build:unit-test` |
-| Background | Canvas API plus an OffscreenCanvas mountain worker |
+| Background and play | Canvas API plus an OffscreenCanvas mountain worker; DOM/CSS Extras platformer |
 | Hosting target | Render static site |
 | Content | Typed static TypeScript data; no CMS or backend |
 
 ## Core Experience
 
-The homepage is one scrolling route with five sections. Project cards can also open prerendered detail routes.
+The homepage is one scrolling route with five sections. Project selection stays inside the page and never interrupts the scroll experience.
 
 ### 1. Hero
 
@@ -41,19 +41,21 @@ The homepage is one scrolling route with five sections. Project cards can also o
 
 The earlier hero feature-card strip and CTA were intentionally removed because they duplicated the navbar and section navigation.
 
-### 2. Projects
+### 2. About
 
-A filterable grid of five statically defined projects. Cards show a thumbnail, title, description, tags, and available demo/repository links. Each card links to `/projects/:slug`, and all five detail routes are prerendered.
+An origin-story section led by a larger introductory card and followed by a four-stage, compiler-themed history timeline. Scroll progress advances the single active chapter and rail through cyan, blue, violet, and pink while tilting the cards; each stage uses one consistent accent for highlighted phrases and contextual links.
 
-Current project content and URLs are placeholders. Each project has a themed placeholder thumbnail SVG under `public/assets/images/`; swapping in real screenshots is a file drop at the same paths.
+### 3. Projects
 
-### 3. About
+A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. A compact index of smaller preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
 
-A concise static bio focused on Tyler’s development interests and personality. A timeline remains deferred.
+All seven project previews live under `public/assets/images/`. Six are real captures — Live Bingo, Pineapple Expense, Mochi 2026, the Roblox PvP world, It's Never Just Black and White, and Minecraft Hide & Seek. Only Calcite Portfolio remains original themed SVG art, a finite recursive browser window. Content order and membership are controlled entirely by `projects.data.ts`.
 
-### 4. Skills
+### 4. Extras
 
-A category-based skills grid covering languages, frontend, backend, databases, DevOps, testing, Git workflows, and architecture concepts.
+A playful three-island platformer replaces the former résumé-style skills grid. Three broad rounded scanline media screens live directly over the site's mountain scene and double as the platforms for Capstone Summit, Keyboard Cove, and Robotics Outpost. The complete desktop level scales into view without a horizontal crop or side-scrolling camera; the pixel explorer begins near the left edge of the middle Keyboard island while every screen remains in standby. Page-level WASD/arrow input moves the explorer, while the first W/A/S/D press activates the supporting island and dismisses the movement hint. Clicking an inactive screen activates it and teleports the character without changing keyboard focus or prematurely removing that hint. Active islands and their headings rise together and remain active for one second after the explorer leaves. Gallery arrows remain directly interactive even over inactive panes and both browse and teleport when used there. Smaller screens receive readable vertically stacked media panes and an explorer prompt to try the platformer on desktop or widen the window. Keyboard Cove and Robotics Outpost use muted YouTube embeds that resume from saved progress after inactivity; Pineapple Expense uses the supplied IMG_1 → IMG_2 → rendered IMG_3 → IMG_4 → IMG_5 image sequence, while Mochi follows IMG_2 → IMG_1 → competition video → IMG_4 → IMG_3, with the video beginning at 3:03:36 on its first play. Galleries advance through capstone and robotics media but pause while their current video is actively playing.
+
+The level geometry is typed, source-controlled data in `extras-level.data.ts`. A development-only editor at `?extrasDebug=level#extras` provides separate Edit and Playtest modes: islands can be repositioned but remain protected, while supplemental platforms can be added, moved, resized, duplicated, and deleted. Browser `localStorage` recovers draft edits; copying or downloading the generated TypeScript and replacing the canonical data file is the deliberate permanent-publish workflow for this static site. Supplemental platforms support the explorer without activating media, and the previously active island still deactivates after its grace period when the explorer lands on one.
 
 ### 5. Contact
 
@@ -72,7 +74,7 @@ A direct email link and social links. There is deliberately no contact form or b
 
 In scope for the first complete version:
 
-- Single-page portfolio plus project detail routes.
+- Single-page portfolio with an in-page, swappable project showcase.
 - Neon design system and animated background.
 - Responsive, accessible core content.
 - Replaceable artwork and project screenshots.
@@ -91,4 +93,4 @@ Deferred for future versions:
 
 ## Content Strategy
 
-Portfolio copy, projects, skills, and social links live in `src/app/data/`. Updating content should normally require editing one typed data file or replacing an asset at a stable public path. There is no database, backend, CMS, or runtime API dependency.
+Portfolio copy, projects, Extras topics/media, Extras level geometry, and social links live in `src/app/data/`. `extras.data.ts` owns the media topics while `extras-level.data.ts` owns the versioned world, spawn, island, and supplemental-platform geometry. Updating those records and adding or replacing assets requires no route or prerender configuration change. There is no database, backend, CMS, or runtime API dependency; the level editor's local draft is only a development recovery aid until its exported source is committed.

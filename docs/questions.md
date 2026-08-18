@@ -15,10 +15,11 @@ This document began as the project’s clarification questionnaire. Resolved ans
 
 ### Content
 
-- Use five placeholder projects while building the layout; real projects and screenshots will replace them later.
-- Keep replacement simple through stable asset paths and typed data files.
-- Skills are grouped into languages, frontend, backend, databases, DevOps, testing/quality, Git/version control, and architecture/concepts.
-- About is bio plus skills for v1; an experience timeline is deferred.
+- Projects use one stable focus stage plus a compact selector index; there are no filters or project-detail routes.
+- The current display order is Live Bingo, Pineapple Expense, Calcite Portfolio, Mochi 2026, It's Never Just Black and White, Minecraft Hide & Seek, and WIP Roblox PvP Game.
+- Keep replacement simple through ordered typed data and stable asset paths. The six new preview SVGs are project-specific original art and may be replaced with real screenshots later without structural changes.
+- The original grouped Skills section was superseded on August 13, 2026 by the interactive Extras section; project tags and descriptions now carry the primary technical-skills signal.
+- About is an origin story and compiler-themed history timeline. Extras follows Projects with hardware, capstone, and robotics media.
 - Tyler will create final pixel artwork; development uses placeholders.
 - Contact uses direct email and social links, not a form.
 - Current social platforms are GitHub, Discord, and LinkedIn.
@@ -44,8 +45,7 @@ The planned non-load-bearing Easter-egg layer may include:
 
 ## Open
 
-1. Which real projects, descriptions, repository URLs, live URLs, and screenshots should replace the five placeholder records?
-2. Are the current bio, email address, Discord URL, LinkedIn URL, and GitHub URL final?
-3. Which final avatar and UFO artwork should replace the current large SVG placeholders?
-4. Is the existing Render service/domain configuration currently live and correct, or does deployment still need to be completed?
-5. Which ideas from the optional Easter-egg list should ship in v1 after responsive, accessibility, and performance work is complete?
+1. Are the current bio, email address, Discord URL, LinkedIn URL, and GitHub URL final?
+2. Which final avatar and UFO artwork should replace the current large SVG placeholders?
+3. Is the existing Render service/domain configuration currently live and correct, or does deployment still need to be completed?
+4. Which ideas from the optional Easter-egg list should ship in v1 after responsive, accessibility, and performance work is complete?

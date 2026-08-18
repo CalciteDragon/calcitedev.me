@@ -1,54 +1,79 @@
-import { TestBed } from '@angular/core/testing';
 import { ComponentRef } from '@angular/core';
-import { provideRouter } from '@angular/router';
-import { ProjectsSectionComponent } from './projects-section.component';
+import { TestBed } from '@angular/core/testing';
 import { Project } from '../../../../models/project.model';
+import { ProjectsSectionComponent } from './projects-section.component';
 
-const mockProjects: Project[] = [
-  { slug: 'a', title: 'A', description: '', longDescription: '', tags: ['Angular', 'TypeScript'], imageUrl: '', featured: false, category: 'tool', glowColor: 'cyan' },
-  { slug: 'b', title: 'B', description: '', longDescription: '', tags: ['React', 'TypeScript'], imageUrl: '', featured: false, category: 'web-app', glowColor: 'blue' },
-  { slug: 'c', title: 'C', description: '', longDescription: '', tags: ['Angular', 'Node.js'], imageUrl: '', featured: false, category: 'api', glowColor: 'purple' },
+const mockProjects: readonly Project[] = [
+  {
+    slug: 'alpha',
+    title: 'Alpha',
+    eyebrow: 'Personal · Web',
+    status: 'SHIPPED',
+    description: 'Alpha summary',
+    longDescription: 'Alpha detail copy.',
+    tags: ['Angular', 'TypeScript'],
+    imageUrl: 'alpha.svg',
+    imageAlt: 'Alpha preview',
+    githubUrl: 'https://example.com/alpha',
+    glowColor: 'cyan',
+  },
+  {
+    slug: 'beta',
+    title: 'Beta',
+    eyebrow: 'Team · Game',
+    status: 'IN DEVELOPMENT',
+    description: 'Beta summary',
+    longDescription: 'Beta detail copy.',
+    tags: ['Java', 'Robotics'],
+    imageUrl: 'beta.svg',
+    imageAlt: 'Beta preview',
+    glowColor: 'pink',
+  },
 ];
 
 describe('ProjectsSectionComponent', () => {
   let ref: ComponentRef<ProjectsSectionComponent>;
+  let element: HTMLElement;
 
   beforeEach(() => {
-    // Project cards render routerLink anchors, so a router must be provided.
-    TestBed.configureTestingModule({
-      imports: [ProjectsSectionComponent],
-      providers: [provideRouter([])],
-    });
+    TestBed.configureTestingModule({ imports: [ProjectsSectionComponent] });
     const fixture = TestBed.createComponent(ProjectsSectionComponent);
     ref = fixture.componentRef;
     ref.setInput('projects', mockProjects);
     fixture.detectChanges();
+    element = fixture.nativeElement;
   });
 
-  it('shows all projects when no filter is active', () => {
-    expect(ref.instance.filteredProjects()).toHaveLength(3);
+  it('selects the first project by data order initially', () => {
+    expect(ref.instance.selectedProject()?.slug).toBe('alpha');
+    expect(element.querySelector('[aria-pressed="true"]')?.textContent).toContain('Alpha');
   });
 
-  it('filters to projects matching the active tag', () => {
-    ref.instance.setFilter('Angular');
-    expect(ref.instance.filteredProjects()).toHaveLength(2);
-    expect(ref.instance.filteredProjects().map(p => p.slug)).toEqual(['a', 'c']);
+  it('updates the focus project without reordering selector buttons', () => {
+    const orderBefore = [...element.querySelectorAll<HTMLButtonElement>('app-project-selector button')]
+      .map(button => button.getAttribute('aria-label'));
+
+    ref.instance.selectProject({ slug: 'beta', focusDetails: false });
+    ref.changeDetectorRef.detectChanges();
+
+    const orderAfter = [...element.querySelectorAll<HTMLButtonElement>('app-project-selector button')]
+      .map(button => button.getAttribute('aria-label'));
+    expect(ref.instance.selectedProject()?.slug).toBe('beta');
+    expect(orderAfter).toEqual(orderBefore);
+    expect(element.querySelector('[aria-pressed="true"]')?.textContent).toContain('Beta');
   });
 
-  it('resets to all projects when filter is cleared', () => {
-    ref.instance.setFilter('React');
-    ref.instance.setFilter(null);
-    expect(ref.instance.filteredProjects()).toHaveLength(3);
+  it('falls back to the first project when a selected slug disappears', () => {
+    ref.instance.selectProject({ slug: 'beta', focusDetails: false });
+    ref.setInput('projects', [mockProjects[0]]);
+    ref.changeDetectorRef.detectChanges();
+    expect(ref.instance.selectedProject()?.slug).toBe('alpha');
   });
 
-  it('returns only tags appearing in 2 or more projects', () => {
-    // mockProjects: a=['Angular','TypeScript'], b=['React','TypeScript'], c=['Angular','Node.js']
-    // Angular: a,c → 2 ✓   TypeScript: a,b → 2 ✓
-    // React: b → 1 ✗        Node.js: c → 1 ✗
-    const tags = ref.instance.popularTags();
-    expect(tags).toContain('Angular');
-    expect(tags).toContain('TypeScript');
-    expect(tags).not.toContain('React');
-    expect(tags).not.toContain('Node.js');
+  it('renders a graceful empty state', () => {
+    ref.setInput('projects', []);
+    ref.changeDetectorRef.detectChanges();
+    expect(ref.instance.selectedProject()).toBeNull();
+    expect(element.querySelector('.projects-section__empty')?.textContent).toContain('compiling');
   });
 });

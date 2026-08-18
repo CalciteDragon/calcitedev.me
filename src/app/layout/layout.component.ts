@@ -58,8 +58,7 @@ import { BackgroundSceneComponent } from '../features/home/background-scene/back
 export class LayoutComponent {
   private readonly document = inject(DOCUMENT);
 
-  // Plain fragment hrefs resolve against <base href="/"> and would route
-  // back to the home page from /projects/:slug — jump manually instead.
+  // Jump and focus manually so the skip link behaves consistently after redirects.
   protected skipToContent(event: Event): void {
     event.preventDefault();
     const main = this.document.getElementById('main-content');

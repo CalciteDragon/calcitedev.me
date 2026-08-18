@@ -2,75 +2,121 @@ import { Project } from '../models/project.model';
 
 export const projectsData: readonly Project[] = [
   {
-    title: 'Pixel Quest',
-    slug: 'pixel-quest',
+    title: 'Live Bingo',
+    slug: 'live-bingo',
+    eyebrow: 'Realtime multiplayer · Full stack',
+    status: 'SHIPPED',
+    description:
+      'A head-to-head online race that turns Minecraft challenge goals into a live, shared bingo board.',
+    longDescription:
+      'Players create or join a private 1v1 lobby, ready up, and claim a shared 5×5 board while a server-authoritative backend enforces ownership, timers, reconnects, rematches, and multiple win conditions. An Angular client, pure TypeScript match engine, WebSockets, and PostgreSQL persistence keep both sides synchronized.',
+    tags: ['Angular', 'TypeScript', 'WebSockets', 'Node.js', 'PostgreSQL', 'Multiplayer'],
+    imageUrl: 'assets/images/project-live-bingo.png',
+    imageAlt:
+      'A live Live Bingo match: a five-by-five board of Minecraft goals with blue and red claimed tiles, a match timer, and both players tied on the leaderboard',
+    githubUrl: 'https://github.com/CalciteDragon/Live-Bingo',
+    glowColor: 'blue',
+  },
+  {
+    title: 'Pineapple Expense',
+    slug: 'pineapple-expense',
+    eyebrow: 'Senior capstone · Android & cloud',
+    status: 'CAPSTONE',
+    description:
+      'A full-stack Android expense workflow that turns receipt photos into structured reports ready for approval.',
+    longDescription:
+      'The Kotlin and Jetpack Compose client supports receipt capture, editing, user and approver workflows, cloud record keeping, and CSV exports. Behind it, an AWS serverless pipeline uses S3, Lambda, Step Functions, Textract, Bedrock, and RDS to extract, categorize, and store expense data.',
+    tags: ['Kotlin', 'Jetpack Compose', 'AWS Lambda', 'Receipt OCR', 'Bedrock AI', 'Auth0'],
+    imageUrl: 'assets/images/project-pineapple-expense.png',
+    imageAlt:
+      'The Pineapple Expense architecture diagram: a user authenticates through Auth0 into the Android app, which calls an AWS API Gateway fronting Lambdas, a receipt S3 bucket, and a Step Function that runs Textract and Bedrock before writing to the report, receipt, and prediction result databases',
+    githubUrl: 'https://github.com/pineapple-expense/Pineapple-Expense',
+    glowColor: 'gold',
+  },
+  {
+    title: 'Calcite Portfolio',
+    slug: 'calcite-portfolio',
+    eyebrow: 'This site · Angular portfolio',
+    status: 'YOU ARE HERE',
+    description:
+      'The portfolio you are browsing: a playful, statically rendered showcase wrapped in neon and pixel-art details.',
+    longDescription:
+      'Built with Angular 21, strict TypeScript, SCSS, static prerendering, and a two-canvas background scene, this site balances a cyberpunk identity with accessible, responsive UI. This tile is deliberately recursive: a portfolio project inside the Projects section of the portfolio project inside the Projects section…',
+    tags: ['Angular', 'TypeScript', 'SCSS', 'Canvas', 'Accessibility', 'Static SSR'],
+    imageUrl: 'assets/images/project-calcite-portfolio.jpg',
+    imageAlt:
+      'Screenshot of this portfolio’s Projects section, whose Calcite Portfolio detail view shows the same section again, three levels deep',
+    githubUrl: 'https://github.com/CalciteDragon/calcitedev.me',
+    glowColor: 'purple',
+  },
+  {
+    title: 'Mochi 2026',
+    slug: 'mochi-2026',
+    eyebrow: 'FRC team engineering · Robotics',
+    status: 'TEAM BUILD',
+    description:
+      'Competition robot software combining swerve drive, multi-camera vision, autonomous paths, and simulation.',
+    longDescription:
+      'I contributed to Ramen Robotics 9036’s command-based Java and WPILib codebase, built to run across competition and practice hardware. It combines CTRE swerve drive, Limelight and AprilTag odometry, PathPlanner autonomous routines, hardware abstraction, subsystem simulation, and an extensive automated test suite.',
+    tags: ['FRC Robotics', 'Java', 'WPILib', 'Swerve Drive', 'Computer Vision', 'PathPlanner'],
+    imageUrl: 'assets/images/project-mochi-2026.jpg',
+    imageAlt:
+      'The competition robot mid-build on the shop floor: an aluminium chassis with NEO Vortex and Talon FX motors on geared drive modules, a REV power distribution hub reading 12.6 volts, a team battery, and a yellow game piece resting on the frame',
+    githubUrl: 'https://github.com/RamenRobotics9036/Mochi2026',
+    glowColor: 'pink',
+  },
+  {
+    title: 'It’s Never Just Black and White',
+    slug: 'black-and-white',
+    eyebrow: 'Vibe-coded experiment · Browser game',
+    status: 'EXPERIMENT',
     description:
       'A retro-style 2D platformer with hand-crafted pixel art, procedural level generation, and local co-op support.',
     longDescription:
       'Pixel Quest is a passion project combining a love of classic platformers with modern game development techniques. Built with TypeScript and the Canvas API, it features a custom physics engine, procedurally generated dungeons, and a pixel-art rendering pipeline. Supports local two-player co-op and a daily challenge mode.',
     tags: ['TypeScript', 'Canvas API', 'Game Dev', 'Pixel Art'],
-    imageUrl: 'assets/images/project-pixel-quest.svg',
+    imageUrl: 'assets/images/project-black-and-white.png',
+    imageAlt:
+      'In-game capture of the level “FIRST STEPS” at 0:13.01: a white diamond player character falling between stark white platforms on a black background, with chromatic-aberration edges, scanline grain, and a small cyan particle burst above a dark chevron spike',
     githubUrl: 'https://github.com/CalciteDragon/pixel-quest',
-    featured: true,
-    category: 'game',
     glowColor: 'cyan',
   },
   {
-    title: 'DevBoard',
-    slug: 'devboard',
+    title: 'Minecraft Hide & Seek',
+    slug: 'minecraft-hide-and-seek',
+    eyebrow: 'Minecraft minigame · Java plugin',
+    status: 'ARCHIVED',
     description:
-      'A full-stack developer productivity dashboard — task tracking, GitHub activity, and live metrics in one place.',
+      'A custom Minecraft 1.21 server plugin that turns a hand-built world into a complete hide-and-seek match.',
     longDescription:
-      'DevBoard is a unified workspace for developers who want to stay in flow. It aggregates GitHub activity, tracks personal tasks, and surfaces key project metrics. Built with Angular on the frontend and Node.js/Express on the backend, with a PostgreSQL database and real-time WebSocket updates.',
-    tags: ['Angular', 'Node.js', 'PostgreSQL', 'WebSockets', 'REST API'],
-    imageUrl: 'assets/images/project-devboard.svg',
-    liveUrl: 'https://devboard.calcitedev.me',
-    githubUrl: 'https://github.com/CalciteDragon/devboard',
-    featured: true,
-    category: 'web-app',
+      'One player is randomly selected as seeker, hiders get a 30-second head start, and a live scoreboard runs the ten-minute hunt. Java and Paper event handlers manage teams, deaths, respawns, win states, and seven playful power-ups including invisibility, healing, reveals, knockback, fire, bows, and returnable wormholes.',
+    tags: ['Java', 'Paper API', 'Minecraft', 'Bukkit', 'Game Systems', 'Power-ups'],
+    imageUrl: 'assets/images/project-hide-and-seek.jpg',
+    imageAlt:
+      'Rendered Minecraft scene in a torch- and lantern-lit library: a player in a black hoodie and cyan-lensed goggles crouches against a wall of bookshelves while two diamond-helmeted players holding diamond swords close in from either side',
+    githubUrl: 'https://github.com/CalciteDragon/Hide-and-Seek-Plugin',
     glowColor: 'blue',
   },
   {
-    title: 'NeonChat',
-    slug: 'neonchat',
+    title: 'WIP Roblox PvP Game',
+    slug: 'roblox-pvp-world',
+    eyebrow: 'Work in progress · Multiplayer game',
+    status: 'IN DEVELOPMENT',
     description:
-      'A real-time group chat app with room-based messaging, presence indicators, and a cyberpunk UI theme.',
+      'A community-driven open-world PvP game built for a persistent experience across multiple Roblox servers.',
     longDescription:
-      'NeonChat delivers real-time messaging via WebSockets with a latency-first architecture. Features include room creation, user presence indicators, message history persistence in PostgreSQL, and JWT-based authentication. The UI is built in React with a neon cyberpunk aesthetic.',
-    tags: ['React', 'Node.js', 'WebSockets', 'PostgreSQL', 'Authentication'],
-    imageUrl: 'assets/images/project-neonchat.svg',
-    githubUrl: 'https://github.com/CalciteDragon/neonchat',
-    featured: false,
-    category: 'web-app',
+      'This in-progress Roblox project explores a shared world where player choices, rivalries, and community activity persist beyond a single server session. The build includes original environments and custom assets alongside the multiplayer systems needed to keep a large, evolving PvP space coherent.',
+    tags: [
+      'Luau',
+      'Roblox Studio',
+      'Multiplayer',
+      'Persistent Data',
+      'Game Design',
+      'Custom Assets',
+    ],
+    imageUrl: 'assets/images/project-roblox-pvp-world.jpg',
+    imageAlt:
+      'Roblox Studio viewport showing an in-progress obstacle course of floating platforms, pillars, and hazard markers',
     glowColor: 'purple',
-  },
-  {
-    title: 'CodeCraft API',
-    slug: 'codecraft-api',
-    description:
-      'A RESTful API platform for managing code snippets — tagging, search, versioning, and team sharing.',
-    longDescription:
-      'CodeCraft API is a developer utility for organizing reusable code snippets across projects and teams. It provides full CRUD operations, tag-based search, snippet versioning, and team workspaces. Built as a containerized Node.js/Express service with Docker, PostgreSQL, and JWT authentication.',
-    tags: ['Node.js', 'Express.js', 'REST API', 'Docker', 'PostgreSQL'],
-    imageUrl: 'assets/images/project-codecraft.svg',
-    githubUrl: 'https://github.com/CalciteDragon/codecraft-api',
-    featured: false,
-    category: 'api',
-    glowColor: 'pink',
-  },
-  {
-    title: 'StarMapper',
-    slug: 'starmapper',
-    description:
-      'An interactive star map visualization — browse the night sky, search constellations, and save personal observations.',
-    longDescription:
-      'StarMapper renders a real-time interactive star map in the browser using the Canvas API and real astronomical data. Users can rotate the view, search for constellations, and log personal sky observations with timestamps and notes. A clean, minimal Angular UI keeps the focus on the stars.',
-    tags: ['TypeScript', 'Canvas API', 'Angular', 'SCSS'],
-    imageUrl: 'assets/images/project-starmapper.svg',
-    liveUrl: 'https://starmapper.calcitedev.me',
-    githubUrl: 'https://github.com/CalciteDragon/starmapper',
-    featured: true,
-    category: 'tool',
-    glowColor: 'gold',
   },
 ];

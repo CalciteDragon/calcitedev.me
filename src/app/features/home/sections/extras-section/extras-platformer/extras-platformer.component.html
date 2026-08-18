@@ -1,0 +1,238 @@
+<div
+  #viewport
+  class="extra-game"
+  [class.extra-game--reduced-motion]="reducedMotion()"
+  [class.extra-game--editing]="editorEnabled() && editorMode() === 'edit'"
+>
+  @if (editorEnabled()) {
+    <app-extras-level-editor
+      [level]="level()"
+      [selectedElementId]="selectedElementId()"
+      [mode]="editorMode()"
+      [snapEnabled]="snapEnabled()"
+      [canUndo]="canUndo()"
+      [canRedo]="canRedo()"
+      [status]="editorStatus()"
+      (selectionChanged)="selectEditorElement($event)"
+      (modeChanged)="changeEditorMode($event)"
+      (snapChanged)="snapEnabled.set($event)"
+      (addRequested)="addEditorPlatform()"
+      (deleteRequested)="deleteSelectedElement()"
+      (duplicateRequested)="duplicateSelectedElement()"
+      (undoRequested)="undoEditorChange()"
+      (redoRequested)="redoEditorChange()"
+      (resetRequested)="resetEditorLevel()"
+      (copyRequested)="copyEditorSource()"
+      (downloadRequested)="downloadEditorSource()"
+      (propertyChanged)="updateEditorProperty($event)"
+    />
+    @if (stackedLayout()) {
+      <p class="extra-game__editor-width-notice" role="status">
+        Widen this section to at least 1080px to drag and playtest the level. Your draft is preserved.
+      </p>
+    }
+  }
+
+  @if (!stackedLayout()) {
+    <div
+      class="extra-game__viewport"
+      tabindex="0"
+      [attr.role]="editorEnabled() && editorMode() === 'edit' ? 'region' : 'application'"
+      [attr.aria-label]="editorEnabled() && editorMode() === 'edit'
+        ? 'Extras level editor. Select and drag an island or jump platform.'
+        : 'Extras island platformer. Use WASD or the arrow keys anywhere on the page to move, jump, and crouch. Click a screen to teleport to it.'"
+      [style.height.px]="desktopViewportHeight()"
+    >
+      <div
+        class="extra-game__world"
+        [class.extra-game__world--editing]="editorEnabled() && editorMode() === 'edit'"
+        [style.width.px]="worldWidth()"
+        [style.height.px]="worldHeight()"
+        [style.transform]="'scale(' + worldScale() + ')'"
+      >
+        @for (island of islands(); track island.topicId) {
+          <div
+            class="extra-game__island-copy"
+            [class.extra-game__island-copy--active]="activeTopicId() === island.topicId"
+            [attr.data-accent]="island.topic.accent"
+            [style.left.px]="island.x"
+            [style.top.px]="island.y - 200"
+            [style.width.px]="island.width"
+          >
+            <p><span aria-hidden="true">//</span> {{ island.topic.islandLabel }}</p>
+            <h3>{{ island.topic.title }}</h3>
+            <span>{{ island.topic.description }}</span>
+          </div>
+
+          <div
+            class="extra-game__screen"
+            [class.extra-game__screen--active]="activeTopicId() === island.topicId && popoutTopicId() !== island.topicId"
+            [attr.inert]="editorEnabled() && editorMode() === 'edit' ? '' : null"
+            [style.left.px]="island.x"
+            [style.top.px]="island.y"
+            [style.width.px]="island.width"
+            [style.height.px]="island.height"
+          >
+            <app-extra-media-screen
+              [topic]="island.topic"
+              [active]="activeTopicId() === island.topicId && popoutTopicId() !== island.topicId"
+              [mediaIndex]="mediaIndex(island.topicId)"
+              (visitRequested)="visitTopic(island.topicId)"
+              (popoutRequested)="openPopout(island.topicId)"
+              (previousRequested)="navigateMedia(island.topicId, -1)"
+              (nextRequested)="navigateMedia(island.topicId, 1)"
+            />
+          </div>
+        }
+
+        @for (pad of mediaPads(); track pad.id) {
+          <app-extra-media-pad
+            class="extra-game__media-pad"
+            [accent]="pad.accent"
+            [glyph]="pad.glyph"
+            [active]="activeTopicId() === pad.topicId"
+            [pressed]="padPressed(pad.id)"
+            [attr.inert]="editorEnabled() && editorMode() === 'edit' ? '' : null"
+            [style.left.px]="pad.x"
+            [style.top.px]="pad.y"
+            [style.width.px]="pad.width"
+            [style.height.px]="pad.height"
+            (pressRequested)="pressMediaPad(pad)"
+          />
+        }
+
+        @for (platform of jumpPlatforms(); track platform.id) {
+          <div
+            class="extra-game__jump-platform"
+            [style.left.px]="platform.x"
+            [style.top.px]="platform.y"
+            [style.width.px]="platform.width"
+            [style.height.px]="platform.height"
+            aria-hidden="true"
+          ></div>
+        }
+
+        @if (editorEnabled() && editorMode() === 'edit') {
+          @for (element of level().elements; track element.id) {
+            <button
+              type="button"
+              class="extra-game__editor-target"
+              [class.extra-game__editor-target--selected]="selectedElementId() === element.id"
+              [class.extra-game__editor-target--platform]="element.kind === 'platform'"
+              [style.left.px]="element.x"
+              [style.top.px]="element.y"
+              [style.width.px]="element.width"
+              [style.height.px]="element.height"
+              [attr.aria-label]="'Select and move ' + element.id"
+              (pointerdown)="startEditorDrag($event, element.id)"
+              (pointermove)="moveEditorDrag($event)"
+              (pointerup)="finishEditorDrag($event)"
+              (pointercancel)="cancelEditorDrag($event)"
+            >
+              <span>{{ element.id }} · {{ element.x }}, {{ element.y }}</span>
+            </button>
+          }
+        }
+
+        <div
+          class="extra-game__player"
+          [class.extra-game__player--left]="facing() === 'left'"
+          [class.extra-game__player--moving]="moving()"
+          [class.extra-game__player--crouching]="crouching()"
+          [class.extra-game__player--airborne]="airborne()"
+          [style.width.px]="playerWidth"
+          [style.height.px]="playerHeight"
+          [style.transform]="'translate3d(' + playerPosition().x + 'px, ' + playerPosition().y + 'px, 0)'"
+          role="img"
+          aria-label="8-bit pixel art avatar of Tyler Hawthorn"
+        >
+          @if (showWasdHint()) {
+            <span class="extra-game__wasd-hint" aria-hidden="true">try WASD</span>
+          }
+          <span class="extra-game__player-sprite" aria-hidden="true"></span>
+        </div>
+      </div>
+
+    </div>
+  } @else {
+    <div class="extra-game__stack" aria-label="Extras media">
+      <div class="extra-game__desktop-prompt">
+        <div
+          class="extra-game__player extra-game__player--fallback"
+          [style.width.px]="playerWidth"
+          [style.height.px]="playerHeight"
+          role="img"
+          aria-label="8-bit pixel art avatar of Tyler Hawthorn"
+        >
+          <span class="extra-game__player-sprite" aria-hidden="true"></span>
+        </div>
+        <p class="extra-game__desktop-hint">Try this on desktop — or make your window wider.</p>
+      </div>
+
+      @for (island of islands(); track island.topicId) {
+        <article
+          class="extra-game__stack-pane"
+          [class.extra-game__stack-pane--active]="activeTopicId() === island.topicId"
+          [attr.data-accent]="island.topic.accent"
+          (click)="activateStackedTopic(island.topicId)"
+          (focusin)="activateStackedTopic(island.topicId)"
+        >
+          <div class="extra-game__stack-copy">
+            <p><span aria-hidden="true">//</span> {{ island.topic.islandLabel }}</p>
+            <h3>{{ island.topic.title }}</h3>
+            <span>{{ island.topic.description }}</span>
+          </div>
+
+          <div class="extra-game__stack-screen">
+            <app-extra-media-screen
+              [topic]="island.topic"
+              [active]="activeTopicId() === island.topicId && popoutTopicId() !== island.topicId"
+              [staticLayout]="true"
+              [mediaIndex]="mediaIndex(island.topicId)"
+              (popoutRequested)="openPopout(island.topicId)"
+              (previousRequested)="navigateMedia(island.topicId, -1)"
+              (nextRequested)="navigateMedia(island.topicId, 1)"
+            />
+          </div>
+        </article>
+      }
+    </div>
+  }
+
+  @if (popoutTopic(); as topic) {
+    <div class="extra-game__popout-backdrop" (click)="closePopout()">
+      <section
+        class="extra-game__popout-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="extras-popout-title"
+        (click)="$event.stopPropagation()"
+      >
+        <button
+          type="button"
+          class="extra-game__popout-close"
+          aria-label="Close pop-out"
+          (click)="closePopout()"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+        <header class="extra-game__popout-header">
+          <p><span aria-hidden="true">//</span> {{ topic.islandLabel }}</p>
+          <h2 id="extras-popout-title">{{ topic.title }}</h2>
+          <span>{{ topic.description }}</span>
+        </header>
+        <div class="extra-game__popout-media">
+          <app-extra-media-screen
+            [topic]="topic"
+            [active]="true"
+            [staticLayout]="true"
+            [showPopoutButton]="false"
+            [mediaIndex]="mediaIndex(topic.id)"
+            (previousRequested)="navigateMedia(topic.id, -1)"
+            (nextRequested)="navigateMedia(topic.id, 1)"
+          />
+        </div>
+      </section>
+    </div>
+  }
+</div>

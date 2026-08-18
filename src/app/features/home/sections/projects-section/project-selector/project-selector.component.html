@@ -1,0 +1,33 @@
+<div class="project-selector" aria-label="Choose a project">
+  @for (project of projects(); track project.slug; let index = $index) {
+    <div class="project-selector__reveal" appScrollReveal>
+      <button
+        type="button"
+        [class]="projectClass(project)"
+        [class.project-selector__button--active]="selectedSlug() === project.slug"
+        [attr.aria-pressed]="selectedSlug() === project.slug"
+        [attr.aria-controls]="'project-focus-' + project.slug"
+        [attr.aria-label]="'Show ' + project.title + ' project'"
+        (click)="selectProject(project, $event)"
+      >
+        <span class="project-selector__visual" aria-hidden="true">
+          <img [src]="project.imageUrl" alt="" width="640" height="360" loading="lazy" />
+          <span class="project-selector__number">{{ projectNumber(index) }}</span>
+          <span class="project-selector__active-marker">
+            <span aria-hidden="true">◆</span> ACTIVE
+          </span>
+        </span>
+
+        <span class="project-selector__body">
+          <span class="project-selector__title">{{ project.title }}</span>
+          <span class="project-selector__status">{{ project.status }}</span>
+          <span class="project-selector__tags" aria-hidden="true">
+            @for (tag of previewTags(project); track tag) {
+              <span>{{ tag }}</span>
+            }
+          </span>
+        </span>
+      </button>
+    </div>
+  }
+</div>

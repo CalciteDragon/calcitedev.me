@@ -1,0 +1,316 @@
+@use 'variables' as *;
+
+:host { display: block; }
+
+.extra-game {
+  width: 100%;
+  max-width: 112.5rem;
+  margin: 0 auto;
+}
+
+.extra-game__viewport {
+  position: relative;
+  overflow: visible;
+  outline: none;
+  touch-action: pan-y;
+
+  &:focus-visible .extra-game__player {
+    filter: drop-shadow(0 0 12px rgba(var(--accent-cyan-rgb), 0.9));
+  }
+}
+
+.extra-game__world {
+  position: absolute;
+  inset: 0 auto auto 0;
+  transform-origin: left top;
+
+  &--editing {
+    background-image:
+      linear-gradient(rgba(var(--accent-cyan-rgb), 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(var(--accent-cyan-rgb), 0.08) 1px, transparent 1px);
+    background-size: 10px 10px;
+    outline: 1px solid rgba(var(--accent-cyan-rgb), 0.28);
+  }
+}
+
+.extra-game__island-copy {
+  --copy-accent: var(--accent-cyan);
+  position: absolute;
+  z-index: 1;
+  display: grid;
+  gap: 0.35rem;
+  align-content: end;
+  min-height: 8.75rem;
+  padding-inline: $space-2;
+  opacity: 0.62;
+  text-align: center;
+  text-shadow: 0 2px 15px var(--bg-primary);
+  transform: translateY(0);
+  transition: opacity 700ms ease-out, transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+
+  &[data-accent='gold'] { --copy-accent: var(--accent-gold); }
+  &[data-accent='pink'] { --copy-accent: var(--accent-pink); }
+
+  &--active {
+    opacity: 0.94;
+    transform: translateY(-8px);
+  }
+
+  p {
+    color: var(--copy-accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    color: var(--text-primary);
+    font-size: clamp(1.3rem, 1.7vw, 1.75rem);
+    line-height: 1.08;
+  }
+
+  > span {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+}
+
+.extra-game__screen,
+.extra-game__stack-screen {
+  filter: drop-shadow(0 20px 24px rgba(0, 0, 0, 0.38));
+}
+
+.extra-game__screen {
+  position: absolute;
+  z-index: 3;
+  transform: translateY(0);
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  &--active { transform: translateY(-8px); }
+}
+
+// Placement only; ExtraMediaPadComponent owns the housing, cap, and press states.
+.extra-game__media-pad {
+  position: absolute;
+  z-index: 5;
+}
+
+.extra-game__jump-platform {
+  position: absolute;
+  z-index: 4;
+  background: linear-gradient(180deg, var(--accent-cyan), var(--accent-blue));
+  border: 2px solid var(--accent-cyan);
+  border-radius: 4px;
+  box-shadow: 0 0 12px rgba(var(--accent-cyan-rgb), 0.34);
+}
+
+.extra-game__editor-target {
+  position: absolute;
+  z-index: 12;
+  display: grid;
+  place-items: start center;
+  padding: 0;
+  color: var(--text-primary);
+  background: rgba(var(--accent-cyan-rgb), 0.04);
+  border: 2px dashed rgba(var(--accent-cyan-rgb), 0.72);
+  cursor: grab;
+  touch-action: none;
+
+  &:active { cursor: grabbing; }
+
+  &--platform { border-color: var(--accent-gold); }
+  &--selected {
+    border-style: solid;
+    box-shadow: 0 0 0 3px rgba(var(--accent-pink-rgb), 0.34), 0 0 20px rgba(var(--accent-cyan-rgb), 0.42);
+  }
+
+  span {
+    padding: 0.18rem 0.35rem;
+    background: rgba(5, 8, 18, 0.9);
+    border-radius: 0 0 4px 4px;
+    font: 11px/1.25 'JetBrains Mono', monospace;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
+
+.extra-game__editor-width-notice {
+  margin: 0 0 $space-2;
+  color: var(--accent-gold);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  text-align: center;
+}
+
+.extra-game--editing .extra-game__player { opacity: 0.72; }
+
+.extra-game__player {
+  position: absolute;
+  z-index: 7;
+  top: 0;
+  left: 0;
+  filter: drop-shadow(0 0 8px rgba(var(--accent-cyan-rgb), 0.55));
+  transform-origin: center bottom;
+  will-change: transform;
+
+  &--left .extra-game__player-sprite { transform: scaleX(-1); }
+  &--moving .extra-game__player-sprite { animation: player-step 480ms steps(4) infinite; }
+  &--crouching .extra-game__player-sprite {
+    background-position-x: -152px;
+    animation: none;
+  }
+  &--airborne .extra-game__player-sprite {
+    background-position-x: -190px;
+    animation: none;
+  }
+
+  &--fallback {
+    position: relative;
+    top: auto;
+    left: auto;
+    flex: 0 0 auto;
+    transform: none;
+    will-change: auto;
+  }
+}
+
+.extra-game__wasd-hint,
+.extra-game__desktop-hint {
+  color: rgba(229, 231, 235, 0.78);
+  background: rgba(11, 15, 26, 0.84);
+  border: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
+  border-radius: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: 0.04em;
+}
+
+// One shared speech-bubble tail for both the in-world hint and the stacked-layout prompt.
+.extra-game__wasd-hint::after,
+.extra-game__desktop-hint::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -0.36rem;
+  width: 0.62rem;
+  height: 0.62rem;
+  background: rgba(11, 15, 26, 0.84);
+  border-left: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
+  border-bottom: 1px solid rgba(var(--accent-cyan-rgb), 0.3);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.extra-game__wasd-hint {
+  position: absolute;
+  bottom: 0.75rem;
+  left: calc(100% + 0.55rem);
+  min-width: 4.8rem;
+  padding: 0.32rem 0.48rem;
+  font-size: 0.58rem;
+  text-align: center;
+  white-space: nowrap;
+  animation: hint-arrive 500ms ease-out both;
+}
+
+.extra-game__player-sprite {
+  position: absolute;
+  inset: 0;
+  background: url('/assets/pixel-art/extras-explorer.svg') 0 0 / 228px 48px no-repeat;
+  image-rendering: pixelated;
+  transform-origin: center bottom;
+}
+
+.extra-game__stack {
+  display: grid;
+  gap: clamp(4rem, 8vw, 6rem);
+  padding-block: $space-2;
+}
+
+.extra-game__desktop-prompt {
+  display: grid;
+  grid-template-columns: auto minmax(0, 28rem);
+  gap: $space-2;
+  align-items: center;
+  justify-content: center;
+  width: min(100%, 36rem);
+  margin: 0 auto;
+}
+
+.extra-game__desktop-hint {
+  position: relative;
+  padding: 0.75rem 0.9rem;
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.extra-game__stack-pane {
+  --pane-accent: var(--accent-cyan);
+  display: grid;
+  gap: $space-2;
+  width: min(100%, 60rem);
+  margin: 0 auto;
+
+  &[data-accent='gold'] { --pane-accent: var(--accent-gold); }
+  &[data-accent='pink'] { --pane-accent: var(--accent-pink); }
+}
+
+.extra-game__stack-copy {
+  display: grid;
+  gap: 0.35rem;
+  padding-inline: $space-1;
+  text-align: center;
+  text-shadow: 0 2px 15px var(--bg-primary);
+
+  p {
+    color: var(--pane-accent);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    color: var(--text-primary);
+    font-size: clamp(1.3rem, 4vw, 1.75rem);
+    line-height: 1.12;
+  }
+
+  > span {
+    max-width: 42rem;
+    margin: 0 auto;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.55;
+  }
+}
+
+.extra-game__stack-screen {
+  height: clamp(18rem, 62vw, 34rem);
+  transition: filter $transition-base;
+}
+
+.extra-game__stack-pane--active .extra-game__stack-screen {
+  filter:
+    drop-shadow(0 20px 24px rgba(0, 0, 0, 0.38))
+    drop-shadow(0 0 16px color-mix(in srgb, var(--pane-accent) 18%, transparent));
+}
+
+@keyframes player-step { to { background-position-x: -152px; } }
+@keyframes hint-arrive { from { opacity: 0; transform: translateY(4px) scale(0.96); } }
+
+@media (max-width: $bp-sm) {
+  .extra-game__stack { gap: $space-6; }
+  .extra-game__desktop-prompt { gap: 0.85rem; }
+  .extra-game__desktop-hint { padding: 0.65rem 0.75rem; font-size: 0.66rem; }
+  .extra-game__stack-screen { height: clamp(16rem, 72vw, 20rem); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .extra-game__player-sprite,
+  .extra-game__wasd-hint { animation: none !important; }
+  .extra-game__screen,
+  .extra-game__island-copy,
+  .extra-game__stack-screen { transition: none; }
+}

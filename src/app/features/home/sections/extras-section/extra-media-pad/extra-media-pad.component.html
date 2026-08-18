@@ -1,0 +1,11 @@
+<button
+  type="button"
+  class="extra-pad"
+  [class.extra-pad--active]="active()"
+  [class.extra-pad--pressed]="pressed()"
+  tabindex="-1"
+  aria-hidden="true"
+  (click)="requestPress()"
+>
+  <span>{{ glyph() }}</span>
+</button>

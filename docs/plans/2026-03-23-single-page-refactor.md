@@ -1,5 +1,7 @@
 # Single-Page Scroll Refactor
 
+> **Historical plan notice (August 13, 2026):** References below to project filters, shared project cards, `/projects/:slug`, or `ProjectDetailComponent` describe the architecture at the time this phase was implemented. The current Projects experience is the single-page focus stage and selector documented in `docs/architecture.md`; those routes/components no longer exist.
+
 > **Status:** Planning — not yet started
 > **Goal:** Convert the multi-route portfolio into a single scrollable page. Sections: Home → Projects → About → Skills → Contact. Navbar links quick-scroll to sections and highlight based on viewport. Angular routing preserved for future detail pages.
 

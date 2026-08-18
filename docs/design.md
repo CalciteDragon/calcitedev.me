@@ -79,9 +79,9 @@ Used for: heading gradients, active states, card border glows, CTA accents.
 
 | Element         | Size (desktop)           | Weight | Notes                                              |
 | --------------- | ------------------------ | ------ | -------------------------------------------------- |
-| Hero name       | `clamp(3rem, 8vw, 7rem)` | 700    | Cyan→pink gradient via `background-clip: text` — viewport-fixed attachment ≥ lg; per-element (vertical) below lg |
-| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Same gradient — per-element horizontal below lg  |
-| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Same gradient — per-element horizontal below lg  |
+| Hero name       | — (raster art)           | —      | Not type: the `hero-title.webp` neon-sign image inside the `h1`. `width: min(100%, 560px)`, `min(100%, clamp(560px, 60vw, 930px))` ≥ lg |
+| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Solid `$accent-cyan` with a low two-stop halo; `letter-spacing: 0.08em`. Sits in the `.hero__tagline` panel |
+| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Solid `$accent-pink` with the same halo (9.5:1 and 4.9:1 on the panel). Sits in the `.hero__tagline` panel |
 | H2 (Section)    | 2rem–2.5rem              | 700    | Section headings                                   |
 | H3 (Card title) | 1.25rem                  | 600    | Card headings                                      |
 | Body            | 1rem                     | 400    | Line height 1.6                                    |
@@ -94,7 +94,7 @@ Use `clamp()` for fluid typography on mobile.
 
 ### Grid System
 
-- **Max content width:** 1200px, centered
+- **Max content width:** 1200px, centered. The hero is the one exception: from xl up it widens to 1400px so the neon sign has room beside the avatar
 - **Section padding:** 80–120px vertical, 24px horizontal (mobile: 48–64px vertical, 16px)
 - **Card grid:** CSS Grid, responsive (`repeat(auto-fill, minmax(320px, 1fr))`)
 - **Spacing scale:** 8px base — 8, 16, 24, 32, 48, 64, 96
@@ -133,15 +133,20 @@ Soft glow around buttons, icons, headings, and card borders. Implemented via `bo
 
 ### Gradient Text
 
-Hero name uses the accent gradient as `background-clip: text`:
+The hero no longer uses gradient text anywhere. The name is the neon-sign raster, and the alias and subtitle are lit tubes (see Hero Section Design) — `-webkit-text-fill-color: transparent` and `text-shadow` are mutually exclusive, since a transparent glyph has nothing to bloom off, so a glow that matches the sign requires solid color:
 
 ```scss
-.hero__name {
-  background: var(--gradient-accent);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+@mixin hero-neon-text($color) {
+  color: $color;
+  text-shadow:
+    0 0 8px rgba($color, 0.32),   // tight bloom
+    0 0 22px rgba($color, 0.12);  // faint spill
 }
 ```
+
+The halo is deliberately weak. The sign is the only element in the hero that should read as actually emitting light; the subtext only needs to look lit by the same room. It resolves to `none` under `prefers-reduced-motion: reduce`.
+
+Gradient text via `background-clip: text` remains available as the `gradient-text` mixin in `_glow.scss` for other sections.
 
 ## Hero Section Design
 
@@ -152,9 +157,9 @@ Hero name uses the accent gradient as `background-clip: text`:
 │  [Background: star field + mountains + parallax] │
 │                                                   │
 │   🧑‍💻                                       🛸   │
-│  (pixel avatar)   TYLER HAWTHORN         (UFO — │
-│  [=== platform]   AKA CALCITE             HTML) │
-│                   Full Stack Developer            │
+│  (pixel avatar)  [TYLER HAWTHORN sign]   (UFO — │
+│  [=== platform]    │ AKA CALCITE          HTML) │
+│                    │ Full Stack Developer        │
 │                                                   │
 │                     ↓  ↓  ↓  (scroll indicator)  │
 └─────────────────────────────────────────────────┘
@@ -162,7 +167,10 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 **Current hero elements:**
 - Avatar (left, floating animation) on a glowing sci-fi platform (CSS pseudo-element depth effect)
-- Name, alias, and title — cyan→pink gradients applied via `background-clip: text`. From the lg breakpoint up the gradient uses `background-attachment: fixed`, so color shifts subtly with scroll; below lg each element carries its own local gradient (vertical on the two-line name, horizontal on alias/subtitle) because fixed attachment muddies mobile text and iOS Safari ignores it
+- Name — `public/assets/images/hero-title.webp`, a 1400×467 photographic neon sign reading TYLER HAWTHORN (cyan top line, pink bottom line) on a transparent background. It sits as an `<img>` inside the `h1`, with `alt` bound to `bio().name` so the accessible name still comes from the data layer, and `fetchpriority="high"` because it is the hero LCP element. The art carries its own glow, so `.hero__name` applies no gradient or text fill — it is only a flex box that centers below lg and left-aligns from lg up. Negative block margins pull the tagline panel back toward the visible tubing, since the source art bleeds glow to its own edges. Sizing is wrapped in `min(100%, …)` so the sign can ask for more width than the flex column has and simply take whatever is available — that guard is what keeps it from overflowing at lg, where the column is narrowest relative to the request
+- Alias and title — cyan→pink gradients applied via `background-clip: text`. From the lg breakpoint up the gradient uses `background-attachment: fixed`, so color shifts subtly with scroll; below lg each element carries its own local horizontal gradient because fixed attachment muddies mobile text and iOS Safari ignores it
+- Tagline (`.hero__tagline`) — alias and subtitle share a wrapper that carries no plate at all: no background, border, backdrop filter, or shadow. From lg up it is indented `$space-6` from the column edge and marked by a single 2px hairline rule on its left, fading to transparent at both ends so it reads as an edge the copy hangs off rather than as a drawn graphic. Below lg the copy is centered and the rule is not generated — the `content` property lives inside the `lg` query, so there is no pseudo-element on mobile rather than a hidden one. The wrapper's remaining jobs are the flex `gap` between the two lines and the indent itself
+- Subtext color — cyan alias over pink subtitle repeats the sign's own two-line split (cyan TYLER above, pink HAWTHORN below), so the panel reads as the sign's third and fourth lines rather than as caption text under it. Both carry the `hero-neon-text` halo, which collapses to a single soft stop under `prefers-reduced-motion: reduce`
 - UFO — HTML `<img>` parked high in the upper-right sky (`top: 4%` at lg, right-edge bleed capped by `max(calc(760px - 50vw), -60px)`), clear of the headline at scroll 0; CSS float + tilt keyframe plus scroll-driven parallax (drifts down 140vh over 200vh scroll); homepage sections establish DOM-order stacking contexts so all later content, including project cards, renders above it
 - UFO tractor beam — CSS gradient cone beneath the disc
 - Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
@@ -171,7 +179,7 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 ### Layout Note
 
-The page is a single-page scroll: Home hero → Projects → About → Skills → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
+The page is a single-page scroll: Home hero → About → Projects → Extras → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
 
 ### Background Scene (Canvas)
 
@@ -198,7 +206,7 @@ The page is a single-page scroll: Home hero → Projects → About → Skills �
 
 - Fixed to top, semi-transparent `#0B0F1A` with `backdrop-filter: blur(12px)`
 - Small pixel-style icons on the left (branding)
-- Nav links (left-to-right): Projects, About, Skills, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
+- Nav links (left-to-right): About, Projects, Extras, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
 - Hover: glow + color shift, underline animation or pixel highlight
 - Mobile: hamburger → slide-in drawer
 
@@ -206,35 +214,83 @@ The page is a single-page scroll: Home hero → Projects → About → Skills �
 
 The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were removed in the layout-and-design-tweaks pass. Do not reintroduce them without a new product decision; fixed navigation and the natural section order now provide that function.
 
-### Project Cards
+### About Story Timeline
 
-- Dark surface background, rounded corners (12px)
-- Thumbnail/preview at top — fixed 200px-high wrapper with a dark fallback background so a missing asset never collapses the card; current art is per-project placeholder SVGs in each project's glow color under `public/assets/images/`
-- Title, description, tech tags below
-- The title is a stretched `routerLink` anchor (an `::after` overlay covers the card), so clicking anywhere on the card opens `/projects/:slug`; Live Demo / GitHub pills sit above the overlay on their own z-index and keep working independently
-- Keyboard: the stretched link shows a cyan focus-visible ring around the whole card
-- Hover: lift + neon border glow
+- The About section immediately follows the hero and begins with one prominent intro card. Its copy is slightly larger than the history copy and limits emphasis to the site's cyan/pink identity colors.
+- `// My history` introduces a terminal-style production command, followed by four compiler stages: Source Parsing, AST Construction, Bytecode Generation, and JIT Optimization.
+- The history palette follows one intentional cold-to-warm progression: cyan → blue → violet → pink. Every chapter owns one accent; its heading, emphasized phrases, links, edge, and node all use that color rather than mixing accents inside a card.
+- The component measures each chapter during passive, animation-frame-coalesced scroll updates. Card perspective tilt follows chapter position against a fixed activation line 40% up from the viewport bottom (60% from the top).
+- The rail's glowing fill/head maps progress through the About section from -6.8% to 64.9%. Because the calculation uses the section's own top and height, changes above or below About do not alter the timing. The target follows frame-rate-independent exponential damping with a 90ms time constant. The rail's physical endpoints and gradient color stops are measured from the numbered nodes, and the single active chapter follows the node closest to the same smoothed rail head. This keeps the head, color, and number glow synchronized without stacking CSS transitions. Hover does not change card tilt, borders, nodes, or timeline glow.
+- In development mode, `?aboutDebug=scroll` (or `#aboutDebug=scroll`) shows a compact fixed scroll-tuning HUD with page pixels/percentage, About-section progress, unclamped rail-cursor percentage, clamped target, smoothed glow progress, active chapter, and configured bounds. Normal development URLs hide it, and it is always absent from production builds.
+- A faint rail gradient keeps later-stage colors visible ahead of the active fill. The rail intentionally stops cleanly at the center of node 04, with no decorative tail or fade below the final number; this approved treatment keeps the timeline visually contained by its numbered endpoints.
+- Scroll reveal applies only to the prominent intro card. The history heading and all four chapters render immediately without reveal animation.
+- History text remains visible in full. There are no accordions, carousels, tabs, or hidden-content controls. Only contextual text links and the inline FIRST clarification are interactive/content accents.
+- Desktop uses wide readable chapter panels. Mobile moves the rail toward the left edge, allows the terminal command and long URLs to wrap, and gives the chapter copy the remaining width.
+- `prefers-reduced-motion` disables the terminal cursor blink and card tilt, hides the moving rail head, renders the rail fully filled, and bypasses JavaScript damping so timeline state snaps directly to its target.
+
+### Project Showcase
+
+- The section uses one **focus stage** followed by a `// PROJECT INDEX`; there are no filters or detail-page transitions.
+- Every focus article occupies the same CSS grid cell. Inactive articles stay in grid sizing but are hidden, inert, and removed from the accessibility tree. The stage therefore reserves its tallest content height and selection never shifts the index or later sections.
+- Desktop focus layout is a 7/5 media-detail split with a stable 30rem minimum height and 16px radius. Below the lg breakpoint it stacks; media is reserved at 16:9 so artwork never collapses or crops into an arbitrary tall box.
+- The active project controls its existing cyan/blue/purple/pink/gold accent through CSS custom properties. Accent affects corner brackets, border, status dot, metadata, and CTAs while the body remains an opaque readable surface over the mountain canvas.
+- Detail hierarchy: project number, status, eyebrow, title, researched long description, technology tags, then available repository/live actions. Projects without public links show a quiet `Building in private` state.
+- The focus image has meaningful alt text. Repository/live actions explicitly announce that they open a new tab and retain 44px touch targets.
+- Every project except Calcite Portfolio now uses a real capture rather than SVG art — a live match board on `#F8FAFC`, the capstone AWS architecture diagram on white, a shop-floor robot build photo, a Studio viewport of the obstacle course, an in-game platformer frame, and a rendered Minecraft library scene. They read as genuine product and engineering artifacts against the dark stage. The two light ones sit noticeably brighter than the surrounding cards; the Mochi photo, padded with `--bg-primary`, sits comfortably in the dark grid. The Black and White capture is the darkest asset in the grid — its near-black background merges with the stage, so the white platforms and the small cyan particle burst carry the whole composition and the cyan accent reads as part of the game rather than as chrome. The Hide & Seek render is the warmest and most saturated asset, and its letterbox padding is `--bg-primary` so the render appears to float in the stage rather than sit in a black box; the diamond armour and goggle lenses happen to land near the project's own blue accent, while its torch and lantern light are the warmest note in the section. The one remaining piece of original 640×360 SVG art is the finite recursive portfolio window.
+- The recursive portfolio preview is intentionally finite SVG artwork, not an iframe: browser windows nest a few levels and end in a `YOU ARE HERE` label.
+
+### Project Selector
+
+- Preview tiles are real `<button type="button">` controls with `aria-pressed`, `aria-controls`, and a project-specific accessible name. External links never nest inside them.
+- Each preview has its own `ScrollRevealDirective` wrapper, so cards reveal as their row enters without the scroll animation overriding the button's hover/press transforms.
+- The selected state adds an `ACTIVE` marker plus accent border/inset glow, so it is not communicated by color alone. Border width does not change and the data order never changes.
+- At 1024px and above, previews form four equal columns; from 480–1023px they use two columns. Below 480px they become compact horizontal cards with a 7rem visual and title/status body, avoiding a second long wall of full-size cards.
+- Desktop/tablet previews include three curated keywords. The smallest layout suppresses them to protect title readability.
+- Selecting a preview updates the focus stage with no route change. If the updated stage is outside the viewport it scrolls beneath the fixed navbar; keyboard activation focuses the active article, and a polite live region announces the change.
+
+### Extras Platformer
+
+- The former Skills grid is intentionally removed. Project tags/descriptions retain the professional capability signal; Extras uses that space for personal, tactile evidence of making things.
+- An open 1880×820 DOM/CSS world places three broad monitors directly over the site's existing mountain-and-stars background: gold Capstone Summit, cyan Keyboard Cove, and pink Robotics Outpost. There is no enclosing game window, HUD bar, local sky, destination navigation, horizontal crop, or side-scrolling camera. The monitor top edges are the island collision surfaces, and a 38×48 hero-inspired pixel explorer stands and jumps directly on the screens. Its six-pose SVG strip keeps the hero's swept brown hair, square glasses, blue headphones, dark hoodie, and cyan-blue shoes readable at the level's scaled desktop size; idle, four-frame walking, crouch, and airborne poses share the same unchanged collision box.
+- Every monitor has rounded corners, a dark bezel, and a non-interactive scanline overlay. Redundant topic/status text above the media, caption/counter text below it, and the visible teleport prompt are omitted because the island copy and click behavior already identify the content. Multi-item galleries expose only circular previous/next arrows over the media. Those arrows remain above the inactive pane's teleport overlay so their accent hover state and direct controls always work; using one on an inactive island both changes the record and teleports to activate that island. Mochi uses the canonical source sequence IMG_2 → IMG_1 → competition video → IMG_4 → IMG_3 for all forward movement. The active island intensifies its accent border/glow without adding more pane chrome; the rest of an inactive pane remains a full-surface teleport button with an accessible label.
+- Each monitor also has a small bottom-right expand control; it activates/teleports to that island and opens the same media in a large, viewport-centered pop-out with a stable 16:9 media frame, pop-out-specific contain-fitting (including letterboxed 4:3 sources) so every carousel image remains fully visible, its carousel arrows, and a top-right close button. The pop-out uses a page-wide dark scrim, locks page scrolling with an overflow-only document lock that leaves the current scroll position unchanged, keeps a subdued scanline texture, uses a low-opacity cyan outline, and uses a matching low-opacity cyan close control. Pointer arrow clicks release focus so game keypresses do not leave a carousel button highlighted, while keyboard focus remains visible for keyboard activation.
+- The explorer starts 58px inside the left edge of the middle Keyboard island while all three monitors remain in `STANDBY`. Arrow input can move the explorer without beginning media playback. The first W, A, S, or D press activates whichever platform currently supports the explorer and dismisses the onboarding hint; afterward, ordinary landings activate islands normally. Pointer activation is independent of that keyboard onboarding state.
+- Galleries never advance on a timer. Slides move only when the visitor moves them, through one of three deliberate controls: the circular cursor arrows on the monitor, the pop-out arrows, or the explorer landing on a slide pad. Nothing changes while the visitor reads.
+- Every island with more than one slide wears a pair of analog previous/next pushbuttons on its monitor. Each is a dark housing seated flush on the monitor's top edge with an accent-tinted cap that carries the island's own colour — gold on Capstone Summit, pink on Robotics Outpost. Keyboard Cove holds one video, so it wears none. The pair is centred over the monitor with a 48px gap, wide enough for the explorer to drop cleanly between them onto the screen below.
+- The pads are real platforms: one-way top collision like the neutral ledges, so the explorer passes through them while walking and can only land on one from above. Landing pushes the cap 7px down into its housing, easing it down over 220ms rather than snapping, so the explorer is seen pressing the button rather than teleporting it to the bottom; that is exactly one slide per landing. Holding still on a pressed pad neither repeats the slide nor lets the island time out, because a pad counts as its own island's support. Jumping off springs the cap back over 220ms; the next landing advances again. A cursor click on a pad does the same thing and depresses the cap for 180ms.
+- Activating an island lifts the monitor, collision surface, its slide pads, and its visible label/title/description together by 8px. Activation persists for one second after the explorer leaves, so normal jumps do not flicker the island state. A real YouTube video is inserted only while its video record is active and starts muted through the privacy-enhanced embed; leaving long enough to deactivate destroys the iframe and stops playback. A media record may provide an initial timestamp, with saved whole-second playback progress taking priority on later activations. The Robotics Outpost video starts at 3:03:36.
+- The four Mochi competition photos and five Pineapple Expense capstone photos are optimized JPEG assets; the portrait Mochi source is cropped to the pane's landscape ratio while preserving the three foreground teammates, and the supplied Pineapple PDF is rendered as the third carousel image.
+- The game is enhancement, not a content gate. At desktop widths, page-level WASD/arrow listeners keep movement working after teleporting or clicking elsewhere on the page; editable fields are left alone. There are no visible direction or jump buttons. Users can click anywhere outside the gallery arrows on an inactive monitor to teleport directly onto and activate it without moving focus. This pointer activation deliberately leaves the `try WASD` speech bubble visible; the hint disappears permanently for the component session only after the first W, A, S, or D press.
+- All three island labels, titles, and descriptions remain visible above their monitors so the full horizontal composition reads at a glance. The active topic lifts that copy with its monitor and increases its opacity and glow without hiding the other destinations.
+- The complete desktop level scales uniformly to the available content width, preserving the 1880px physics coordinate space while keeping every island visible at once. Falling below the world respawns at the last active island.
+- Below the 1080px component-width threshold, the game is replaced by three vertically stacked media panes in Capstone, Keyboard, Robotics order. The explorer remains above the stack with the speech bubble `Try this on desktop — or make your window wider.`; the fallback exposes normal media/gallery controls but no application role, movement controls, camera, or horizontal scrolling.
+- `prefers-reduced-motion` holds the explorer on a still sprite frame and disables the speech-bubble entrance, copy emphasis, and slide-pad travel transitions. User-driven desktop movement, facing, crouch/jump pose changes, click-to-teleport, slide pads, gallery arrows, and video controls remain available; because nothing advances on a timer, there is no automatic motion left to suppress.
+
+- Supplemental jump platforms use compact neon ledges and one-way top collision. They support normal movement without activating a topic. If the explorer leaves an island and lands on a neutral ledge during the one-second grace period, the previous island still deactivates because activation follows the actual supporting island rather than grounded state alone.
+- The level editor is a development tool, not public page chrome. It appears only in an Angular development build at `http://localhost:4200/?extrasDebug=level#extras`. Its compact dark terminal panel uses normal buttons, a labeled element selector, numeric geometry fields, clear selected-element outlines, and a polite status region rather than relying on drag interaction or accent color alone.
+- Edit mode pauses player physics and media-pane interaction. The three media islands may be selected, dragged, or nudged but cannot be deleted, duplicated, or resized. Supplemental platforms may be added, dragged, resized through numeric fields, duplicated, or deleted. Ten-pixel snapping is enabled by default, with undo/redo and reset controls for safe iteration.
+- Playtest mode hides editing handles, resets the explorer to the draft spawn, and runs the same movement, collision, activation, and respawn behavior used by the ordinary platformer. Returning to Edit preserves draft geometry.
+- Editor changes recover from versioned browser `localStorage`; this recovery state never changes the ordinary site. **Copy config** and **Download** emit the complete TypeScript source for `extras-level.data.ts`, which must replace the canonical file and be committed to publish the layout permanently.
+- Below the 1080px component threshold, the standard stacked media fallback remains intact. The debug panel adds a notice that dragging and Playtest require a wider section, while preserving the current draft across the breakpoint.
 
 ### Buttons and Link CTAs
 
-- Filter pills, project links, and the contact email CTA use compact rounded neon treatments.
+- Project links, project selector buttons, Extras gallery/teleport controls, and the contact email CTA use compact neon treatments.
 - Hover states should intensify borders/glow without overwhelming adjacent text.
-- Pressed state: motion-safe `scale(0.96–0.98)` compression on filter pills, card links, detail links, and the email CTA.
-- Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; components with bespoke treatments (social icons, stretched card links) override locally.
-- The filter bar collapses to one horizontally scrollable row with a trailing-edge fade mask below the md breakpoint; from md up it wraps normally.
+- Pressed state: motion-safe `scale(0.96–0.985)` compression on selector buttons, project links, and the email CTA.
+- Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; selector buttons use their project accent and social icons keep their bespoke treatment.
 
 ### Footer
 
 - Minimal by design: a centered copyright line with the "Built with Angular" note, and nothing else
 - Deliberately carries **no** social icons. The footer sits directly beneath the Contact section at scroll-bottom, so rendering `SocialLinksComponent` in both produced two near-identical icon rows within one screen. The Contact section owns the social row because email + social links are its defined purpose; the footer stays a thin closing rule.
-- Trade-off: `/projects/:slug` therefore shows no social links. Detail pages keep their own project Live Demo/GitHub anchors, and the navbar Contact link returns to the row on `/`.
 - Not fixed — sits at bottom of content
 
 ## Animation Guidelines
 
 ### Durations
 
-- Micro-interactions (hover, click): 150–300ms
+- Micro-interactions (hover, click): 150–300ms. Project focus swaps use a 240ms opacity/8px-rise transition with the existing entrance easing.
 - Scroll reveals: scroll-position-linked (not time-based) — animation progress maps directly to scroll position via `animation-timeline: view()`, bounded to a maximum scroll distance (see [Scroll Reveal Range](#scroll-reveal-range))
 - Background elements (star twinkle, avatar float): continuous, slow (2–5s loops)
 
@@ -250,7 +306,7 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 
 ### Scroll Reveal Range
 
-`.scroll-reveal` (applied by `ScrollRevealDirective`) runs `scroll-reveal-slide` on a `view()` timeline. A `view()` timeline defines its `entry` range as **exactly the subject's own height**, so percentage-only offsets stretch the reveal in proportion to the element — and for any subject taller than the viewport, `entry 100%` (the subject's bottom edge reaching the viewport bottom) can only occur after its top has already scrolled off screen. The project grid is ~970px at desktop and ~2280px at mobile widths, so it never finished revealing while still in view.
+`.scroll-reveal` (applied by `ScrollRevealDirective`) runs `scroll-reveal-slide` on a `view()` timeline. A `view()` timeline defines its `entry` range as **exactly the subject's own height**, so percentage-only offsets stretch the reveal in proportion to the element — and for any tall subject, `entry 100%` can occur only after its top has already scrolled off screen. The Projects showcase and other large groups therefore rely on an absolute cap.
 
 The range is therefore capped in absolute scroll distance, using tokens in `_variables.scss`:
 
@@ -263,7 +319,7 @@ animation-range: entry min(20%, $scroll-reveal-max-delay) entry min(100%, $scrol
 | `$scroll-reveal-max-delay` | `40px` | Caps the dead zone before the fade starts (otherwise 20% of the subject's height) |
 | `$scroll-reveal-max-distance` | `400px` | The reveal is always complete by this far into `entry` |
 
-The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px (under which 20% of the height is already less than 40px). Every subject on the page sits outside that 200–400px band — the filter bar, skills groups, and contact block are all under 150px; the project grid and About content are both over 400px — so **short subjects keep their original height-proportional timing**, which already completed as they became fully visible, and only the grid and About content are clamped. A subject landing between 200px and 400px would simply begin its fade slightly earlier than before, which is harmless.
+The two caps engage at different heights: `min(100%, 400px)` is a no-op below 400px, while `min(20%, 40px)` is a no-op below 200px. The contact block and About intro retain height-proportional timing; the full Projects and Extras showcases use the cap. About history chapters do not use `ScrollRevealDirective`.
 
 Note that `min()` must be written with Sass interpolation (`#{$token}`) so it compiles to a CSS `min()` rather than Sass's own, which rejects mixed `%`/`px` units.
 
@@ -277,6 +333,8 @@ Note that `min()` must be written with Sass interpolation (`#{$token}`) so it co
 
 - Smooth, not overwhelming — prioritize clarity
 - Respect `prefers-reduced-motion` — CSS animations are disabled by media-query fallbacks, and the canvas scene renders a still frame (frozen twinkle/particles) that redraws only on scroll so parallax still tracks the user's own gesture
+- Project focus swaps become immediate under `prefers-reduced-motion`: no rise, image scale, or corner sweep. Viewport correction uses instant scrolling.
+- Extras keeps user-driven desktop platformer movement but removes decorative loops, copy emphasis transitions, and slide-pad travel animation under `prefers-reduced-motion`. Galleries have no automatic advance to suppress.
 - The canvas rAF loop pauses on `visibilitychange` while the tab is hidden and resumes on return
 - Use `transform` and `opacity` only (GPU-composited)
 - Reduce background complexity on small screens and low-power devices
@@ -289,4 +347,6 @@ Note that `min()` must be written with Sass interpolation (`#{$token}`) so it co
 - Hero: stack avatar above text, full-width
 - Background scene: simplify or disable heavy canvas elements
 - Navbar: hamburger menu with slide-in drawer
+- Projects: stacked 16:9 focus stage plus compact horizontal selector cards below 480px; two preview columns from 480px
+- Extras: the full three-island level scales into view without horizontal clipping at desktop widths; smaller widths use vertically stacked, readable media panes plus the explorer's desktop/wider-window prompt
 - Reduce glow intensity to save battery on OLED screens

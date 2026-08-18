@@ -1,10 +1,114 @@
 <section class="about-section">
   <app-section-header title="About Me" />
-  <div class="about-section__content" appScrollReveal>
-    <div class="about-section__card">
-      <p class="about-section__bio">{{ bio().shortBio }}</p>
-      <hr class="about-section__divider" aria-hidden="true" />
-      <p class="about-section__extended">{{ bio().extendedBio }}</p>
+
+  <div class="about-section__content">
+    <div class="about-section__intro" appScrollReveal>
+      <span class="about-section__corner about-section__corner--top" aria-hidden="true"></span>
+      <p class="about-section__intro-copy">
+        @for (segment of bio().about.intro; track $index) {
+          <span class="about-section__highlight" [attr.data-tone]="segment.tone ?? null">{{ segment.text }}</span>
+        }
+      </p>
+      <span class="about-section__corner about-section__corner--bottom" aria-hidden="true"></span>
+    </div>
+
+    <div class="about-section__history-heading">
+      <p class="about-section__comment"><span aria-hidden="true">//</span> My history</p>
+      <div class="about-section__command" aria-label="Production build command">
+        <span class="about-section__prompt" aria-hidden="true">$</span>
+        <code>npm run build -- Tyler-Hawthorn --configuration production</code>
+        <span class="about-section__cursor" aria-hidden="true"></span>
+      </div>
+    </div>
+
+    <div
+      class="about-section__timeline"
+      [attr.data-active-tone]="activeTone()"
+      [style.--timeline-progress]="timelineProgress()"
+      [style.--timeline-rail-top]="timelineRailTop()"
+      [style.--timeline-rail-height]="timelineRailHeight()"
+      [style.--timeline-blue-stop]="timelineBlueStop()"
+      [style.--timeline-purple-stop]="timelinePurpleStop()"
+    >
+      <span class="about-section__rail" aria-hidden="true">
+        <span class="about-section__rail-progress"></span>
+        <span class="about-section__rail-head"></span>
+      </span>
+
+      @for (entry of bio().about.history; track entry.id) {
+        <article
+          class="about-section__entry"
+          [class.about-section__entry--active]="activeEntryIndex() === $index"
+          [attr.id]="'about-' + entry.id"
+          [attr.data-tone]="entry.tone"
+          [attr.aria-current]="activeEntryIndex() === $index ? 'step' : null"
+          [style.--scroll-tilt]="entryTilt($index)"
+        >
+          <span class="about-section__node" aria-hidden="true">
+            <span>{{ entry.index }}</span>
+          </span>
+
+          <div class="about-section__chapter">
+            <h3 class="about-section__chapter-title">
+              <span aria-hidden="true">//</span>{{ entry.index }} — {{ entry.title }}
+            </h3>
+            <p class="about-section__chapter-copy">
+              @for (segment of entry.segments; track $index) {
+                @if (segment.href) {
+                  <a
+                    class="about-section__link"
+                    [href]="segment.href"
+                    [attr.target]="segment.external ? '_blank' : null"
+                    [attr.rel]="segment.external ? 'noopener noreferrer' : null"
+                  >{{ segment.text }}</a>
+                } @else if (segment.sideNote) {
+                  <span class="about-section__side-note">{{ segment.text }}</span>
+                } @else {
+                  <span
+                    class="about-section__highlight"
+                    [class.about-section__highlight--emphasis]="segment.emphasis"
+                  >{{ segment.text }}</span>
+                }
+              }
+            </p>
+          </div>
+        </article>
+      }
     </div>
   </div>
+
+  @if (showScrollDebug()) {
+    <aside class="about-section__scroll-debug" aria-hidden="true">
+      <p class="about-section__scroll-debug-title">Scroll Debug · Dev Only</p>
+      <dl>
+        <div>
+          <dt>Page</dt>
+          <dd>{{ pageScrollY() }} px · {{ formatPercent(pageProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>About</dt>
+          <dd>{{ formatPercent(sectionProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Rail cursor</dt>
+          <dd>{{ formatPercent(rawTimelineProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Rail target</dt>
+          <dd>{{ formatPercent(timelineTargetProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Rail glow</dt>
+          <dd>{{ formatPercent(timelineProgress()) }}</dd>
+        </div>
+        <div>
+          <dt>Chapter</dt>
+          <dd>{{ activeEntryIndex() + 1 }} / {{ bio().about.history.length }}</dd>
+        </div>
+      </dl>
+      <p class="about-section__scroll-debug-hint">
+        Bounds: About -6.8% → 64.9%
+      </p>
+    </aside>
+  }
 </section>

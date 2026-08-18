@@ -1,0 +1,126 @@
+@use 'variables' as *;
+
+:host {
+  position: relative;
+  z-index: 20;
+  display: block;
+}
+
+.level-editor {
+  display: grid;
+  gap: 0.7rem;
+  width: min(100%, 54rem);
+  margin: 0 auto $space-2;
+  padding: 0.8rem;
+  color: var(--text-primary);
+  background: rgba(5, 9, 19, 0.96);
+  border: 1px solid rgba(var(--accent-cyan-rgb), 0.42);
+  border-radius: $radius-lg;
+  box-shadow: 0 0 22px rgba(var(--accent-cyan-rgb), 0.12);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.level-editor__heading,
+.level-editor__actions,
+.level-editor__publish,
+.level-editor__selection,
+.level-editor__modes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.level-editor__heading {
+  justify-content: space-between;
+
+  span {
+    color: var(--accent-cyan);
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+  }
+
+  h3 {
+    margin-top: 0.12rem;
+    font-size: 0.92rem;
+  }
+}
+
+button,
+select,
+input {
+  min-height: 2rem;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--bg-border);
+  border-radius: $radius-sm;
+  font: inherit;
+  font-size: 0.68rem;
+}
+
+button {
+  padding: 0.35rem 0.58rem;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible,
+  &.level-editor__button--active {
+    color: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+  }
+
+  &:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+  }
+}
+
+.level-editor__selection {
+  label {
+    color: var(--text-secondary);
+    font-size: 0.66rem;
+  }
+
+  select {
+    min-width: min(100%, 18rem);
+    padding-inline: 0.45rem;
+  }
+}
+
+.level-editor__inspector {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(5.2rem, 1fr));
+  gap: 0.5rem;
+  padding: 0.55rem;
+  border: 1px solid var(--bg-border);
+  border-radius: $radius-sm;
+
+  legend {
+    padding-inline: 0.3rem;
+    color: var(--accent-cyan);
+    font-size: 0.66rem;
+  }
+
+  label {
+    display: grid;
+    gap: 0.22rem;
+    color: var(--text-secondary);
+    font-size: 0.62rem;
+  }
+
+  input {
+    width: 100%;
+    padding-inline: 0.4rem;
+
+    &:disabled { opacity: 0.42; }
+  }
+}
+
+.level-editor__publish { border-top: 1px solid var(--bg-border); padding-top: 0.65rem; }
+.level-editor__empty,
+.level-editor__status { color: var(--text-secondary); font-size: 0.64rem; line-height: 1.45; }
+.level-editor__status { min-height: 0.9rem; color: var(--accent-cyan); }
+
+@media (max-width: $bp-sm) {
+  .level-editor__inspector { grid-template-columns: repeat(2, 1fr); }
+}

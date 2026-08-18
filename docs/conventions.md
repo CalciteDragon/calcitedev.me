@@ -14,17 +14,17 @@
 
 | Thing             | Convention            | Example                         |
 | ----------------- | --------------------- | ------------------------------- |
-| Components        | kebab-case files      | `project-card.component.ts`     |
-| Component class   | PascalCase            | `ProjectCardComponent`          |
+| Components        | kebab-case files      | `project-selector.component.ts` |
+| Component class   | PascalCase            | `ProjectSelectorComponent`      |
 | Services          | kebab-case files      | `theme.service.ts`              |
 | Service class     | PascalCase            | `ThemeService`                  |
 | Models/Interfaces | kebab-case files      | `project.model.ts`              |
 | Interface         | PascalCase, no `I`    | `Project` (not `IProject`)      |
 | Directives        | kebab-case files      | `scroll-reveal.directive.ts`    |
 | Directive selector| camelCase, app prefix | `appScrollReveal`               |
-| Component selector| kebab-case, app prefix| `app-project-card`              |
+| Component selector| kebab-case, app prefix| `app-project-selector`          |
 | Constants         | camelCase             | `projectsData`                  |
-| Enums             | PascalCase            | `ProjectCategory`               |
+| Type aliases      | PascalCase            | `GlowColor`                     |
 | SCSS variables    | kebab-case            | `$color-accent`                 |
 | CSS custom props  | kebab-case            | `--accent-cyan`                 |
 
@@ -33,31 +33,31 @@
 Each component gets its own folder with co-located files:
 
 ```
-project-card/
-├── project-card.component.ts       # Component class + metadata
-├── project-card.component.html     # Template
-├── project-card.component.scss     # Styles (scoped)
-└── project-card.component.spec.ts  # Tests (when needed)
+project-selector/
+├── project-selector.component.ts       # Component class + metadata
+├── project-selector.component.html     # Template
+├── project-selector.component.scss     # Styles (scoped)
+└── project-selector.component.spec.ts  # Tests (when needed)
 ```
 
 Inline templates/styles are acceptable for very small components (< 15 lines of template).
 
 ### Component Patterns
 
-#### Presentational (Shared) Components
+#### Presentational Components
 
 ```typescript
 @Component({
-  selector: 'app-project-card',
+  selector: 'app-project-selector',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
-  templateUrl: './project-card.component.html',
-  styleUrl: './project-card.component.scss'
+  templateUrl: './project-selector.component.html',
+  styleUrl: './project-selector.component.scss'
 })
-export class ProjectCardComponent {
-  project = input.required<Project>();   // signal input
-  clicked = output<string>();            // output event
+export class ProjectSelectorComponent {
+  projects = input.required<readonly Project[]>();
+  selectedSlug = input.required<string>();
+  projectSelected = output<ProjectSelection>();
 }
 ```
 
@@ -70,20 +70,20 @@ export class ProjectCardComponent {
 
 ```typescript
 @Component({
-  selector: 'app-projects',
+  selector: 'app-projects-section',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ProjectCardComponent, SectionHeaderComponent],
-  templateUrl: './projects.component.html',
-  styleUrl: './projects.component.scss'
+  imports: [ProjectFocusStageComponent, ProjectSelectorComponent],
+  templateUrl: './projects-section.component.html',
+  styleUrl: './projects-section.component.scss'
 })
-export class ProjectsComponent {
-  projects = signal(projectsData);
-  filter = signal<string | null>(null);
+export class ProjectsSectionComponent {
+  projects = input.required<readonly Project[]>();
+  selectedSlug = signal<string | null>(null);
 
-  filtered = computed(() => {
-    const f = this.filter();
-    return f ? this.projects().filter(p => p.tags.includes(f)) : this.projects();
+  selectedProject = computed(() => {
+    const selected = this.projects().find(project => project.slug === this.selectedSlug());
+    return selected ?? this.projects()[0] ?? null;
   });
 }
 ```
