@@ -130,6 +130,24 @@
     transition: filter $transition-base, transform $transition-base;
   }
 
+  // CRT scanline overlay — preview thumbnails only; the focus stage stays clean
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2px,
+      rgba(0, 0, 0, 0.3) 3px,
+      rgba(0, 0, 0, 0.3) 4px
+    );
+    opacity: 0.85;
+    pointer-events: none;
+    transition: opacity $transition-base;
+  }
+
   @include sm {
     min-height: 0;
     aspect-ratio: 16 / 7.5;
@@ -144,6 +162,12 @@
   transform: scale(1.025);
 }
 
+.project-selector__button:hover .project-selector__visual::after,
+.project-selector__button:focus-visible .project-selector__visual::after,
+.project-selector__button--active .project-selector__visual::after {
+  opacity: 0.5;
+}
+
 .project-selector__number,
 .project-selector__active-marker {
   position: absolute;
@@ -154,6 +178,7 @@
   border: 1px solid rgba(var(--project-rgb), 0.3);
   border-radius: $radius-sm;
   font-family: $font-code;
+  z-index: 2;
   font-size: 0.58rem;
   letter-spacing: 0.06em;
   backdrop-filter: blur(6px);
@@ -225,7 +250,8 @@
 
 @include motion-reduced {
   .project-selector__button,
-  .project-selector__visual img {
+  .project-selector__visual img,
+  .project-selector__visual::after {
     transition: none;
   }
 

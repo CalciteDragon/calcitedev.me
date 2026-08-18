@@ -1,0 +1,74 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'typography' as *;
+
+:host {
+  display: block;
+}
+
+.carousel-nav {
+  --nav-accent: var(--accent-cyan);
+  --nav-rgb: var(--accent-cyan-rgb);
+
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--nav-accent);
+  background: rgba(17, 24, 39, 0.94);
+  border: 1px solid rgba(var(--nav-rgb), 0.6);
+  border-radius: $radius-full;
+  box-shadow:
+    0 6px 18px rgba(0, 0, 0, 0.3),
+    inset 0 0 12px rgba(var(--nav-rgb), 0.08);
+  font-family: $font-code;
+  font-size: 1.4rem;
+  line-height: 0.85;
+  cursor: pointer;
+  transition: all $transition-fast;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--bg-primary);
+    background: var(--nav-accent);
+    border-color: var(--nav-accent);
+    box-shadow: 0 0 18px rgba(var(--nav-rgb), 0.45);
+  }
+
+  &:focus-visible {
+    outline-color: var(--nav-accent);
+  }
+
+  &--blue {
+    --nav-accent: var(--accent-blue);
+    --nav-rgb: var(--accent-blue-rgb);
+  }
+
+  &--purple {
+    --nav-accent: var(--accent-purple);
+    --nav-rgb: var(--accent-purple-rgb);
+  }
+
+  &--pink {
+    --nav-accent: var(--accent-pink);
+    --nav-rgb: var(--accent-pink-rgb);
+  }
+
+  &--gold {
+    --nav-accent: var(--accent-gold);
+    --nav-rgb: var(--accent-gold-rgb);
+  }
+
+  @include motion-safe {
+    &:active {
+      transform: scale(0.92);
+    }
+  }
+}
+
+@include motion-reduced {
+  .carousel-nav {
+    transition: none;
+  }
+}

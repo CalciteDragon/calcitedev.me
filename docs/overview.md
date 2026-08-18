@@ -47,7 +47,7 @@ An origin-story section led by a larger introductory card and followed by a four
 
 ### 3. Projects
 
-A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. A compact index of smaller preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
+A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. Wrapping carousel arrows sit outside the stage and step through the projects in order. A compact index of smaller scanline preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
 
 All seven project previews live under `public/assets/images/`. Six are real captures — Live Bingo, Pineapple Expense, Mochi 2026, the Roblox PvP world, It's Never Just Black and White, and Minecraft Hide & Seek. Only Calcite Portfolio remains original themed SVG art, a finite recursive browser window. Content order and membership are controlled entirely by `projects.data.ts`.
 

@@ -8,6 +8,39 @@
 
 .project-focus-stage {
   display: grid;
+
+  // Carousel chrome sits outside the pane so it reads as movement between
+  // projects rather than a control belonging to the project on screen.
+  &--carousel {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'prev  next'
+      'panes panes';
+    gap: $space-2;
+
+    @include md {
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      grid-template-areas: 'prev panes next';
+      align-items: center;
+      gap: $space-2;
+    }
+  }
+}
+
+.project-focus-stage__panes {
+  grid-area: panes;
+  display: grid;
+  min-width: 0;
+}
+
+.project-focus-stage__nav--prev {
+  grid-area: prev;
+  justify-self: start;
+}
+
+.project-focus-stage__nav--next {
+  grid-area: next;
+  justify-self: end;
 }
 
 .project-focus {

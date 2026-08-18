@@ -31,6 +31,7 @@ src/
 │   │       ├── sections/
 │   │       │   ├── about-section/
 │   │       │   ├── projects-section/
+│   │       │   │   ├── project-carousel-nav/ # One accent-aware carousel arrow
 │   │       │   │   ├── project-focus-stage/ # Stable stacked detail panels
 │   │       │   │   └── project-selector/    # Compact button-based project index
 │   │       │   ├── extras-section/
@@ -117,7 +118,7 @@ LayoutComponent
 │       ├── HeroComponent
 │       ├── AboutSectionComponent
 │       ├── ProjectsSectionComponent
-│       │   ├── ProjectFocusStageComponent → TechTagComponent
+│       │   ├── ProjectFocusStageComponent → TechTagComponent, ProjectCarouselNavComponent
 │       │   └── ProjectSelectorComponent
 │       ├── ExtrasSectionComponent
 │       │   └── ExtrasPlatformerComponent
@@ -130,7 +131,7 @@ LayoutComponent
 
 `HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives; the project showcase components are feature-local because no other route consumes them.
 
-`ProjectsSectionComponent` owns `selectedSlug`, resolves `selectedProject` with a safe first-entry fallback, and announces selection changes. It guards viewport and focus behavior with `isPlatformBrowser()`. `ProjectFocusStageComponent` renders all projects into the same CSS grid cell; inactive articles remain in sizing calculations but are `visibility: hidden`, `aria-hidden`, `inert`, and non-interactive. This makes the focus stage as tall as its largest record and prevents swaps from moving later content. `ProjectSelectorComponent` renders the unchanged data order as real buttons with `aria-pressed` and `aria-controls`. External links live only in the active focus article, so selector buttons never contain nested interactive elements.
+`ProjectsSectionComponent` owns `selectedSlug`, resolves `selectedProject` with a safe first-entry fallback, and announces selection changes. It guards viewport and focus behavior with `isPlatformBrowser()`. `ProjectFocusStageComponent` renders all projects into the same CSS grid cell; inactive articles remain in sizing calculations but are `visibility: hidden`, `aria-hidden`, `inert`, and non-interactive. This makes the focus stage as tall as its largest record and prevents swaps from moving later content. The stage wraps those articles in a `__panes` grid cell and places two `ProjectCarouselNavComponent` instances outside it through named grid areas, so the arrows are siblings of the pane rather than children of any article. Because a sibling cannot inherit the `--project-accent` custom property declared on `.project-focus--{color}`, the stage passes the selected project's `glowColor` down as an `accent` input and the nav re-declares the accent itself. The stage derives the wrapping previous/next targets with computed signals and emits the chosen slug through a `projectStepped` output; `ProjectsSectionComponent.stepProject()` forwards it into the same `selectProject()` path with `focusDetails: false`, so state stays in one place and arrows do not steal focus from themselves. `ProjectSelectorComponent` renders the unchanged data order as real buttons with `aria-pressed` and `aria-controls`. External links live only in the active focus article, so selector buttons never contain nested interactive elements.
 
 `ExtrasPlatformerComponent` owns a fixed 1880×820 desktop physics space, signal-backed player and responsive-layout state, requestAnimationFrame physics, platform collision, active-island state, gallery indices, and slide-pad press state. Galleries never advance on their own: every slide change comes from a cursor arrow, a pop-out arrow, or the explorer landing on a slide pad. The player keeps a fixed 38×48 physics box while a six-frame SVG strip supplies hero-inspired idle, walk, crouch, and airborne artwork; facing mirrors only the inner sprite so the transform used for world position remains stable. The complete world scales uniformly into the available desktop width, keeping the Capstone, Keyboard, and Robotics screen-islands visible without a camera or horizontal crop. The explorer begins 58px inside the left edge of the middle Keyboard island with `activeTopicId` unset. Page-level WASD/arrow listeners move the explorer even after teleporting or clicking elsewhere on the page; editable controls are excluded, and the former pointer direction/jump controls have been removed. Arrow input alone leaves every island in standby. The first W/A/S/D press performs the keyboard-derived activation for the supporting island and dismisses the hint; subsequent landings activate normally. Clicking an inactive screen immediately teleports and activates without changing focus or dismissing that WASD hint. Active screens, collision geometry, and their visible copy rise together by 8px and deactivate only after a one-second airborne grace period. Gallery arrows sit above the inactive pane overlay; manually browsing an inactive island also teleports and activates it.
 
