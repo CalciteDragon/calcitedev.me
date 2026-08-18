@@ -36,7 +36,7 @@ The homepage is one scrolling route with five sections. Project selection stays 
 - Pixel-art avatar placeholder floating above a CSS sci-fi platform.
 - Large fixed-background cyan-to-pink gradient name, alias, and title.
 - HTML/CSS UFO with floating motion, scroll parallax, and a tractor beam.
-- Three-chevron scroll indicator.
+- Single cyan chevron scroll indicator.
 - Fixed canvas background with stars, particles, atmosphere, horizon glow, and procedural wireframe terrain.
 
 The earlier hero feature-card strip and CTA were intentionally removed because they duplicated the navbar and section navigation.
