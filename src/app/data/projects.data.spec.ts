@@ -7,7 +7,7 @@ describe('projectsData', () => {
       'pineapple-expense',
       'calcite-portfolio',
       'mochi-2026',
-      'pixel-quest',
+      'black-and-white',
       'minecraft-hide-and-seek',
       'roblox-pvp-world',
     ]);
