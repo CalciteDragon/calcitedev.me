@@ -26,7 +26,6 @@ export interface Bio {
   name: string;
   alias: string;
   title: string;
-  tagline: string;
   email: string;
   about: BioAbout;
 }

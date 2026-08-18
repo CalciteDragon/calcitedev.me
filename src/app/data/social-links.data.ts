@@ -1,7 +1,5 @@
 import { SocialLink } from '../models/social-link.model';
 
-// Handles are placeholders until the real account names are confirmed; the URLs
-// they are derived from are the live profiles.
 export const socialLinksData: readonly SocialLink[] = [
   {
     platform: 'github',
@@ -11,13 +9,13 @@ export const socialLinksData: readonly SocialLink[] = [
   },
   {
     platform: 'discord',
-    url: 'https://discord.com/users/calcite',
+    url: 'https://discord.com/users/calcitedragon',
     label: 'Discord',
-    handle: '@calcite',
+    handle: '@calcitedragon',
   },
   {
     platform: 'linkedin',
-    url: 'https://linkedin.com/in/tyler-hawthorn',
+    url: 'https://www.linkedin.com/in/tyler-hawthorn-58259a355/',
     label: 'LinkedIn',
     handle: 'in/tyler-hawthorn',
   },

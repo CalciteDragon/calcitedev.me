@@ -6,9 +6,8 @@ import { Bio } from '../../../models/bio.model';
 const mockBio: Bio = {
   name: 'Tyler Hawthorn',
   alias: 'Calcite',
-  title: 'Full Stack Developer & Game Enthusiast',
-  tagline: 'Code · Create · Innovate',
-  email: 'tyler@calcitedev.me',
+  title: 'Full-Stack & Game Developer',
+  email: 'calcitedragon@gmail.com',
   about: {
     intro: [{ text: 'Short bio.' }],
     history: [],
@@ -50,7 +49,7 @@ describe('HeroComponent', () => {
 
   it('should render the title as subtitle', () => {
     expect(compiled.querySelector('.hero__subtitle')?.textContent).toContain(
-      'Full Stack Developer',
+      'Full-Stack & Game Developer',
     );
   });
 

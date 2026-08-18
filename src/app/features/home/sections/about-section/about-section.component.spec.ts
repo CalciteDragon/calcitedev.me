@@ -54,7 +54,7 @@ describe('AboutSectionComponent', () => {
     expect(scratchLink.target).toBe('_blank');
     expect(scratchLink.rel).toBe('noopener noreferrer');
 
-    expect(compiled.querySelectorAll('a[href="#projects"]')).toHaveLength(2);
+    expect(compiled.querySelectorAll('a[href="#projects"]')).toHaveLength(3);
     expect(compiled.querySelector('.about-section__side-note')?.textContent).toContain(
       "we didn't place first, unfortunately, haha",
     );

@@ -83,6 +83,8 @@ Two padding strategies are in use, depending on the source:
 
 Future screenshots replacing the remaining placeholders should follow whichever recipe matches the source. The recursive portfolio art is a real 1912×945 screenshot of this Projects section captured while the Calcite Portfolio tile was selected, so the nesting is three levels of genuine page — not an iframe or runtime recursion. Four web-sized Mochi competition JPEGs and five web-sized Pineapple Expense capstone JPEGs live under `public/assets/images/extras/`; the third Pineapple asset is a rendered image of the supplied project-poster PDF. `public/assets/pixel-art/extras-explorer.svg` is a 228×48 strip of six 38×48 hero-inspired player poses used by the Extras platformer.
 
+`public/assets/images/og-cover.jpg` is the social-sharing card referenced by the `og:image`/`twitter:image` tags in `src/index.html`: a real 1200×630 headless-Chrome capture of the live hero (JPEG q88, 116 KB) rather than a mockup, so the preview always matches the current hero. The meta tags use absolute `https://calcitedev.me/` URLs because scrapers do not resolve relative paths, and `twitter:card` is `summary_large_image` so the capture renders full-bleed. Re-capture it whenever the hero lockup, alias, or title changes.
+
 The Extras feature also contains `extras-level-editor/` for its standalone development toolbar,
 draft validation/persistence helpers, and editor tests. Canonical geometry lives in
 `src/app/data/extras-level.data.ts`, with its schema in `src/app/models/extra-level.model.ts`.

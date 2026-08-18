@@ -279,7 +279,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 
 ### Contact Section (`features/home/sections/contact-section/`)
 - [x] Email and socials render as one coherent handle list — `icon | platform label | handle` rows, aligned handle column, per-platform accent on hover. Supersedes the earlier standalone email CTA button plus bare social-icon row, which read as two unrelated controls on one screen.
-- [x] `SocialLinksComponent` reuse — gains a `layout` input (`row` | `list`) and an `email` icon; `SocialLink` gains a `handle` field. Handles are placeholders until the real account names are confirmed.
+- [x] `SocialLinksComponent` reuse — gains a `layout` input (`row` | `list`) and an `email` icon; `SocialLink` gains a `handle` field. Handles and URLs are the confirmed live profiles (August 2026 content pass).
 - [x] Clean, minimal layout — no form
 
 **Built:** `BackgroundSceneComponent` lives in `LayoutComponent`. `HomeComponent` reads `projectsData`, `extrasData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Extras → Contact. Projects use `ProjectsSectionComponent` selection state, an overlapping `ProjectFocusStageComponent`, and `ProjectSelectorComponent`; Extras owns the hero-inspired animated player, responsive mode, delayed active-island, speech-prompt, saved-video-time, gallery state, slide-pad press state, and its development-only level editor; there is no project or Extras route. The August 18 verification passes 198 tests and prerenders four routes.

@@ -299,7 +299,7 @@ The Contact section renders one list, not an email CTA plus a separate icon row.
 - Each row carries its platform accent as `--link-color` / `--link-color-rgb` design tokens: Email → gold, GitHub → cyan, Discord → blue, LinkedIn → purple. Hover tints the icon and handle to that accent, lifts the row 2px, and adds a matching border and 18px glow.
 - List width is `min(100%, 30rem)`, centered. Below 480px the uppercase label is dropped so the monospace handle keeps one line.
 - `SocialLinksComponent` still supports the original bare-icon `row` layout; the list is the `list` layout. `mailto:` rows deliberately omit `target="_blank"`, and rows with a visible name omit the redundant `aria-label`.
-- Handles are placeholders until the real account names are confirmed. The URLs they sit on are the live profiles.
+- Handles and URLs are the confirmed live profiles: `calcitedragon@gmail.com`, GitHub `@CalciteDragon`, Discord `@calcitedragon`, LinkedIn `in/tyler-hawthorn-58259a355` (displayed as `in/tyler-hawthorn` for readability).
 
 ### Page-End Pixel Dissolve
 

@@ -10,7 +10,7 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** with a dark 
 | --- | --- |
 | Name | Tyler Hawthorn |
 | Alias | Calcite |
-| Title | Full Stack Developer & Game Enthusiast |
+| Title | Full-Stack & Game Developer |
 | Domain | calcitedev.me |
 
 ## Current Tech Stack
