@@ -54,11 +54,11 @@ src/
 public/
 ├── favicon.svg                          # Pixel-C SVG favicon
 └── assets/
-    ├── images/                          # Seven project previews — six real captures, one SVG
+    ├── images/                          # Hero neon title plus seven project previews — six real captures, one SVG
     └── pixel-art/                       # Extras explorer strip plus avatar/UFO placeholders
 ```
 
-Assets are served from `public/`, not `src/assets/`. The seven project visuals referenced by `projects.data.ts` live under `public/assets/images/`. Only Calcite Portfolio remains project-specific SVG art. Six are real captures that have replaced their placeholders:
+Assets are served from `public/`, not `src/assets/`. `public/assets/images/hero-title.webp` is the hero headline — a 1400×467 neon-sign render of TYLER HAWTHORN with a transparent background, downscaled from the 2172×724 source and encoded to WebP at q0.92 (298 KB) because the original PNG was 2 MB and this is the LCP element. The seven project visuals referenced by `projects.data.ts` live under `public/assets/images/`. Only Calcite Portfolio remains project-specific SVG art. Six are real captures that have replaced their placeholders:
 
 - `project-live-bingo.png` — 1368×720, an in-progress match composited on the app's own `#F8FAFC` background.
 - `project-pineapple-expense.png` — 1949×1026, the capstone AWS architecture diagram lifted off its presentation slide (slide header and footer chrome cropped away) on white.

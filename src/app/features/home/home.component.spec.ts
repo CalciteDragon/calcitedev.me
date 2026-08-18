@@ -68,8 +68,8 @@ describe('HomeComponent', () => {
   });
 
   it('should pass bioData name to the hero', () => {
-    const h1 = compiled.querySelector('.hero__name');
-    expect(h1?.textContent).toContain('TYLER HAWTHORN');
+    const img = compiled.querySelector('.hero__name-img') as HTMLImageElement;
+    expect(img?.alt).toBe('Tyler Hawthorn');
   });
 
   it('should render five sections with correct ids', () => {

@@ -79,9 +79,9 @@ Used for: heading gradients, active states, card border glows, CTA accents.
 
 | Element         | Size (desktop)           | Weight | Notes                                              |
 | --------------- | ------------------------ | ------ | -------------------------------------------------- |
-| Hero name       | `clamp(3rem, 8vw, 7rem)` | 700    | Cyan→pink gradient via `background-clip: text` — viewport-fixed attachment ≥ lg; per-element (vertical) below lg |
-| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Same gradient — per-element horizontal below lg  |
-| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Same gradient — per-element horizontal below lg  |
+| Hero name       | — (raster art)           | —      | Not type: the `hero-title.webp` neon-sign image inside the `h1`. `width: min(100%, 560px)`, `min(100%, clamp(560px, 60vw, 930px))` ≥ lg |
+| Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Solid `$accent-cyan` with a low two-stop halo; `letter-spacing: 0.08em`. Sits in the `.hero__tagline` panel |
+| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Solid `$accent-pink` with the same halo (9.5:1 and 4.9:1 on the panel). Sits in the `.hero__tagline` panel |
 | H2 (Section)    | 2rem–2.5rem              | 700    | Section headings                                   |
 | H3 (Card title) | 1.25rem                  | 600    | Card headings                                      |
 | Body            | 1rem                     | 400    | Line height 1.6                                    |
@@ -94,7 +94,7 @@ Use `clamp()` for fluid typography on mobile.
 
 ### Grid System
 
-- **Max content width:** 1200px, centered
+- **Max content width:** 1200px, centered. The hero is the one exception: from xl up it widens to 1400px so the neon sign has room beside the avatar
 - **Section padding:** 80–120px vertical, 24px horizontal (mobile: 48–64px vertical, 16px)
 - **Card grid:** CSS Grid, responsive (`repeat(auto-fill, minmax(320px, 1fr))`)
 - **Spacing scale:** 8px base — 8, 16, 24, 32, 48, 64, 96
@@ -133,15 +133,20 @@ Soft glow around buttons, icons, headings, and card borders. Implemented via `bo
 
 ### Gradient Text
 
-Hero name uses the accent gradient as `background-clip: text`:
+The hero no longer uses gradient text anywhere. The name is the neon-sign raster, and the alias and subtitle are lit tubes (see Hero Section Design) — `-webkit-text-fill-color: transparent` and `text-shadow` are mutually exclusive, since a transparent glyph has nothing to bloom off, so a glow that matches the sign requires solid color:
 
 ```scss
-.hero__name {
-  background: var(--gradient-accent);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+@mixin hero-neon-text($color) {
+  color: $color;
+  text-shadow:
+    0 0 8px rgba($color, 0.32),   // tight bloom
+    0 0 22px rgba($color, 0.12);  // faint spill
 }
 ```
+
+The halo is deliberately weak. The sign is the only element in the hero that should read as actually emitting light; the subtext only needs to look lit by the same room. It resolves to `none` under `prefers-reduced-motion: reduce`.
+
+Gradient text via `background-clip: text` remains available as the `gradient-text` mixin in `_glow.scss` for other sections.
 
 ## Hero Section Design
 
@@ -152,9 +157,9 @@ Hero name uses the accent gradient as `background-clip: text`:
 │  [Background: star field + mountains + parallax] │
 │                                                   │
 │   🧑‍💻                                       🛸   │
-│  (pixel avatar)   TYLER HAWTHORN         (UFO — │
-│  [=== platform]   AKA CALCITE             HTML) │
-│                   Full Stack Developer            │
+│  (pixel avatar)  [TYLER HAWTHORN sign]   (UFO — │
+│  [=== platform]    │ AKA CALCITE          HTML) │
+│                    │ Full Stack Developer        │
 │                                                   │
 │                     ↓  ↓  ↓  (scroll indicator)  │
 └─────────────────────────────────────────────────┘
@@ -162,7 +167,10 @@ Hero name uses the accent gradient as `background-clip: text`:
 
 **Current hero elements:**
 - Avatar (left, floating animation) on a glowing sci-fi platform (CSS pseudo-element depth effect)
-- Name, alias, and title — cyan→pink gradients applied via `background-clip: text`. From the lg breakpoint up the gradient uses `background-attachment: fixed`, so color shifts subtly with scroll; below lg each element carries its own local gradient (vertical on the two-line name, horizontal on alias/subtitle) because fixed attachment muddies mobile text and iOS Safari ignores it
+- Name — `public/assets/images/hero-title.webp`, a 1400×467 photographic neon sign reading TYLER HAWTHORN (cyan top line, pink bottom line) on a transparent background. It sits as an `<img>` inside the `h1`, with `alt` bound to `bio().name` so the accessible name still comes from the data layer, and `fetchpriority="high"` because it is the hero LCP element. The art carries its own glow, so `.hero__name` applies no gradient or text fill — it is only a flex box that centers below lg and left-aligns from lg up. Negative block margins pull the tagline panel back toward the visible tubing, since the source art bleeds glow to its own edges. Sizing is wrapped in `min(100%, …)` so the sign can ask for more width than the flex column has and simply take whatever is available — that guard is what keeps it from overflowing at lg, where the column is narrowest relative to the request
+- Alias and title — cyan→pink gradients applied via `background-clip: text`. From the lg breakpoint up the gradient uses `background-attachment: fixed`, so color shifts subtly with scroll; below lg each element carries its own local horizontal gradient because fixed attachment muddies mobile text and iOS Safari ignores it
+- Tagline (`.hero__tagline`) — alias and subtitle share a wrapper that carries no plate at all: no background, border, backdrop filter, or shadow. From lg up it is indented `$space-6` from the column edge and marked by a single 2px hairline rule on its left, fading to transparent at both ends so it reads as an edge the copy hangs off rather than as a drawn graphic. Below lg the copy is centered and the rule is not generated — the `content` property lives inside the `lg` query, so there is no pseudo-element on mobile rather than a hidden one. The wrapper's remaining jobs are the flex `gap` between the two lines and the indent itself
+- Subtext color — cyan alias over pink subtitle repeats the sign's own two-line split (cyan TYLER above, pink HAWTHORN below), so the panel reads as the sign's third and fourth lines rather than as caption text under it. Both carry the `hero-neon-text` halo, which collapses to a single soft stop under `prefers-reduced-motion: reduce`
 - UFO — HTML `<img>` parked high in the upper-right sky (`top: 4%` at lg, right-edge bleed capped by `max(calc(760px - 50vw), -60px)`), clear of the headline at scroll 0; CSS float + tilt keyframe plus scroll-driven parallax (drifts down 140vh over 200vh scroll); homepage sections establish DOM-order stacking contexts so all later content, including project cards, renders above it
 - UFO tractor beam — CSS gradient cone beneath the disc
 - Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`

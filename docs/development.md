@@ -154,6 +154,7 @@ Phase 0: Scaffold & Global Styles
 - [x] `social-links.data.ts` — GitHub, Discord, and LinkedIn entries
 - [x] Seven project previews under `public/assets/images/` — six real captures plus the recursive Calcite Portfolio window as the last piece of original SVG art
 - [x] The hero-inspired six-pose Extras explorer sprite and the current avatar/UFO placeholders live under `public/assets/pixel-art/`; the rocket and card-icon assets were removed with their corresponding UI
+- [x] `public/assets/images/hero-title.webp` — the neon-sign headline that replaced the gradient-text `h1`; the `alt` still binds to `bio().name`, so the accessible name and the tests stay data-driven
 
 **Deliverable:** `import { projectsData } from './data/projects.data'` works everywhere. Placeholder visuals exist for every slot.
 
