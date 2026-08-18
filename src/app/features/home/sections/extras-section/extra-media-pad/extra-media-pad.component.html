@@ -5,7 +5,7 @@
   [class.extra-pad--pressed]="pressed()"
   tabindex="-1"
   aria-hidden="true"
-  (click)="requestPress()"
+  (click)="requestPress($event)"
 >
   <span>{{ glyph() }}</span>
 </button>

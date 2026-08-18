@@ -46,7 +46,7 @@
     <button
       type="button"
       class="extra-screen__visit"
-      (click)="requestVisit()"
+      (click)="requestVisit($event)"
       [attr.aria-label]="'Teleport to ' + topic().islandLabel"
     ></button>
   }

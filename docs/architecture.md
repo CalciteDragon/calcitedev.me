@@ -22,8 +22,11 @@ src/
 │   │   ├── directives/
 │   │   │   ├── glow.directive.ts
 │   │   │   └── scroll-reveal.directive.ts
-│   │   └── types/
-│   │       └── glow-color.type.ts
+│   │   ├── types/
+│   │   │   └── glow-color.type.ts
+│   │   └── utils/
+│   │       └── pointer-focus.ts        # Drops focus after a pointer click so no stale focus ring
+│   │                                    #   lights up when the next key press flips :focus-visible on
 │   ├── features/
 │   │   └── home/
 │   │       ├── background-scene/       # Scene renderer, mountain renderer, worker bridge

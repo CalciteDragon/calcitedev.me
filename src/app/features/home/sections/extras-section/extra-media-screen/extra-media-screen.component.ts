@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ExtraMediaItem, ExtraTopic } from '../../../../../models/extra.model';
+import { clearPointerFocus } from '../../../../../shared/utils/pointer-focus';
 
 @Component({
   selector: 'app-extra-media-screen',
@@ -93,30 +94,27 @@ export class ExtraMediaScreenComponent implements OnInit, OnDestroy {
     );
   }
 
-  protected requestVisit(): void {
+  protected requestVisit(event: Event): void {
+    clearPointerFocus(event);
     this.visitRequested.emit();
   }
 
   protected requestPrevious(event: Event): void {
     event.stopPropagation();
-    this.clearPointerFocus(event);
+    clearPointerFocus(event);
     this.previousRequested.emit();
   }
 
   protected requestNext(event: Event): void {
     event.stopPropagation();
-    this.clearPointerFocus(event);
+    clearPointerFocus(event);
     this.nextRequested.emit();
   }
 
   protected requestPopout(event: Event): void {
     event.stopPropagation();
+    clearPointerFocus(event);
     this.popoutRequested.emit();
-  }
-
-  private clearPointerFocus(event: Event): void {
-    if (!(event instanceof MouseEvent) || event.detail === 0) return;
-    if (event.currentTarget instanceof HTMLButtonElement) event.currentTarget.blur();
   }
 
   private readonly handlePlayerMessage = (event: MessageEvent<unknown>): void => {

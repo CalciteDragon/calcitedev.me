@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { clearPointerFocus } from '../../../../../shared/utils/pointer-focus';
 
 /**
  * One analog slide pad: the housing bolted flush to an island's top edge plus the cap that
@@ -21,7 +22,8 @@ export class ExtraMediaPadComponent {
 
   readonly pressRequested = output<void>();
 
-  protected requestPress(): void {
+  protected requestPress(event: Event): void {
+    clearPointerFocus(event);
     this.pressRequested.emit();
   }
 }
