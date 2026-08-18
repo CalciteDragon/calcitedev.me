@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { bioData } from '../../../../data/bio.data';
 import {
   AboutSectionComponent,
-  aboutRailProgressForSection,
+  aboutRailProgressForGeometry,
   aboutScrollDebugEnabled,
   closestTimelineNodeIndex,
 } from './about-section.component';
@@ -77,10 +77,33 @@ describe('AboutSectionComponent', () => {
     expect(activeEntries[0].getAttribute('aria-current')).toBe('step');
   });
 
-  it('maps the rail glow to section-relative bounds', () => {
-    expect(aboutRailProgressForSection(-0.068)).toBeCloseTo(0);
-    expect(aboutRailProgressForSection(0.649)).toBeCloseTo(1);
-    expect(aboutRailProgressForSection(0.2905)).toBeCloseTo(0.5);
+  it('starts the rail at the viewport line and ends it at 46% page scroll', () => {
+    const vh = 1000;
+    const maxScroll = 5000;
+    const endScroll = 0.46 * maxScroll;
+    // Fill opens the moment node 01's center reaches 60% of the viewport.
+    expect(aboutRailProgressForGeometry(600, vh, 1200, maxScroll)).toBeCloseTo(0);
+    // Fill completes at 46% page scroll no matter where the section sits.
+    expect(aboutRailProgressForGeometry(400, vh, endScroll, maxScroll)).toBeCloseTo(1);
+    expect(aboutRailProgressForGeometry(-800, vh, endScroll, maxScroll)).toBeCloseTo(1);
+  });
+
+  it('ends the rail at 46% page scroll on both 1080p and 1440p viewports', () => {
+    const maxScroll = 5280;
+    const endScroll = 0.46 * maxScroll;
+    const nodeOnePageOffset = 1725;
+
+    for (const vh of [985, 1345]) {
+      // node 01's viewport position at the moment page scroll hits 46%.
+      const firstNodeCenter = nodeOnePageOffset - endScroll;
+      expect(
+        aboutRailProgressForGeometry(firstNodeCenter, vh, endScroll, maxScroll),
+      ).toBeCloseTo(1);
+    }
+  });
+
+  it('reports no rail progress when the page cannot scroll', () => {
+    expect(aboutRailProgressForGeometry(0, 768, 0, 0)).toBe(0);
   });
 
   it('selects the number closest to the smoothed rail head', () => {
@@ -117,8 +140,8 @@ describe('AboutSectionComponent', () => {
     expect(debugOverlay?.textContent).toContain('Rail target');
     expect(debugOverlay?.textContent).toContain('Rail glow');
     expect(debugOverlay?.textContent).toContain('Chapter');
-    expect(debugOverlay?.textContent).toContain('About -6.8%');
-    expect(debugOverlay?.textContent).toContain('64.9%');
+    expect(debugOverlay?.textContent).toContain('60% vh');
+    expect(debugOverlay?.textContent).toContain('page 46%');
     debugFixture.destroy();
   });
 
