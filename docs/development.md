@@ -199,7 +199,7 @@ Phase 0: Scaffold & Global Styles
 **Tasks:**
 - [x] `BackgroundSceneComponent` — full-viewport `<canvas>` element positioned behind hero content
 - [x] `isPlatformBrowser` guard — skip canvas init during SSR/prerender
-- [x] **Star field:** sparse pixel-style stars, subtle twinkle animation, random placement
+- [x] **Star field:** sparse pixel-style stars, subtle twinkle animation, seeded placement (fixed layout across sessions)
 - [x] **Cyber mountains:** perspective-projected FBM terrain with filled faces, wire passes, fog, and scroll-driven camera movement
 - [x] **Parallax:** mountains and elements shift based on scroll position
 - [x] **UFO:** implemented as an HTML/CSS hero element with floating motion, parallax, and a tractor beam; removed from the canvas renderer
@@ -218,6 +218,12 @@ Phase 0: Scaffold & Global Styles
 **Stars** concentrated in upper 85% of canvas; radius 0.4–2.5px; opacity 0.2–0.8; large stars (radius > 1.8) rendered with cross-sparkle arms. Star count: 130 full / 65 reduced.
 
 **Updated in layout-and-design-tweaks:** UFO and Rocket removed from `SceneRenderer` entirely — `UFO`/`Rocket` interfaces, `createUFO()`/`createRocket()` factories, `drawUFO()`/`drawRocket()` methods, and the `heroHeight` hero-visibility gate all deleted. The UFO moved to `HeroComponent` as a CSS/HTML element. The rocket is deferred to Phase 8 (Easter Eggs).
+
+**Updated in final-polish — fixed scene, cropped mountains:**
+
+- `seeded-random.ts` adds a mulberry32 PRNG plus `SCENE_SEED` / `PARTICLE_SEED`. `createStars()` and `createParticles()` take an optional `seed` and default to those constants, so the star field is identical on every page load and after every resize re-seed instead of reshuffling. Particle respawns after drifting off-screen stay random.
+- `MountainConfig.terrainSeed` (default `0`) offsets the phase of the terrain hash noise. The noise was already deterministic; the seed makes that explicit and adjustable, and `0` reproduces the shipped range exactly. It is a structural parameter — changing it triggers a full `buildGrid()`.
+- `PROJECTION_REFERENCE_WIDTH` (1920) in `mountain.config.ts` locks the horizontal projection scale. `buildProjectionCache()` uses `Math.max(W, PROJECTION_REFERENCE_WIDTH) * 0.56` for screen X, so viewports narrower than 1080p crop the range symmetrically instead of compressing it. Wider viewports keep the previous proportional behavior. Vertical scale still tracks viewport height.
 
 Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Phase 9 performance work.
 

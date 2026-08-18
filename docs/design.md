@@ -187,12 +187,14 @@ The page is a single-page scroll: Home hero → About → Projects → Extras �
 
 | Element           | Description                                                                                          |
 | ----------------- | ---------------------------------------------------------------------------------------------------- |
-| Star field        | 130 stars (65 reduced), radius 0.4–2.5px, opacity 0.2–0.8, concentrated in upper 85% of canvas. Large stars get cross-sparkle arms. Per-star parallax (0.01–0.04). |
+| Star field        | 130 stars (65 reduced), radius 0.4–2.5px, opacity 0.2–0.8, concentrated in upper 85% of canvas. Large stars get cross-sparkle arms. Per-star parallax (0.01–0.04). Positions come from a seeded PRNG (`seeded-random.ts`), so the same sky is drawn on every page load and after every resize re-seed. Star coordinates are normalized to the viewport, so they scale with width rather than cropping. |
 | Cyber mountains   | Perspective-projected FBM terrain with filled faces, wire passes, per-face fog, and a scroll-driven camera. The static fog blend is cached in each face color so the visual treatment needs one face fill instead of two. The mountain canvas is transferred to `MountainRenderer` in a dedicated worker through `MountainWorkerBridge`. It renders site-wide, not only behind the hero. |
 | Atmosphere        | Subtle cyan-to-indigo linear gradient haze toward the lower canvas — simulates light scatter.        |
 | Horizon glow      | Neon bloom band (cyan → purple) drawn above mountains to simulate atmospheric ridge scatter.         |
+| Terrain seed      | `MountainConfig.terrainSeed` offsets the hash-noise phase and pins one specific mountain range. `0` is the shipped range; changing it rerolls the terrain and forces a full grid rebuild. |
+| Narrow viewports  | The horizontal projection scale is locked to `PROJECTION_REFERENCE_WIDTH` (1920 CSS px). Below that width the range keeps its 1080p pixels-per-world-unit and is cropped symmetrically at the left and right edges instead of being compressed into a narrower box; above it the projection widens with the viewport as before. Vertical scale still follows viewport height. |
 | Parallax          | Mountains shift on scroll via `camY = scrollY / 1200` panning.                                      |
-| Particles         | Minimal upward-drifting pixel particles (very subtle, 20 default / 8 reduced).                      |
+| Particles         | Minimal upward-drifting pixel particles (very subtle, 20 default / 8 reduced). Starting positions are seeded from a distinct seed; off-screen respawns stay random. |
 
 > **Note:** The UFO and Rocket were removed from the canvas in the layout-and-design-tweaks pass. The UFO is now an HTML/CSS element inside `HeroComponent` (see Hero Section Design below). The rocket is planned for Phase 8 (Easter Eggs) as a controllable element.
 

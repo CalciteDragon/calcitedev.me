@@ -29,7 +29,8 @@ src/
 │   │                                    #   lights up when the next key press flips :focus-visible on
 │   ├── features/
 │   │   └── home/
-│   │       ├── background-scene/       # Scene renderer, mountain renderer, worker bridge
+│   │       ├── background-scene/       # Scene renderer, mountain renderer, worker bridge,
+│   │       │                            #   seeded-random.ts for a fixed star/particle layout
 │   │       ├── hero/                   # Avatar, platform, gradient type, CSS/HTML UFO
 │   │       ├── sections/
 │   │       │   ├── about-section/

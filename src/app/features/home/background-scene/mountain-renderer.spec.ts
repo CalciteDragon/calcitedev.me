@@ -1,5 +1,5 @@
 import { MountainRenderer } from './mountain-renderer';
-import { DEFAULT_MOUNTAIN_CONFIG } from './mountain.config';
+import { DEFAULT_MOUNTAIN_CONFIG, PROJECTION_REFERENCE_WIDTH } from './mountain.config';
 
 describe('MountainRenderer', () => {
   let canvas: HTMLCanvasElement;
@@ -246,6 +246,64 @@ describe('MountainRenderer', () => {
         r.setCamY(i * 0.1);
         expect(() => r.draw()).not.toThrow();
       }
+    });
+  });
+  // ─── terrainSeed ───────────────────────────────────────────────────────────
+
+  describe('terrainSeed', () => {
+    it('produces the same terrain for the same seed on every build', () => {
+      const grid = (seed: number): number[][] => {
+        const r = new MountainRenderer(document.createElement('canvas'));
+        r.setConfig({ ...DEFAULT_MOUNTAIN_CONFIG, terrainSeed: seed });
+        return (r as unknown as { grid: number[][] }).grid;
+      };
+      expect(grid(0)).toEqual(grid(0));
+    });
+
+    it('rebuilds the grid into a different range when the seed changes', () => {
+      const r = new MountainRenderer(canvas);
+      r.setConfig(DEFAULT_MOUNTAIN_CONFIG);
+      const rr = r as unknown as { grid: number[][] };
+      const before = rr.grid.map(row => [...row]);
+
+      r.setConfig({ ...DEFAULT_MOUNTAIN_CONFIG, terrainSeed: 7 });
+      expect(rr.grid).not.toEqual(before);
+    });
+  });
+
+  // ─── Horizontal projection ─────────────────────────────────────────────────
+
+  describe('horizontal projection below the reference width', () => {
+    /**
+     * Screen X of every projected point, measured from the canvas center.
+     * Points behind the camera are skipped — buildProjectionCache() never writes
+     * them, so their slots hold a stale 0. The behind-camera set depends only on
+     * depth, so it is identical at every width and the arrays stay index-aligned.
+     */
+    const offsetsFromCenter = (width: number): number[] => {
+      const r = new MountainRenderer(document.createElement('canvas'));
+      r.setConfig(DEFAULT_MOUNTAIN_CONFIG);
+      r.resize(width, 900);
+      const rr = r as unknown as { ptsX: Float32Array; ptsNull: Uint8Array };
+      return Array.from(rr.ptsX)
+        .filter((_, i) => !rr.ptsNull[i])
+        .map(x => x - width / 2);
+    };
+
+    it('crops rather than squishes — pixel offsets match below the reference width', () => {
+      const wide = offsetsFromCenter(PROJECTION_REFERENCE_WIDTH);
+      const narrow = offsetsFromCenter(900);
+      expect(narrow).toHaveLength(wide.length);
+      // Offsets are stored in a Float32Array around a different center, so they
+      // agree to float32 precision rather than bit-for-bit.
+      narrow.forEach((offset, i) => expect(offset).toBeCloseTo(wide[i], 2));
+    });
+
+    it('still widens with the viewport above the reference width', () => {
+      const atReference = offsetsFromCenter(PROJECTION_REFERENCE_WIDTH);
+      const ultrawide = offsetsFromCenter(PROJECTION_REFERENCE_WIDTH * 2);
+      const i = atReference.findIndex(v => Math.abs(v) > 1);
+      expect(Math.abs(ultrawide[i])).toBeGreaterThan(Math.abs(atReference[i]));
     });
   });
 });
