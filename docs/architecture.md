@@ -11,11 +11,13 @@ src/
 │   ├── layout/
 │   │   ├── navbar/                     # Fixed desktop nav + mobile drawer
 │   │   ├── footer/                     # Minimal copyright-only footer
-│   │   └── layout.component.ts         # Navbar + background + router outlet + footer
+│   │   └── layout.component.ts         # Navbar + background + router outlet + page-end dissolve + footer
 │   ├── shared/
 │   │   ├── components/
+│   │   │   ├── pixel-dissolve/         # Blue-noise block dissolve that ends the page in black
+│   │   │   │                            #   dissolve-pattern.ts = noise, dissolve-field.ts = coverage + path
 │   │   │   ├── section-header/
-│   │   │   ├── social-links/
+│   │   │   ├── social-links/           # Icon row, or icon + handle contact list
 │   │   │   └── tech-tag/
 │   │   ├── directives/
 │   │   │   ├── glow.directive.ts
@@ -121,7 +123,8 @@ LayoutComponent
 │       │   └── ExtrasPlatformerComponent
 │       │       ├── ExtrasLevelEditorComponent (development-only)
 │       │       └── ExtraMediaScreenComponent
-│       └── ContactSectionComponent → SocialLinksComponent
+│       └── ContactSectionComponent → SocialLinksComponent (list layout)
+├── PixelDissolveComponent
 └── FooterComponent
 ```
 
@@ -135,7 +138,15 @@ Islands whose topic holds more than one slide also carry a pair of analog previo
 
 `bioData.about` stores the About introduction and four history entries as typed text segments. Intro segments can select cyan or pink; history segments carry semantic emphasis while their parent entry supplies the single stage color. `AboutSectionComponent` coalesces passive scroll measurements into animation frames and applies frame-rate-independent damping to card tilt and continuous rail progress. The rail is measured from the first number's center to the last number's center; the active chapter follows the closest numbered stop. In development, `?aboutDebug=scroll` exposes a read-only tuning HUD.
 
-`FooterComponent` is a presentation-only shell with no inputs or data dependencies. `ContactSectionComponent` is the single consumer of `SocialLinksComponent` and `socialLinksData`, avoiding duplicate social rows at scroll-bottom. `LayoutComponent` owns the skip-to-content link and manually focuses `<main id="main-content">` so it behaves consistently after redirects.
+`FooterComponent` is a presentation-only shell with no inputs or data dependencies. `ContactSectionComponent` is the single consumer of `SocialLinksComponent` and `socialLinksData`, avoiding duplicate social rows at scroll-bottom. It prepends a synthetic `email` channel (a `mailto:` `SocialLink` built from `bioData.email`) to `socialLinksData` and renders the combined list through `SocialLinksComponent` in `list` layout, so email and the socials read as one set of handles rather than a CTA plus an icon row. `LayoutComponent` owns the skip-to-content link and manually focuses `<main id="main-content">` so it behaves consistently after redirects.
+
+`PixelDissolveComponent` sits between `<main>` and `FooterComponent`, pulled up over the end of the content with a negative margin so the disintegration starts just above the last contact card. `FooterComponent` follows it on a solid black ground, which is where the copyright now lives.
+
+The dissolve splits into two modules. `dissolve-pattern.ts` builds the blue-noise threshold tile once at module load — a 32x6 void-and-cluster ordering, toroidal so it tiles seamlessly at any width. `dissolve-field.ts` owns the coverage field, `dissolveCoverage(tx, ty)`, which accelerates non-linearly downward and runs ahead of itself toward the page edges, plus `buildDissolvePath()`, which walks the block grid and emits one SVG path.
+
+Coverage varying in two dimensions is why the component measures the viewport rather than staying purely declarative: an SVG `<pattern>` tiles uniformly and can only shade by row, and the alternatives that keep a fluid width — percentage-width columns, or an `objectBoundingBox` clip-path along the iso-coverage curve — both cut blocks mid-edge and lose the square-pixel look. The grid is therefore laid out against the measured pixel width, via `afterNextRender` plus a debounced `ResizeObserver` writing a signal (the app is zoneless, so the signal write drives change detection on its own). Runs of adjacent black blocks merge into single rectangles, which roughly halves both the path string and the rasteriser's work.
+
+The SVG carries no `viewBox`, so one user unit stays one CSS pixel and blocks keep a constant 10px size at every viewport width. Before the width is known — which is exactly the server-side render's state — the path is empty, so the prerendered markup carries no grid and the effect draws on hydration. It is `aria-hidden` and `pointer-events: none`, so the content it overlaps stays readable to assistive tech and clickable with a mouse. Nothing animates, so `prefers-reduced-motion` needs no special case.
 
 The fixed background belongs to `LayoutComponent`. `BackgroundSceneComponent` owns the motion policy: under `prefers-reduced-motion` it draws a still frame and redraws only on scroll, and it pauses its animation loop while `document.hidden`. The UFO is an HTML/CSS element in `HeroComponent`; the controllable rocket remains future Phase 8 work.
 
@@ -216,4 +227,4 @@ dist/portfolio/browser/
 Render static-site publish directory (planned/externally configured)
 ```
 
-The August 15 verification passes 169 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget, and the Extras platformer stylesheet regained roughly 1.4 kB of headroom once the slide pad moved into `extra-media-pad/`. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.
+The August 18 verification passes 192 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget, and the Extras platformer stylesheet regained roughly 1.4 kB of headroom once the slide pad moved into `extra-media-pad/`. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.

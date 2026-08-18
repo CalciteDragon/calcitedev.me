@@ -59,7 +59,7 @@ The level geometry is typed, source-controlled data in `extras-level.data.ts`. A
 
 ### 5. Contact
 
-A direct email link and social links. There is deliberately no contact form or backend.
+One list of contact handles — email, GitHub, Discord, LinkedIn — each shown as `icon | platform | handle` beside the icon for its platform. There is deliberately no contact form or backend. The page then disintegrates into black through a blocky pixel dissolve that begins over the end of the section, with the copyright left sitting in the black at the very bottom.
 
 ## Non-Functional Goals
 

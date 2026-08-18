@@ -20,7 +20,7 @@
 - The July 2026 polish pass added the original project-thumbnail treatment, hero UFO repositioning, mobile-local hero gradients, a global `:focus-visible` ring, skip-to-content link, drawer body-scroll lock with md auto-close, press-state compression, canvas reduced-motion still-frame + hidden-tab rAF pause, static head metadata, and a pixel-C SVG favicon. Its card routing/filter UI was superseded by the August 13 project showcase.
 - Phase 7 is now mostly complete: project focus/selector transitions, section scroll reveals, active navbar state, smooth scrolling, CSS reduced-motion fallbacks, button micro-interactions, gradient rendering across breakpoints, and a canvas reduced-motion policy. Optional pointer-following card tilt remains open.
 - Phase 9 has partial foundations: lazy routes, lazy project images, semantic section structure, reduced mobile scene entity counts, skip link, hidden-tab canvas suspension, and baseline SEO metadata.
-- Static output is configured and verified: 169 tests pass and a production build prerenders four routes. The slide pads were checked in the running desktop layout by driving the explorer onto one with real key events: the pad advanced one slide, the cap and explorer sank 7px together, the island stayed active while resting, and no slide changed after nine idle seconds. Pop-out flows and hero-inspired explorer poses were also checked there; the stacked narrow layout remains covered by component tests.
+- Static output is configured and verified: 192 tests pass and a production build prerenders four routes. The slide pads were checked in the running desktop layout by driving the explorer onto one with real key events: the pad advanced one slide, the cap and explorer sank 7px together, the island stayed active while resting, and no slide changed after nine idle seconds. Pop-out flows and hero-inspired explorer poses were also checked there; the stacked narrow layout remains covered by component tests.
 - The Angular development server uses one-second file polling with full-page live reload, avoiding stale Windows watcher sessions and unreliable component-style HMR updates during `npm start`.
 - The July 16 mountain-performance audit restored the original worker-rAF renderer, added opt-in real-scroll metrics (`?canvasPerf=scroll`), and tested scheduling, path reuse, projection-loop, and fog candidates independently. Only static fog precomposition was retained: three standard scroll traces reduced worker-draw cadence p95 from roughly 30–33 ms to 22–25 ms, end-to-end p95 from 19.8–21.4 ms to 18.1–19.8 ms, and draw median from 5.5–5.7 ms to 5.2–5.4 ms. Immediate worker tasks, repeated-path reuse, and projection-loop changes were discarded because they did not improve real scroll cadence consistently.
 - Known repository gaps: the hero (7.39 kB), About (7.75 kB), project focus (6.59 kB), Extras platformer (6.56 kB), and project selector (4.88 kB) stylesheets exceed the 4 kB warning budget but remain below the 8 kB error limit; the new Extras media-pad, the simplified Extras media-screen, and the separate level-editor stylesheets remain below the warning budget. The platformer's slide pad has since been extracted into `extra-media-pad/` alongside the existing `extra-media-screen` and `extras-level-editor` siblings, which cut the platformer stylesheet from 7.99 kB to 6.56 kB and restored roughly 1.4 kB of headroom against the error budget. The pressed cap's 220ms ease-down is deliberate, not a missed instant-press: the platformer stylesheet carried a `transition-duration: 0ms` declaration that never applied (equal specificity, base rule written later), and it has been removed rather than made to work, so the cap keeps easing into its housing while the explorer's own drop stays instant. Mountain DPR scaling, the broader responsive/accessibility audits, an og:image asset, and external deployment verification remain open.
@@ -127,7 +127,8 @@ Phase 0: Scaffold & Global Styles
 - [x] `SectionHeaderComponent` — gradient text heading with optional subtitle
 - [x] `ExtraMediaScreenComponent` — feature-local rounded monitor for privacy-enhanced, timestamp-resuming video and image gallery records
 - [x] `TechTagComponent` — compact project technology tag
-- [x] `SocialLinksComponent` — typed social-link row with platform-specific presentation
+- [x] `SocialLinksComponent` — typed contact-channel component with platform-specific presentation; `row` renders bare icons, `list` renders icon + label + handle
+- [x] `PixelDissolveComponent` — static SVG blue-noise block dissolve that ends the page in black, with non-linear vertical and edge-weighted horizontal intensity
 - [x] `ProjectFocusStageComponent` and `ProjectSelectorComponent` — feature-local project focus/index presentation; supersede and remove the former shared `CardComponent`/`ProjectCardComponent`
 - [x] `ScrollRevealDirective` — CSS scroll-driven animation via `animation-timeline: view()`, adds `.scroll-reveal` class when on a browser platform; the CSS handles all animation logic, including the `min()` caps that keep tall subjects from stretching the reveal (see `docs/design.md` → Scroll Reveal Range)
 - [x] `GlowDirective` — configurable neon glow behavior
@@ -147,7 +148,7 @@ Phase 0: Scaffold & Global Styles
 **Tasks:**
 - [x] `project.model.ts` — readonly `Project` display contract (title, slug, eyebrow, status, descriptions, tags, image/alt, optional links, glow color); route/filter fields removed
 - [x] `extra.model.ts` — typed Extras topic and mixed image/YouTube media records
-- [x] `social-link.model.ts` — `SocialLink` interface (platform, url, icon, glowColor)
+- [x] `social-link.model.ts` — `SocialLink` interface (platform, url, label, handle)
 - [x] `projects.data.ts` — seven ordered real/current projects with researched descriptions, truthful team/contribution language, links, keywords, and stable preview paths
 - [x] `extras.data.ts` — capstone, keyboard, and robotics topics; Capstone exposes the five supplied images in numeric filename order with the PDF rendered to an image, keyboard and robotics use supplied YouTube videos, including the robotics video's 3:03:36 initial timestamp, and Robotics exposes the four supplied competition photos in their requested order
 - [x] `bio.data.ts` — typed identity fields plus structured About intro/history copy with emphasis, links, and side-note metadata
@@ -269,11 +270,11 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] Former filter bar, shared project cards, `/projects/:slug` detail component, parameterized routes, and prerender slug list removed
 
 ### Contact Section (`features/home/sections/contact-section/`)
-- [x] Email link (styled as a prominent CTA or card)
-- [x] `SocialLinksComponent` reuse — GitHub, Discord, and LinkedIn with glow hover
+- [x] Email and socials render as one coherent handle list — `icon | platform label | handle` rows, aligned handle column, per-platform accent on hover. Supersedes the earlier standalone email CTA button plus bare social-icon row, which read as two unrelated controls on one screen.
+- [x] `SocialLinksComponent` reuse — gains a `layout` input (`row` | `list`) and an `email` icon; `SocialLink` gains a `handle` field. Handles are placeholders until the real account names are confirmed.
 - [x] Clean, minimal layout — no form
 
-**Built:** `BackgroundSceneComponent` lives in `LayoutComponent`. `HomeComponent` reads `projectsData`, `extrasData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Extras → Contact. Projects use `ProjectsSectionComponent` selection state, an overlapping `ProjectFocusStageComponent`, and `ProjectSelectorComponent`; Extras owns the hero-inspired animated player, responsive mode, delayed active-island, speech-prompt, saved-video-time, gallery state, slide-pad press state, and its development-only level editor; there is no project or Extras route. The August 15 verification passes 169 tests and prerenders four routes.
+**Built:** `BackgroundSceneComponent` lives in `LayoutComponent`. `HomeComponent` reads `projectsData`, `extrasData`, `socialLinksData`, and `bioData` and passes them through signal inputs. The homepage order is Hero → About → Projects → Extras → Contact. Projects use `ProjectsSectionComponent` selection state, an overlapping `ProjectFocusStageComponent`, and `ProjectSelectorComponent`; Extras owns the hero-inspired animated player, responsive mode, delayed active-island, speech-prompt, saved-video-time, gallery state, slide-pad press state, and its development-only level editor; there is no project or Extras route. The August 18 verification passes 192 tests and prerenders four routes.
 
 **Deliverable:** All five scroll sections are content-complete. The Projects section contains seven real/current entries in one accessible, responsive, in-page showcase.
 
@@ -288,7 +289,7 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 **Tasks:**
 - [x] **Project hover/selection effects:** selector previews lift subtly; active state uses accent glow plus an explicit marker; focus panels crossfade/rise without reflow
 - [ ] **Card tilt:** subtle 3D tilt following mouse position on project cards (vanilla-tilt style via directive)
-- [x] **Button micro-interactions:** motion-safe press compression on selector buttons, project links, and the email CTA
+- [x] **Button micro-interactions:** motion-safe press compression on selector buttons, project links, and contact channel rows
 - [x] **Scroll reveals:** applied to the About intro card and the major Projects, Extras, and Contact content groups; About history intentionally renders without reveal animation
   - [x] Reveal range capped to an absolute scroll distance. Tall groups such as the Projects showcase use `min()` caps from `_variables.scss`; short subjects retain their original timing.
 - [x] **Navbar active link indicator:** `ScrollService.activeSection` drives desktop and drawer active states
@@ -296,6 +297,8 @@ Note: DPR scaling not applied to `MountainRenderer.resize()` — deferred to Pha
 - [x] **Gradient text polish:** viewport-fixed gradient ≥ lg; per-element local gradients below lg (fixes muddy mobile blend and iOS Safari's missing fixed-attachment support)
 - [x] **Project transitions:** 240ms opacity/rise/image-scale treatment replaces project route transitions and becomes immediate under reduced motion
 - [x] **`prefers-reduced-motion`:** CSS fallbacks disable shared/hero animations, and the canvas renders a still frame that redraws only on scroll
+- [x] **Page-end pixel dissolve:** `PixelDissolveComponent` closes the document with a 220px blue-noise dither ramp, pulled up over the end of the Contact section so the disintegration starts on the last contact card. Its bottom edge is pinned to the top of the footer, so trimming rows off the bottom slides the effect down the page without changing the document height. Coverage accelerates non-linearly downward and runs ahead of itself toward the page edges, producing a concave valley. `FooterComponent` follows on solid black and carries the copyright; its top rule was removed. Static SVG — no canvas, timers, or reduced-motion special case. Verified that the added scroll does not degrade the worker-rendered mountains: `BackgroundSceneComponent` is `position: fixed; inset: 0`, so it repaints the whole viewport at every scroll position.
+  - The two-dimensional coverage is why this measures the viewport: an SVG `<pattern>` tiles uniformly and can only shade by row. The grid is laid out against the measured width via `afterNextRender` plus a debounced `ResizeObserver`; before measurement — the server-side render's state — the path is empty.
 
 **Deliverable:** The site feels polished and responsive to interaction. Every hover, scroll, and click has intentional feedback.
 

@@ -1,5 +1,18 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { SocialLink } from '../../../models/social-link.model';
+
+/**
+ * `row` renders bare icons side by side; `list` renders one stacked row per
+ * channel as `icon — label — handle`.
+ */
+export type SocialLinksLayout = 'row' | 'list';
+
+interface SocialLinkView extends SocialLink {
+  /** Resolved SVG path for the platform, or null when no icon is registered. */
+  readonly iconPath: string | null;
+  /** mailto: links stay in the current tab; everything else opens a new one. */
+  readonly external: boolean;
+}
 
 @Component({
   selector: 'app-social-links',
@@ -10,8 +23,22 @@ import { SocialLink } from '../../../models/social-link.model';
 })
 export class SocialLinksComponent {
   readonly links = input.required<readonly SocialLink[]>();
+  readonly layout = input<SocialLinksLayout>('row');
+
+  protected readonly showHandles = computed(() => this.layout() === 'list');
+
+  /** Precomputed so the template holds no expressions beyond property reads. */
+  protected readonly items = computed<readonly SocialLinkView[]>(() =>
+    this.links().map(link => ({
+      ...link,
+      iconPath: this.iconPaths[link.platform] ?? null,
+      external: !link.url.startsWith('mailto:'),
+    })),
+  );
 
   protected readonly iconPaths: Record<string, string> = {
+    email:
+      'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z',
     github:
       'M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z',
     discord:

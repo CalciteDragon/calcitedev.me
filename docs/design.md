@@ -181,7 +181,7 @@ Gradient text via `background-clip: text` remains available as the `gradient-tex
 
 ### Layout Note
 
-The page is a single-page scroll: Home hero → About → Projects → Extras → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom.
+The page is a single-page scroll: Home hero → About → Projects → Extras → Contact. Sections stack vertically; scroll-driven animations apply as each section enters the viewport. Only the hero section is full-viewport (`min-height: 100svh` via the `--full` modifier); content sections size to their content plus section padding so sparse sections don't leave dead voids and the Contact section composes with the footer at scroll-bottom. The page-end pixel dissolve overlaps the end of the Contact section and runs into the footer, adding roughly 210px of net closing scroll (see [Page-End Pixel Dissolve](#page-end-pixel-dissolve)).
 
 ### Background Scene (Canvas)
 
@@ -277,16 +277,45 @@ The earlier **About Me**, **Latest Projects**, and **My Skills** hero cards were
 
 ### Buttons and Link CTAs
 
-- Project links, project selector buttons, Extras gallery/teleport controls, and the contact email CTA use compact neon treatments.
+- Project links, project selector buttons, Extras gallery/teleport controls, and the contact channel rows use compact neon treatments.
 - Hover states should intensify borders/glow without overwhelming adjacent text.
-- Pressed state: motion-safe `scale(0.96–0.985)` compression on selector buttons, project links, and the email CTA.
+- Pressed state: motion-safe `scale(0.96–0.985)` compression on selector buttons, project links, and contact channel rows.
 - Keyboard focus: a global cyan `:focus-visible` outline covers every focusable control; selector buttons use their project accent and social icons keep their bespoke treatment.
+
+### Contact Channel List
+
+The Contact section renders one list, not an email CTA plus a separate icon row. The standalone bordered email button and the bare social-icon row were both replaced because they read as two unrelated controls stacked on one screen.
+
+- One row per channel, in order: Email, GitHub, Discord, LinkedIn. Email is a `mailto:` row built from `bioData.email`; the rest come from `socialLinksData`.
+- Row grid is `icon | platform label | handle`. The label track is a fixed `5rem`, so every handle starts at the same x — a ragged handle column reads as four unrelated links rather than one list.
+- Platform label: 0.7rem, uppercase, `0.12em` tracking, `--text-secondary`. Handle: JetBrains Mono 0.9rem, `--text-primary`.
+- Each row carries its platform accent as `--link-color` / `--link-color-rgb` design tokens: Email → gold, GitHub → cyan, Discord → blue, LinkedIn → purple. Hover tints the icon and handle to that accent, lifts the row 2px, and adds a matching border and 18px glow.
+- List width is `min(100%, 30rem)`, centered. Below 480px the uppercase label is dropped so the monospace handle keeps one line.
+- `SocialLinksComponent` still supports the original bare-icon `row` layout; the list is the `list` layout. `mailto:` rows deliberately omit `target="_blank"`, and rows with a visible name omit the redundant `aria-label`.
+- Handles are placeholders until the real account names are confirmed. The URLs they sit on are the live profiles.
+
+### Page-End Pixel Dissolve
+
+The bottom of the page disintegrates into black rather than simply ending, and the copyright rides out the far end of it.
+
+- Sits between `<main>` and the footer as the second-to-last element of `LayoutComponent`, so it closes every route.
+- 220px tall (22 blocks), pulled up over the end of the content with `margin-top: calc(-1 * (var(--section-padding-v) + var(--dissolve-lead-in)))`. The last contact card's bottom edge sits exactly one `--section-padding-v` above the end of `<main>`, so the lead-in is measured from there and the disintegration starts **on the last contact card**, not below the footer.
+- The ramp's bottom edge is pinned to the top of the footer. Trimming rows off the bottom and shrinking the pull-up by the same amount is what slides the whole effect further down the page without moving the footer or changing the document height.
+- The footer follows directly beneath on a solid `#000` ground and carries the copyright, so the black the ramp resolves into is where the copyright sits. There is no top rule on the footer: the dissolve is the separator, and a hairline would cut straight through it.
+- **Vertical intensity is non-linear** (`coverage = progress^3.2`): 1% at a quarter down, 12% at halfway, 56% at four-fifths, solid at the bottom. The page frays gently, then collapses.
+- **Horizontal intensity follows a curve toward the sides.** Edge columns get both a head start (`EDGE_OFFSET`) and faster progress (`EDGE_LEAD`), weighted by `|2·tx − 1|^1.9` so the middle — where the content sits — stays clear longest. The sides cross 1% coverage at 10% down versus 23% for the middle, and go solid at 55% down versus 96%. The result reads as a shallow concave valley eating in from both edges; `EDGE_CURVE` closer to 1 flattens that valley, further above 1 deepens it.
+- **Blue noise, not ordered dither.** A Bayer matrix was tried first and looked wrong: at low coverage every tile lights the same cell, so sparse regions read as a precise lattice of dots instead of something coming apart. Void-and-cluster placement puts each new block in the largest remaining gap — evenly spread, no visible grid.
+- Blocks are a constant 10px at every viewport width, always whole and on-grid.
+- Static by construction: no canvas, no timers, no animation. `prefers-reduced-motion` needs no special case; the only runtime work is re-measuring the width on resize.
+- The fixed background scene is `position: fixed; inset: 0`, so it repaints the full viewport at every scroll position — the extra page height can never expose a region outside the mountain render.
+- The ramp is `pointer-events: none` and `aria-hidden`, so the last contact card stays clickable and unchanged for assistive tech even where blocks land on it.
 
 ### Footer
 
 - Minimal by design: a centered copyright line with the "Built with Angular" note, and nothing else
-- Deliberately carries **no** social icons. The footer sits directly beneath the Contact section at scroll-bottom, so rendering `SocialLinksComponent` in both produced two near-identical icon rows within one screen. The Contact section owns the social row because email + social links are its defined purpose; the footer stays a thin closing rule.
-- Not fixed — sits at bottom of content
+- Sits **below** the page-end pixel dissolve on a solid `#000` ground, so the copyright reads as the last thing left after the page disintegrates. No top rule — see [Page-End Pixel Dissolve](#page-end-pixel-dissolve).
+- Deliberately carries **no** social icons. The Contact section owns the channel list because email + social links are its defined purpose; rendering `SocialLinksComponent` in both produced two near-identical rows within one screen.
+- Not fixed — sits at the very bottom of the content
 
 ## Animation Guidelines
 

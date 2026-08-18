@@ -1,18 +1,22 @@
-<div class="social-links">
-  @for (link of links(); track link.platform) {
+<div class="social-links" [class.social-links--list]="showHandles()">
+  @for (item of items(); track item.platform) {
     <a
-      [class]="'social-links__link social-links__link--' + link.platform"
-      [href]="link.url"
-      target="_blank"
-      rel="noopener noreferrer"
-      [attr.aria-label]="link.label"
+      class="social-links__link social-links__link--{{ item.platform }}"
+      [href]="item.url"
+      [attr.target]="item.external ? '_blank' : null"
+      [attr.rel]="item.external ? 'noopener noreferrer' : null"
+      [attr.aria-label]="showHandles() ? null : item.label"
     >
-      @if (iconPaths[link.platform]) {
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path [attr.d]="iconPaths[link.platform]" />
+      @if (item.iconPath) {
+        <svg class="social-links__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path [attr.d]="item.iconPath" />
         </svg>
-      } @else {
-        <span class="social-links__label">{{ link.label }}</span>
+      }
+      @if (showHandles()) {
+        <span class="social-links__platform">{{ item.label }}</span>
+        <span class="social-links__handle">{{ item.handle }}</span>
+      } @else if (!item.iconPath) {
+        <span class="social-links__label">{{ item.label }}</span>
       }
     </a>
   }
