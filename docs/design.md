@@ -81,7 +81,7 @@ Used for: heading gradients, active states, card border glows, CTA accents.
 | --------------- | ------------------------ | ------ | -------------------------------------------------- |
 | Hero name       | — (raster art)           | —      | Not type: the `hero-title.webp` neon-sign image inside the `h1`. `width: min(100%, 560px)`, `min(100%, clamp(560px, 60vw, 930px))` ≥ lg |
 | Hero alias      | `clamp(1rem, 2.5vw, 1.75rem)` | 600 | Solid `$accent-cyan` with a low two-stop halo; `letter-spacing: 0.08em`. Sits in the `.hero__tagline` panel |
-| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Solid `$accent-pink` with the same halo (9.5:1 and 4.9:1 on the panel). Sits in the `.hero__tagline` panel |
+| Hero subtitle   | `clamp(1rem, 2vw, 1.375rem)` | 400  | Solid `$accent-cyan` with the same halo (9.5:1 on the page background). Sits in the `.hero__tagline` panel |
 | H2 (Section)    | 2rem–2.5rem              | 700    | Section headings                                   |
 | H3 (Card title) | 1.25rem                  | 600    | Card headings                                      |
 | Body            | 1rem                     | 400    | Line height 1.6                                    |
@@ -161,7 +161,7 @@ Gradient text via `background-clip: text` remains available as the `gradient-tex
 │  [=== platform]    │ AKA CALCITE          HTML) │
 │                    │ Full Stack Developer        │
 │                                                   │
-│                     ↓  ↓  ↓  (scroll indicator)  │
+│                       ↓  (scroll indicator)      │
 └─────────────────────────────────────────────────┘
 ```
 
@@ -170,12 +170,12 @@ Gradient text via `background-clip: text` remains available as the `gradient-tex
 - Name — `public/assets/images/hero-title.webp`, a 1400×467 photographic neon sign reading TYLER HAWTHORN (cyan top line, pink bottom line) on a transparent background. It sits as an `<img>` inside the `h1`, with `alt` bound to `bio().name` so the accessible name still comes from the data layer, and `fetchpriority="high"` because it is the hero LCP element. The art carries its own glow, so `.hero__name` applies no gradient or text fill — it is only a flex box that centers below lg and left-aligns from lg up. Negative block margins pull the tagline panel back toward the visible tubing, since the source art bleeds glow to its own edges. Sizing is wrapped in `min(100%, …)` so the sign can ask for more width than the flex column has and simply take whatever is available — that guard is what keeps it from overflowing at lg, where the column is narrowest relative to the request
 - Alias and title — cyan→pink gradients applied via `background-clip: text`. From the lg breakpoint up the gradient uses `background-attachment: fixed`, so color shifts subtly with scroll; below lg each element carries its own local horizontal gradient because fixed attachment muddies mobile text and iOS Safari ignores it
 - Tagline (`.hero__tagline`) — alias and subtitle share a wrapper that carries no plate at all: no background, border, backdrop filter, or shadow. From lg up it is indented `$space-6` from the column edge and marked by a single 2px hairline rule on its left, fading to transparent at both ends so it reads as an edge the copy hangs off rather than as a drawn graphic. Below lg the copy is centered and the rule is not generated — the `content` property lives inside the `lg` query, so there is no pseudo-element on mobile rather than a hidden one. The wrapper's remaining jobs are the flex `gap` between the two lines and the indent itself
-- Subtext color — cyan alias over pink subtitle repeats the sign's own two-line split (cyan TYLER above, pink HAWTHORN below), so the panel reads as the sign's third and fourth lines rather than as caption text under it. Both carry the `hero-neon-text` halo, which collapses to a single soft stop under `prefers-reduced-motion: reduce`
+- Subtext color — both lines are `$accent-cyan`. The earlier cyan/pink split echoed the sign's two-line colouring but read as two unrelated captions; a single tube colour lets the alias and subtitle read as one block of secondary copy hanging off the hairline rule, and leaves pink to the sign itself. Both carry the `hero-neon-text` halo, which collapses to a single soft stop under `prefers-reduced-motion: reduce`
 - UFO — HTML `<img>` parked high in the upper-right sky (`top: 4%` at lg, right-edge bleed capped by `max(calc(760px - 50vw), -60px)`), clear of the headline at scroll 0; CSS float + tilt keyframe plus scroll-driven parallax; homepage sections establish DOM-order stacking contexts so all later content, including project cards, renders above it
 - UFO depth treatment — the craft sits on a distant plane, sold by four cues used together: reduced size (170px, 215px at lg, down from 250/325), atmospheric perspective on the whole element (`filter: blur(0.55px) saturate(0.84) contrast(0.86)` at `opacity: 0.88` — the sub-pixel blur matters most, since crisp pixel edges always read as near), a two-part fog overlay, and near-viewport-locked parallax (see the animation table). `contrast()` is used deliberately in place of `brightness()`: haze *lifts* blacks toward the sky colour, whereas dimming crushes them and reads as a turned-down lamp. Note the `filter` makes `.hero__ufo` a stacking context; it still sits below later sections by DOM order
 - UFO fog overlay — two pseudo-elements, both radial in paint *and* mask so neither has an edge of its own. `::after` is the disc-only vignette in background navy (`rgba(11, 15, 26, 0.13)` → `0.46`). `::before` is the distance fog across disc *and* beam — a pale sky-blue (`rgba(146, 178, 216, ~0.13)` → `0.05`), not the background navy, because aerial perspective washes distant objects *toward* the sky rather than darkening them; without it the beam would stay foreground-bright while the disc receded. Both layers mask with `radial-gradient(ellipse 50% 50% at 50% 50%, black N%, transparent 100%)`. The explicit `50% 50%` radii are load-bearing: a radial-gradient defaults to `farthest-corner` sizing, so the ellipse extends past the box, the fade never finishes inside it, and the layer terminates mid-ramp along all four edges as a visible rectangle. Only the fog's *paint* is biased upward toward the disc — an off-centre mask cannot reach zero on its near side without collapsing on the far one
 - UFO tractor beam — CSS gradient cone beneath the disc, sized to match the disc (170×280, 215×370 at lg) at `opacity: 34%`
-- Scroll indicator — 3 cascading pink chevrons, fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
+- Scroll indicator — a single 28×28px `$accent-cyan` chevron at 3px stroke. The previous three-chevron cascade was the loudest thing in the lower half of the hero and competed with the sign; one mark at the same size still reads as a pointer, and cyan keeps pink reserved for the sign. Fades to `opacity: 0` at 150px scroll via `animation-timeline: scroll(root)`
 
 **Removed in layout-and-design-tweaks:** "HEY, I'M" pre-heading, "Code · Create · Innovate" tagline, "View My Work" CTA button, and the three-card hero navigation strip. The feature cards duplicated the fixed navbar and were intentionally deleted.
 
@@ -207,7 +207,8 @@ The page is a single-page scroll: Home hero → About → Projects → Extras �
 ### Navbar
 
 - Fixed to top, semi-transparent `#0B0F1A` with `backdrop-filter: blur(12px)`
-- Small pixel-style icons on the left (branding)
+- Brand lockup on the left — an inline-SVG calcite rhombohedron mark plus the `CALCITE.dev` wordmark, replacing the earlier lone pixel `C`. The mark is five paths in a 24×24 viewBox rendered at 26px: three facet fills at descending cyan alpha (top `0.32`, right `0.17`, left `0.07`) for volume under one overhead-right key light, the three interior edges stroked in `$accent-pink` at `0.72` for refraction, and the hexagonal silhouette stroked in `$accent-cyan` last so its outline paints over the fills and stays crisp. Proportions are elongated on purpose — equal ones draw a plain isometric cube. Inline SVG rather than an asset file so the paths inherit palette tokens and can be lit from CSS. The wordmark is Space Grotesk 700 at `1.125rem` with `0.16em` tracking; the `.dev` suffix is JetBrains Mono at `0.7em` in `--text-secondary`, tying the lockup to `calcitedev.me`
+- Brand hover — the lockup *brightens* (stronger cyan drop-shadow, facet alphas up, `.dev` turns cyan) rather than fading; the old `opacity: 0.8` hover made the logo read as disabled. Focus-visible gets the same treatment
 - Nav links (left-to-right): About, Projects, Extras, Contact — rendered as `<button>` elements (not `<a>` tags); clicking scrolls to the matching section; active state highlights the button for the section currently in view
 - Hover: glow + color shift, underline animation or pixel highlight
 - Mobile: hamburger → slide-in drawer
@@ -332,7 +333,7 @@ The bottom of the page disintegrates into black rather than simply ending, and t
 | `avatar-float`       | 3s       | 8px vertical bob, `ease-in-out infinite`                                      |
 | `ufo-float`          | 7s       | ±14px vertical + ±2° tilt, `ease-in-out infinite`                            |
 | `ufo-parallax`       | scroll   | `animation-timeline: scroll(root)`, range 0–200vh; translates UFO 165vh down. The craft therefore gives back ~83% of the page's scroll and drifts up only a sliver — depth is about how little it moves *relative to the viewport*, not how far it travels |
-| `scroll-pulse`       | 2.5s     | 3 staggered chevrons (0s / 0.35s / 0.7s delay); neon pink glow at 50%        |
+| `scroll-pulse`       | 2.5s     | Single chevron; `opacity` 0.1 → 0.55 with a 2px down-right drift and a cyan glow at 50%; disabled under reduced motion |
 | `scroll-indicator-fade` | scroll | `animation-timeline: scroll(root)`, range 0–150px; fades indicator opacity 1→0 |
 
 ### Scroll Reveal Range

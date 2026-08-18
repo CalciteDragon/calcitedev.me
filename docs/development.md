@@ -101,7 +101,7 @@ Phase 0: Scaffold & Global Styles
 - [x] `LayoutComponent` — wraps `<app-navbar>` + `<router-outlet>` + `<app-footer>`
 - [x] `NavbarComponent`:
   - Fixed position, semi-transparent `#0B0F1A` background, `backdrop-filter: blur(12px)`
-  - Logo/brand text on the left (placeholder pixel icon)
+  - Brand lockup on the left — inline-SVG calcite rhombohedron mark + `CALCITE.dev` wordmark (replaced the placeholder pixel `C` icon)
   - Nav links: About, Projects, Extras, Contact — rendered as `<button>` elements that scroll to the matching section (not `<a>` router links); active state driven by `ScrollService.activeSection` signal
   - Hover state: glow + color shift
   - Mobile: hamburger toggle → slide-in drawer

@@ -30,28 +30,123 @@
 // Brand / Logo
 // ============================
 
+// The lockup is a mark plus a wordmark. The mark is the calcite rhombohedron
+// — the crystal habit the mineral actually grows in — which gives the name
+// something to point at instead of the lone pixel `C` that used to sit here.
+// It is inline SVG rather than an asset so the paths inherit the palette and
+// can be lit on hover with the site's own cyan.
 .navbar__brand {
   display: flex;
   align-items: center;
   gap: $space-1;
   text-decoration: none;
-  transition: opacity $transition-fast;
 
-  &:hover {
-    opacity: 0.8;
+  // Hover brightens the lockup instead of fading it — a logo that dims on
+  // hover reads as disabled. The strokes and glow are driven from here so the
+  // mark and wordmark light together.
+  &:hover,
+  &:focus-visible {
+    .navbar__brand-mark {
+      filter:
+        drop-shadow(0 0 5px rgba($accent-cyan, 0.6))
+        drop-shadow(0 0 12px rgba($accent-cyan, 0.25));
+    }
+
+    .navbar__brand-facet--top {
+      fill: rgba($accent-cyan, 0.44);
+    }
+
+    .navbar__brand-facet--right {
+      fill: rgba($accent-cyan, 0.26);
+    }
+
+    .navbar__brand-facet--left {
+      fill: rgba($accent-cyan, 0.15);
+    }
+
+    .navbar__brand-suffix {
+      color: var(--accent-cyan);
+    }
   }
 }
 
-.navbar__brand-icon {
-  color: var(--accent-cyan);
+.navbar__brand-mark {
+  display: flex;
+  flex-shrink: 0;
+  // Resting glow is deliberately faint: the navbar sits over a live starfield,
+  // and a hot mark up here competes with the hero sign below it.
+  filter: drop-shadow(0 0 4px rgba($accent-cyan, 0.35));
+  transition: filter $transition-base;
+
+  svg {
+    display: block;
+    overflow: visible;
+  }
+
+  path {
+    transition: fill $transition-base;
+  }
+}
+
+// Three facet fills at descending alpha give the crystal volume — a single
+// flat tint reads as a wireframe with a lid on it. The ramp assumes one key
+// light from above and slightly right, the same direction the hero platform
+// and avatar are lit from, so the mark belongs to the same scene.
+.navbar__brand-facet {
+  stroke: none;
+
+  &--top {
+    fill: rgba($accent-cyan, 0.32);
+  }
+
+  &--right {
+    fill: rgba($accent-cyan, 0.17);
+  }
+
+  &--left {
+    fill: rgba($accent-cyan, 0.07);
+  }
+}
+
+// The three interior edges, in pink — the one place the second brand color
+// appears in the mark, reading as light refracting through the crystal.
+.navbar__brand-refraction {
+  fill: none;
+  stroke: rgba($accent-pink, 0.72);
+  stroke-width: 1;
+  stroke-linecap: round;
+}
+
+// Silhouette last in the DOM so its stroke paints over the facet fills and
+// stays crisp — an outline drawn first would have its inner half covered.
+.navbar__brand-body {
+  fill: none;
+  stroke: $accent-cyan;
+  stroke-width: 1.4;
+  stroke-linejoin: miter;
 }
 
 .navbar__brand-text {
   font-family: 'Space Grotesk', system-ui, sans-serif;
-  font-size: 1.25rem; // text-lg
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: 0.05em;
+  // Wider tracking than body type is what separates a wordmark from a heading.
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// Domain suffix, tied to calcitedev.me. Mono and muted so it sits under the
+// wordmark rather than beside it as a second word.
+.navbar__brand-suffix {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  text-transform: lowercase;
+  transition: color $transition-base;
 }
 
 // ============================
