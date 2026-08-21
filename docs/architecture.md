@@ -59,13 +59,13 @@ src/
 └── styles.scss
 
 public/
-├── favicon.svg                          # Pixel-C SVG favicon
+├── favicon.png / favicon.ico            # Faceted-C browser-tab icons derived from the navbar artwork
 └── assets/
-    ├── images/                          # Hero neon title plus seven project previews — six real captures, one SVG
+    ├── images/                          # Navbar logo, hero title, social card, project previews, and Extras media
     └── pixel-art/                       # Extras explorer strip plus avatar/UFO placeholders
 ```
 
-Assets are served from `public/`, not `src/assets/`. `public/assets/images/hero-title.webp` is the hero headline — a 1400×467 neon-sign render of TYLER HAWTHORN with a transparent background, downscaled from the 2172×724 source and encoded to WebP at q0.92 (298 KB) because the original PNG was 2 MB and this is the LCP element. The seven project visuals referenced by `projects.data.ts` live under `public/assets/images/`. Only Calcite Portfolio remains project-specific SVG art. Six are real captures that have replaced their placeholders:
+Assets are served from `public/`, not `src/assets/`. `public/assets/images/navbar-logo.png` is a 128×128 transparent derivative of the supplied 1254×1254 faceted-C artwork, sized for crisp high-DPI rendering in the persistent 38px navbar slot without shipping the oversized source. The same artwork supplies `public/favicon.png` and the multi-size `public/favicon.ico`, so the browser tab and navbar share one mark. `public/assets/images/hero-title.webp` is the hero headline — a 1400×467 neon-sign render of TYLER HAWTHORN with a transparent background, downscaled from the 2172×724 source and encoded to WebP at q0.92 (298 KB) because the original PNG was 2 MB and this is the LCP element. The seven project visuals referenced by `projects.data.ts` live under `public/assets/images/`. Only Calcite Portfolio remains project-specific SVG art. Six are real captures that have replaced their placeholders:
 
 - `project-live-bingo.png` — 1368×720, an in-progress match composited on the app's own `#F8FAFC` background.
 - `project-pineapple-expense.png` — 1949×1026, the capstone AWS architecture diagram lifted off its presentation slide (slide header and footer chrome cropped away) on white.

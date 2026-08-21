@@ -46,6 +46,11 @@ describe('NavbarComponent', () => {
     const brand = compiled.querySelector('a.navbar__brand') as HTMLAnchorElement;
     expect(brand).toBeTruthy();
     expect(brand.getAttribute('href')).toBe('/');
+
+    const logo = brand.querySelector('img.navbar__brand-image') as HTMLImageElement;
+    expect(logo.getAttribute('src')).toBe('/assets/images/navbar-logo.png');
+    expect(logo.getAttribute('alt')).toBe('');
+    expect(brand.querySelector('.navbar__brand-text')?.textContent?.trim()).toBe('ALCITEdev.me');
   });
 
   it('should render 4 nav buttons in order: About, Projects, Extras, Contact', () => {
