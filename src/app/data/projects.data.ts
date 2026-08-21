@@ -70,7 +70,7 @@ export const projectsData: readonly Project[] = [
     title: 'It’s Never Just Black and White',
     slug: 'black-and-white',
     eyebrow: 'Engine-free game dev · Browser game',
-    status: 'EXPERIMENT',
+    status: 'BROWSER GAME',
     description:
       'A two-color momentum platformer where a single button flips gravity and the color palette at once.',
     longDescription:
@@ -79,6 +79,7 @@ export const projectsData: readonly Project[] = [
     imageUrl: 'assets/images/project-black-and-white.png',
     imageAlt:
       'In-game capture of the level “FIRST STEPS” at 0:13.01: a white diamond player character falling between stark white platforms on a black background, with chromatic-aberration edges, scanline grain, and a small cyan particle burst above a dark chevron spike',
+    liveUrl: 'https://neverbnw.calcitedev.me',
     githubUrl: 'https://github.com/CalciteDragon/its-never-just-black-and-white',
     glowColor: 'cyan',
   },
