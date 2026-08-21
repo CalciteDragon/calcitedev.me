@@ -30,28 +30,68 @@
 // Brand / Logo
 // ============================
 
+// The lockup pairs the supplied faceted C artwork with the existing wordmark.
 .navbar__brand {
   display: flex;
   align-items: center;
-  gap: $space-1;
+  gap: 0;
   text-decoration: none;
-  transition: opacity $transition-fast;
 
-  &:hover {
-    opacity: 0.8;
+  // Hover brightens the lockup instead of fading it — a logo that dims on
+  // hover reads as disabled.
+  &:hover,
+  &:focus-visible {
+    .navbar__brand-mark {
+      filter:
+        drop-shadow(0 0 6px rgba($accent-cyan, 0.68))
+        drop-shadow(0 0 14px rgba($accent-blue, 0.3));
+    }
+
+    .navbar__brand-suffix {
+      color: var(--accent-cyan);
+    }
   }
 }
 
-.navbar__brand-icon {
-  color: var(--accent-cyan);
+.navbar__brand-mark {
+  display: block;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  // Resting glow is deliberately faint: the navbar sits over a live starfield,
+  // and a hot mark up here competes with the hero sign below it.
+  filter: drop-shadow(0 0 4px rgba($accent-cyan, 0.35));
+  transition: filter $transition-base;
+}
+
+.navbar__brand-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .navbar__brand-text {
   font-family: 'Space Grotesk', system-ui, sans-serif;
-  font-size: 1.25rem; // text-lg
+  font-size: 1.375rem;
   font-weight: 700;
   color: var(--text-primary);
-  letter-spacing: 0.05em;
+  // Wider tracking than body type is what separates a wordmark from a heading.
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+// Domain suffix, tied to calcitedev.me. Mono and muted so it sits under the
+// wordmark rather than beside it as a second word.
+.navbar__brand-suffix {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.7em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  text-transform: lowercase;
+  transition: color $transition-base;
 }
 
 // ============================

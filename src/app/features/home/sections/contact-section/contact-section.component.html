@@ -1,9 +1,9 @@
 <section class="contact-section">
-  <app-section-header title="Get In Touch" subtitle="Want to collaborate? Let's talk." />
+  <app-section-header
+    title="Get In Touch"
+    subtitle="Currently seeking full-time software engineering roles. Recruiters, collaborators, and fellow devs — let's talk."
+  />
   <div class="contact-section__content" appScrollReveal>
-    <a [href]="'mailto:' + email()" class="contact-section__email-cta">
-      {{ email() }}
-    </a>
-    <app-social-links [links]="socialLinks()" />
+    <app-social-links [links]="channels()" layout="list" />
   </div>
 </section>

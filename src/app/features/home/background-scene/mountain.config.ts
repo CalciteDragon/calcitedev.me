@@ -21,7 +21,22 @@ export interface MountainConfig {
   camYOffset: number;
   /** Camera vertical position offset driven by scroll. You set this externally. Default: 0 */
   camY: number;
+  /**
+   * Seed for the terrain hash noise. The noise itself is deterministic, so this
+   * pins one specific mountain range for good — the same peaks appear on every
+   * load. Change it to generate a different range. Default: 0 (the shipped range)
+   */
+  terrainSeed: number;
 }
+
+/**
+ * Reference viewport width, in CSS px, that the horizontal projection is locked to.
+ *
+ * Below this width the scene keeps its 1080p pixels-per-world-unit and is simply
+ * cropped at the left and right edges, instead of compressing the whole range into
+ * a narrower box. Above it the projection widens with the viewport as before.
+ */
+export const PROJECTION_REFERENCE_WIDTH = 1920;
 
 export const DEFAULT_MOUNTAIN_CONFIG: MountainConfig = {
   zoom: 1.00,
@@ -35,4 +50,5 @@ export const DEFAULT_MOUNTAIN_CONFIG: MountainConfig = {
   gridResolution: 48,
   camYOffset: 3,
   camY: 0,
+  terrainSeed: 0,
 };

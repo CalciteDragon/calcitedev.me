@@ -6,8 +6,12 @@
 }
 
 .footer {
-  border-top: 1px solid rgba($bg-border, 0.4);
-  padding: $space-6 0;
+  // The footer is the tail of the page-end pixel dissolve: it sits directly
+  // below the ramp, which has already reached solid black, and supplies the
+  // black ground the copyright reads against. No top rule — the dissolve is
+  // the separator now, and a hairline would cut straight through it.
+  padding: $space-4 0;
+  background: #000;
 }
 
 .footer__inner {

@@ -50,7 +50,38 @@ describe('createStars', () => {
   });
 });
 
+describe('createStars — determinism', () => {
+  it('produces an identical field on every call with the default seed', () => {
+    expect(createStars(40, 1920, 1080)).toEqual(createStars(40, 1920, 1080));
+  });
+
+  it('produces a different field for a different seed', () => {
+    const a = createStars(40, 1920, 1080, 1);
+    const b = createStars(40, 1920, 1080, 2);
+    expect(a).not.toEqual(b);
+  });
+
+  it('keeps each star at the same relative position across viewport sizes', () => {
+    const wide = createStars(20, 1920, 1080);
+    const narrow = createStars(20, 960, 1080);
+    wide.forEach((star, i) => {
+      expect(narrow[i].x).toBeCloseTo(star.x / 2, 5);
+      expect(narrow[i].y).toBeCloseTo(star.y, 5);
+    });
+  });
+});
+
 describe('createParticles', () => {
+  it('produces an identical field on every call with the default seed', () => {
+    expect(createParticles(20, 800, 600)).toEqual(createParticles(20, 800, 600));
+  });
+
+  it('does not mirror the star field layout', () => {
+    const stars = createStars(20, 800, 600);
+    const particles = createParticles(20, 800, 600);
+    expect(particles.map(p => p.x)).not.toEqual(stars.map(s => s.x));
+  });
+
   it('returns the requested count', () => {
     expect(createParticles(15, 800, 600)).toHaveLength(15);
   });

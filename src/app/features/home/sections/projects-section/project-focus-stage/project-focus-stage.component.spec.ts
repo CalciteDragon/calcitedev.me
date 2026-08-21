@@ -1,5 +1,5 @@
 import { ComponentRef } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Project } from '../../../../../models/project.model';
 import { ProjectFocusStageComponent } from './project-focus-stage.component';
 
@@ -17,12 +17,13 @@ const projects: readonly Project[] = [
 ];
 
 describe('ProjectFocusStageComponent', () => {
+  let fixture: ComponentFixture<ProjectFocusStageComponent>;
   let ref: ComponentRef<ProjectFocusStageComponent>;
   let element: HTMLElement;
 
   beforeEach(() => {
     TestBed.configureTestingModule({ imports: [ProjectFocusStageComponent] });
-    const fixture = TestBed.createComponent(ProjectFocusStageComponent);
+    fixture = TestBed.createComponent(ProjectFocusStageComponent);
     ref = fixture.componentRef;
     ref.setInput('projects', projects);
     ref.setInput('selectedSlug', 'one');
@@ -37,6 +38,30 @@ describe('ProjectFocusStageComponent', () => {
     expect(cards[0].hasAttribute('aria-hidden')).toBe(false);
     expect(cards[1].getAttribute('aria-hidden')).toBe('true');
     expect(cards[1].hasAttribute('inert')).toBe(true);
+  });
+
+  it('wraps the carousel around the project list in both directions', () => {
+    const stepped: string[] = [];
+    ref.instance.projectStepped.subscribe(slug => stepped.push(slug));
+
+    const buttons = element.querySelectorAll<HTMLButtonElement>('.project-focus-stage__nav button');
+    expect(buttons).toHaveLength(2);
+    expect(element.querySelector('.project-focus .carousel-nav')).toBeNull();
+    expect(buttons[0].getAttribute('aria-label')).toBe('Show previous project, Two');
+    expect(buttons[1].getAttribute('aria-label')).toBe('Show next project, Two');
+
+    buttons[0].click();
+    buttons[1].click();
+    expect(stepped).toEqual(['two', 'two']);
+  });
+
+  it('hides the carousel when there is only one project', () => {
+    ref.setInput('projects', [projects[0]]);
+    ref.setInput('selectedSlug', 'one');
+    fixture.detectChanges();
+
+    expect(element.querySelector('.project-focus-stage__nav')).toBeNull();
+    expect(element.querySelector('.project-focus-stage--carousel')).toBeNull();
   });
 
   it('renders repository actions only when a project provides them', () => {

@@ -1,10 +1,14 @@
 @use 'variables' as *;
+@use 'mixins' as *;
 
-$link-colors: (
-  'github': $accent-cyan,
-  'discord': $accent-blue,
-  'linkedin': $accent-purple,
-  'twitter': $accent-blue,
+// Platform → design-token accent. Both the solid and the -rgb channel triplet
+// exist on :root, so rows can tint text and translucent glows from one entry.
+$link-accents: (
+  'email': 'gold',
+  'github': 'cyan',
+  'discord': 'blue',
+  'linkedin': 'purple',
+  'twitter': 'blue',
 );
 
 :host {
@@ -22,12 +26,23 @@ $link-colors: (
   align-items: center;
   justify-content: center;
   color: var(--text-secondary);
-  transition: color 300ms ease-out, filter 300ms ease-out;
+  // Fallback accent, so a platform missing from $link-accents still hovers.
+  --link-color: var(--accent-cyan);
+  --link-color-rgb: var(--accent-cyan-rgb);
+  transition:
+    color $transition-base,
+    filter $transition-base;
 
-  svg {
-    width: 24px;
-    height: 24px;
-    fill: currentColor;
+  @each $platform, $token in $link-accents {
+    &--#{$platform} {
+      --link-color: var(--accent-#{$token});
+      --link-color-rgb: var(--accent-#{$token}-rgb);
+    }
+  }
+
+  &:hover {
+    color: var(--link-color);
+    filter: drop-shadow(0 0 8px rgba(var(--link-color-rgb), 0.4));
   }
 
   &:focus-visible {
@@ -35,16 +50,112 @@ $link-colors: (
     outline-offset: 4px;
     border-radius: 2px;
   }
+}
 
-  @each $platform, $color in $link-colors {
-    &--#{$platform}:hover {
-      color: $color;
-      filter: drop-shadow(0 0 8px rgba($color, 0.4));
-    }
-  }
+.social-links__icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  fill: currentColor;
 }
 
 .social-links__label {
   font-size: 0.875rem;
   font-weight: 500;
+}
+
+// ======================
+// List layout — one row per contact channel
+// ======================
+
+.social-links--list {
+  flex-direction: column;
+  align-items: stretch;
+  gap: $space-1;
+  width: min(100%, 30rem);
+  margin-inline: auto;
+  text-align: left;
+
+  .social-links__link {
+    // icon | platform label | handle. The label track is fixed so every handle
+    // starts on the same x — a ragged handle column reads as four unrelated
+    // links rather than one list.
+    display: grid;
+    grid-template-columns: auto 5rem 1fr;
+    align-items: center;
+    gap: $space-2;
+    padding: 0.7rem 1rem;
+    border: 1px solid rgba($bg-border, 0.85);
+    border-radius: $radius-sm;
+    background: rgba($bg-surface, 0.35);
+    text-decoration: none;
+    transition:
+      border-color $transition-base,
+      background-color $transition-base,
+      box-shadow $transition-base,
+      transform $transition-base;
+
+    &:hover {
+      // List rows glow via box-shadow; the row layout's drop-shadow would blur
+      // the border. Reset it here, not on the base rule, so this does not rely
+      // on source order against the equal-specificity `.__link:hover`.
+      filter: none;
+      color: var(--text-primary);
+      border-color: rgba(var(--link-color-rgb), 0.55);
+      background: rgba($bg-surface, 0.6);
+      box-shadow: 0 0 18px rgba(var(--link-color-rgb), 0.18);
+      transform: translateY(-2px);
+
+      .social-links__icon,
+      .social-links__handle {
+        color: var(--link-color);
+      }
+    }
+
+    @include motion-safe {
+      &:active {
+        transform: translateY(0) scale(0.99);
+      }
+    }
+  }
+
+  .social-links__icon {
+    color: var(--text-secondary);
+    transition: color $transition-base;
+  }
+
+  .social-links__platform {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  .social-links__handle {
+    justify-self: start;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    transition: color $transition-base;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: $bp-sm) {
+  .social-links--list {
+    .social-links__link {
+      // Handles are long relative to a narrow phone; drop the uppercase label
+      // rather than letting the monospace handle wrap onto three lines.
+      grid-template-columns: auto 1fr;
+    }
+
+    .social-links__platform {
+      display: none;
+    }
+
+    .social-links__handle {
+      font-size: 0.8rem;
+    }
+  }
 }

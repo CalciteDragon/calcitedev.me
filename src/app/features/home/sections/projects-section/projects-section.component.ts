@@ -44,6 +44,12 @@ export class ProjectsSectionComponent {
     return selected ?? projects[0] ?? null;
   });
 
+  stepProject(slug: string): void {
+    // Carousel arrows keep focus on the arrow so repeated steps stay usable;
+    // the live region below still announces each change.
+    this.selectProject({ slug, focusDetails: false });
+  }
+
   selectProject(selection: ProjectSelection): void {
     const project = this.projects().find(item => item.slug === selection.slug);
     if (!project || project.slug === this.selectedProject()?.slug) return;

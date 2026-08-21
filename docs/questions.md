@@ -21,7 +21,7 @@ This document began as the project’s clarification questionnaire. Resolved ans
 - The original grouped Skills section was superseded on August 13, 2026 by the interactive Extras section; project tags and descriptions now carry the primary technical-skills signal.
 - About is an origin story and compiler-themed history timeline. Extras follows Projects with hardware, capstone, and robotics media.
 - Tyler will create final pixel artwork; development uses placeholders.
-- Contact uses direct email and social links, not a form.
+- Contact uses direct email and social links, not a form. They are presented as one list of handles rather than an email CTA plus an icon row.
 - Current social platforms are GitHub, Discord, and LinkedIn.
 - Resume, blog, GitHub API integration, and analytics are deferred.
 

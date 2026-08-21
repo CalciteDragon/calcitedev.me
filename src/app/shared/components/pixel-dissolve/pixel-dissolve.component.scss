@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  // Above the fixed background scene (z-index: -1) and, at equal z-index, above
+  // the earlier .main-page__section stacking contexts it overlaps.
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0; // never let the layout flex column squash the ramp
+  pointer-events: none;
+  overflow: hidden;
+
+  // Pull the ramp up over the end of the page content so the disintegration
+  // starts on the last contact card rather than below the footer. That card's
+  // bottom edge sits exactly one --section-padding-v above the end of <main>,
+  // so the lead-in is measured from there.
+  //
+  // The ramp's bottom stays pinned to the top of the footer: shortening the
+  // ramp and shrinking this pull-up by the same amount slides the effect down
+  // the page without moving the footer or changing the document height.
+  --dissolve-lead-in: 0.875rem;
+  margin-top: calc(-1 * (var(--section-padding-v) + var(--dissolve-lead-in)));
+}
+
+.pixel-dissolve {
+  display: block;
+  width: 100%;
+  // No viewBox: one SVG user unit stays one CSS pixel at every viewport width,
+  // so blocks keep a constant size instead of stretching with the page.
+  fill: #000;
+}

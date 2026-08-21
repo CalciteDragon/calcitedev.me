@@ -18,6 +18,16 @@ describe('projectsData', () => {
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
+  it('links the Black and White project to its playable build', () => {
+    expect(projectsData.find(project => project.slug === 'black-and-white')?.liveUrl).toBe(
+      'https://neverbnw.calcitedev.me',
+    );
+  });
+
+  it('labels the Black and White preview as a browser game', () => {
+    expect(projectsData.find(project => project.slug === 'black-and-white')?.status).toBe('BROWSER GAME');
+  });
+
   it('has complete display content for every project', () => {
     for (const project of projectsData) {
       expect(project.title.trim()).not.toBe('');

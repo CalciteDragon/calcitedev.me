@@ -7,13 +7,14 @@ export const projectsData: readonly Project[] = [
     eyebrow: 'Realtime multiplayer · Full stack',
     status: 'SHIPPED',
     description:
-      'A head-to-head online race that turns Minecraft challenge goals into a live, shared bingo board.',
+      'A solo-built online race that turns Minecraft challenge goals into a live, shared bingo board.',
     longDescription:
-      'Players create or join a private 1v1 lobby, ready up, and claim a shared 5×5 board while a server-authoritative backend enforces ownership, timers, reconnects, rematches, and multiple win conditions. An Angular client, pure TypeScript match engine, WebSockets, and PostgreSQL persistence keep both sides synchronized.',
-    tags: ['Angular', 'TypeScript', 'WebSockets', 'Node.js', 'PostgreSQL', 'Multiplayer'],
+      'Up to four players join a private lobby from an invite link, ready up, and race to claim a seeded 5×5 goal board in real time. The backend is fully server-authoritative — clients submit intents; the server validates, applies, persists, and broadcasts match state — with reconnect recovery, rematches, and multiple win conditions. The monorepo pairs an Angular client with a pure TypeScript match engine, Zod-validated contracts, WebSockets, PostgreSQL persistence, and GitHub Actions CI running engine, integration, and UI test suites.',
+    tags: ['Angular', 'TypeScript', 'WebSockets', 'Node.js', 'PostgreSQL', 'CI/CD'],
     imageUrl: 'assets/images/project-live-bingo.png',
     imageAlt:
       'A live Live Bingo match: a five-by-five board of Minecraft goals with blue and red claimed tiles, a match timer, and both players tied on the leaderboard',
+    liveUrl: 'https://live-bingo-1.onrender.com/',
     githubUrl: 'https://github.com/CalciteDragon/Live-Bingo',
     glowColor: 'blue',
   },
@@ -25,7 +26,7 @@ export const projectsData: readonly Project[] = [
     description:
       'A full-stack Android expense workflow that turns receipt photos into structured reports ready for approval.',
     longDescription:
-      'The Kotlin and Jetpack Compose client supports receipt capture, editing, user and approver workflows, cloud record keeping, and CSV exports. Behind it, an AWS serverless pipeline uses S3, Lambda, Step Functions, Textract, Bedrock, and RDS to extract, categorize, and store expense data.',
+      'On our team of four, I was the front-end developer and owned integration and integration testing. The Kotlin and Jetpack Compose client supports receipt capture, editing, user and approver workflows, cloud record keeping, and CSV exports; behind it, an AWS serverless pipeline uses S3, Lambda, Step Functions, Textract, Bedrock, and RDS to extract, categorize, and store expense data. We were selected to present the finished product at the North Seattle & Bellevue College Senior Capstone Showcase, hosted at Northeastern University’s Seattle campus.',
     tags: ['Kotlin', 'Jetpack Compose', 'AWS Lambda', 'Receipt OCR', 'Bedrock AI', 'Auth0'],
     imageUrl: 'assets/images/project-pineapple-expense.png',
     imageAlt:
@@ -57,7 +58,7 @@ export const projectsData: readonly Project[] = [
     description:
       'Competition robot software combining swerve drive, multi-camera vision, autonomous paths, and simulation.',
     longDescription:
-      'I contributed to Ramen Robotics 9036’s command-based Java and WPILib codebase, built to run across competition and practice hardware. It combines CTRE swerve drive, Limelight and AprilTag odometry, PathPlanner autonomous routines, hardware abstraction, subsystem simulation, and an extensive automated test suite.',
+      'I built subsystem control for Ramen Robotics 9036’s command-based Java and WPILib codebase — intake-arm homing, climber travel limits and encoder handling, safety logic, and simulation support — running across competition and practice hardware. The robot combines CTRE swerve drive, Limelight and AprilTag odometry, PathPlanner autonomous routines, hardware abstraction, subsystem simulation, and an extensive automated test suite.',
     tags: ['FRC Robotics', 'Java', 'WPILib', 'Swerve Drive', 'Computer Vision', 'PathPlanner'],
     imageUrl: 'assets/images/project-mochi-2026.jpg',
     imageAlt:
@@ -68,17 +69,18 @@ export const projectsData: readonly Project[] = [
   {
     title: 'It’s Never Just Black and White',
     slug: 'black-and-white',
-    eyebrow: 'Vibe-coded experiment · Browser game',
-    status: 'EXPERIMENT',
+    eyebrow: 'Engine-free game dev · Browser game',
+    status: 'BROWSER GAME',
     description:
-      'A retro-style 2D platformer with hand-crafted pixel art, procedural level generation, and local co-op support.',
+      'A two-color momentum platformer where a single button flips gravity and the color palette at once.',
     longDescription:
-      'Pixel Quest is a passion project combining a love of classic platformers with modern game development techniques. Built with TypeScript and the Canvas API, it features a custom physics engine, procedurally generated dungeons, and a pixel-art rendering pipeline. Supports local two-player co-op and a daily challenge mode.',
-    tags: ['TypeScript', 'Canvas API', 'Game Dev', 'Pixel Art'],
+      'Everything is hand-rolled in TypeScript on the raw Canvas API with zero runtime dependencies — the fonts, sounds, and levels are all code. The player square is a true rigid body with corner-based collisions, the ground-recharged flip move swaps ink and paper while reversing gravity, and a synthesized WebAudio techno track layers up as you gain speed. Ships with an in-browser level editor.',
+    tags: ['TypeScript', 'Canvas API', 'Rigid-Body Physics', 'WebAudio', 'Level Editor'],
     imageUrl: 'assets/images/project-black-and-white.png',
     imageAlt:
       'In-game capture of the level “FIRST STEPS” at 0:13.01: a white diamond player character falling between stark white platforms on a black background, with chromatic-aberration edges, scanline grain, and a small cyan particle burst above a dark chevron spike',
-    githubUrl: 'https://github.com/CalciteDragon/pixel-quest',
+    liveUrl: 'https://neverbnw.calcitedev.me',
+    githubUrl: 'https://github.com/CalciteDragon/its-never-just-black-and-white',
     glowColor: 'cyan',
   },
   {

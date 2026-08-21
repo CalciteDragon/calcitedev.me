@@ -56,6 +56,18 @@ describe('ExtraMediaPadComponent', () => {
     expect(cap.classList).not.toContain('extra-pad--pressed');
   });
 
+  it('clears pointer focus from the cap so a later WASD press does not ring it', () => {
+    cap.focus();
+    cap.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+    expect(document.activeElement).not.toBe(cap);
+
+    // Keyboard activation reports detail 0 and must keep its focus.
+    cap.focus();
+    cap.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(document.activeElement).toBe(cap);
+    cap.blur();
+  });
+
   it('emits pressRequested on every click so the platformer owns the slide change', () => {
     let presses = 0;
     fixture.componentInstance.pressRequested.subscribe(() => { presses += 1; });

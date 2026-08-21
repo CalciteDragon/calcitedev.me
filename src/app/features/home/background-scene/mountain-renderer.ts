@@ -1,4 +1,4 @@
-import { MountainConfig } from './mountain.config';
+import { MountainConfig, PROJECTION_REFERENCE_WIDTH } from './mountain.config';
 
 export class MountainRenderer {
   private ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D;
@@ -49,7 +49,8 @@ export class MountainRenderer {
       config.peakSeparation  !== this.config.peakSeparation ||
       config.terrainNoise    !== this.config.terrainNoise ||
       config.gridResolution  !== this.config.gridResolution ||
-      config.horizontalWidth !== this.config.horizontalWidth;
+      config.horizontalWidth !== this.config.horizontalWidth ||
+      config.terrainSeed     !== this.config.terrainSeed;
 
     const needsColorRebuild =
       needsRebuild ||
@@ -304,7 +305,9 @@ export class MountainRenderer {
 
     const { zoom, verticalStretch: vs, tilt, horizontalWidth: xHalf } = this.config;
     const eyeZ = 0.8;
-    const W056 = this.W * 0.56;
+    // Horizontal scale is pinned to the reference width once the viewport drops
+    // below it, so narrowing the window crops the range instead of squishing it.
+    const W056 = Math.max(this.W, PROJECTION_REFERENCE_WIDTH) * 0.56;
     const H056 = this.H * 0.56;
 
     for (let r = 0; r <= this.ROWS; r++) {
@@ -387,7 +390,10 @@ export class MountainRenderer {
     const ix = Math.floor(x), iz = Math.floor(z);
     const fx = x - ix, fz = z - iz;
     const ux = fx * fx * (3 - 2 * fx), uz = fz * fz * (3 - 2 * fz);
-    const rnd = (a: number, b: number) => ((Math.sin(a * 127.1 + b * 311.7) * 43758.5453) % 1 + 1) % 1;
+    // terrainSeed offsets the hash phase; 0 reproduces the shipped mountain range.
+    const seed = this.config.terrainSeed;
+    const rnd = (a: number, b: number) =>
+      ((Math.sin(a * 127.1 + b * 311.7 + seed) * 43758.5453) % 1 + 1) % 1;
     const v00 = rnd(ix, iz), v10 = rnd(ix + 1, iz), v01 = rnd(ix, iz + 1), v11 = rnd(ix + 1, iz + 1);
     return v00 * (1 - ux) * (1 - uz) + v10 * ux * (1 - uz) + v01 * (1 - ux) * uz + v11 * ux * uz;
   }

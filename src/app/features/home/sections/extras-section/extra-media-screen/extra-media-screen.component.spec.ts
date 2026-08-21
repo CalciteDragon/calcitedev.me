@@ -81,20 +81,32 @@ describe('ExtraMediaScreenComponent', () => {
     expect(popoutRequested).toHaveBeenCalledOnce();
   });
 
-  it('clears pointer focus from carousel arrows without removing keyboard focus', () => {
+  it('clears pointer focus from every screen control without removing keyboard focus', () => {
+    // A clicked button stays focused, and the next WASD press flips the browser's
+    // :focus-visible heuristic on, ringing a control the player has already moved past.
     fixture.componentRef.setInput('topic', extrasData[0]);
+    fixture.componentRef.setInput('active', false);
     fixture.detectChanges();
-    const button = compiled.querySelector(
+
+    const selectors = [
       '.extra-screen__gallery-controls button:last-child',
-    ) as HTMLButtonElement;
+      '.extra-screen__popout',
+      '.extra-screen__visit',
+    ];
 
-    button.focus();
-    button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
-    expect(document.activeElement).not.toBe(button);
+    for (const selector of selectors) {
+      const button = compiled.querySelector(selector) as HTMLButtonElement;
+      expect(button, selector).not.toBeNull();
 
-    button.focus();
-    button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-    expect(document.activeElement).toBe(button);
+      button.focus();
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true, detail: 1 }));
+      expect(document.activeElement, selector).not.toBe(button);
+
+      button.focus();
+      button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(document.activeElement, selector).toBe(button);
+      button.blur();
+    }
   });
 
   it('hides the popout button when disabled', () => {

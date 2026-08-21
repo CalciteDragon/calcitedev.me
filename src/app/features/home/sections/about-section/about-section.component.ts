@@ -19,8 +19,8 @@ import { ScrollRevealDirective } from '../../../../shared/directives/scroll-reve
 const SCROLL_SMOOTHING_TIME_MS = 90;
 const PROGRESS_SETTLE_THRESHOLD = 0.0005;
 const TILT_SETTLE_THRESHOLD = 0.01;
-const RAIL_SECTION_PROGRESS_START = -0.068;
-const RAIL_SECTION_PROGRESS_END = 0.649;
+const RAIL_START_VIEWPORT_LINE = 0.6;
+const RAIL_END_PAGE_PROGRESS = 0.46;
 
 export function aboutScrollDebugEnabled(search: string, hash = ''): boolean {
   const queryMode = new URLSearchParams(search).get('aboutDebug');
@@ -28,11 +28,20 @@ export function aboutScrollDebugEnabled(search: string, hash = ''): boolean {
   return queryMode === 'scroll' || fragmentMode === 'scroll';
 }
 
-export function aboutRailProgressForSection(sectionProgress: number): number {
-  return (
-    (sectionProgress - RAIL_SECTION_PROGRESS_START) /
-    (RAIL_SECTION_PROGRESS_END - RAIL_SECTION_PROGRESS_START)
-  );
+export function aboutRailProgressForGeometry(
+  firstNodeCenter: number,
+  viewportHeight: number,
+  scrollY: number,
+  maximumPageScroll: number,
+): number {
+  if (maximumPageScroll < 1) return 0;
+
+  const startScroll = scrollY + firstNodeCenter - viewportHeight * RAIL_START_VIEWPORT_LINE;
+  const endScroll = maximumPageScroll * RAIL_END_PAGE_PROGRESS;
+  const travel = endScroll - startScroll;
+  if (travel < 1) return 0;
+
+  return (scrollY - startScroll) / travel;
 }
 
 export function closestTimelineNodeIndex(
@@ -221,10 +230,6 @@ export class AboutSectionComponent implements AfterViewInit, OnDestroy {
       const normalizedDistance = (center - activationLine) / tiltRange;
       return Math.max(-1, Math.min(1, normalizedDistance)) * 3.25;
     });
-    const rawTimelineProgress = aboutRailProgressForSection(sectionProgress);
-    this.targetProgress = Math.max(0, Math.min(1, rawTimelineProgress));
-    this.rawTimelineProgress.set(rawTimelineProgress);
-    this.timelineTargetProgress.set(this.targetProgress);
 
     const timeline = this.host.nativeElement.querySelector<HTMLElement>(
       '.about-section__timeline',
@@ -248,6 +253,16 @@ export class AboutSectionComponent implements AfterViewInit, OnDestroy {
       this.timelineRailHeight.set(`${nodeSpan}px`);
       this.timelineBlueStop.set(this.formatPercent(this.nodeProgresses[1] ?? 1 / 3));
       this.timelinePurpleStop.set(this.formatPercent(this.nodeProgresses[2] ?? 2 / 3));
+
+      const rawTimelineProgress = aboutRailProgressForGeometry(
+        firstNodeCenter,
+        viewportHeight,
+        scrollY,
+        maximumPageScroll,
+      );
+      this.targetProgress = Math.max(0, Math.min(1, rawTimelineProgress));
+      this.rawTimelineProgress.set(rawTimelineProgress);
+      this.timelineTargetProgress.set(this.targetProgress);
     }
 
     return true;

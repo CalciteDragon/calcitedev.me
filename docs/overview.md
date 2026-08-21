@@ -10,7 +10,7 @@ A personal developer portfolio for **Tyler Hawthorn (AKA Calcite)** with a dark 
 | --- | --- |
 | Name | Tyler Hawthorn |
 | Alias | Calcite |
-| Title | Full Stack Developer & Game Enthusiast |
+| Title | Full-Stack & Game Developer |
 | Domain | calcitedev.me |
 
 ## Current Tech Stack
@@ -36,7 +36,7 @@ The homepage is one scrolling route with five sections. Project selection stays 
 - Pixel-art avatar placeholder floating above a CSS sci-fi platform.
 - Large fixed-background cyan-to-pink gradient name, alias, and title.
 - HTML/CSS UFO with floating motion, scroll parallax, and a tractor beam.
-- Three-chevron scroll indicator.
+- Single cyan chevron scroll indicator.
 - Fixed canvas background with stars, particles, atmosphere, horizon glow, and procedural wireframe terrain.
 
 The earlier hero feature-card strip and CTA were intentionally removed because they duplicated the navbar and section navigation.
@@ -47,7 +47,7 @@ An origin-story section led by a larger introductory card and followed by a four
 
 ### 3. Projects
 
-A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. A compact index of smaller preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
+A data-driven showcase of seven real projects. One stable focus stage presents the selected project's art, detailed researched description, status, tags, and available repository/live actions. Wrapping carousel arrows sit outside the stage and step through the projects in order. A compact index of smaller scanline preview buttons sits below it; selecting a preview crossfades the corresponding project into the stage without navigation, reordering, or layout shift.
 
 All seven project previews live under `public/assets/images/`. Six are real captures — Live Bingo, Pineapple Expense, Mochi 2026, the Roblox PvP world, It's Never Just Black and White, and Minecraft Hide & Seek. Only Calcite Portfolio remains original themed SVG art, a finite recursive browser window. Content order and membership are controlled entirely by `projects.data.ts`.
 
@@ -59,7 +59,7 @@ The level geometry is typed, source-controlled data in `extras-level.data.ts`. A
 
 ### 5. Contact
 
-A direct email link and social links. There is deliberately no contact form or backend.
+One list of contact handles — email, GitHub, Discord, LinkedIn — each shown as `icon | platform | handle` beside the icon for its platform. There is deliberately no contact form or backend. The page then disintegrates into black through a blocky pixel dissolve that begins over the end of the section, with the copyright left sitting in the black at the very bottom.
 
 ## Non-Functional Goals
 

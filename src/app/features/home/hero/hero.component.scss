@@ -226,9 +226,10 @@
     }
   }
 
-  // Alias cyan over subtitle pink repeats the sign's own two-line split —
-  // cyan TYLER above, pink HAWTHORN below — so the panel reads as the third
-  // and fourth lines of the same sign rather than as caption text under it.
+  // Both subtext lines sit in the sign's cyan. Splitting them cyan/pink read
+  // as two unrelated captions; one tube colour lets the pair read as a single
+  // block of secondary copy hanging off the rule, with the pink left to the
+  // sign itself.
   &__alias {
     font-size: clamp(1rem, 2.5vw, 1.75rem);
     font-weight: 600;
@@ -242,7 +243,7 @@
     letter-spacing: 0.03em;
     // Vertical rhythm inside the panel is the flex gap's job.
     margin: 0;
-    @include hero-neon-text($accent-pink);
+    @include hero-neon-text($accent-cyan);
   }
 
   &__ufo {
@@ -270,22 +271,62 @@
       animation: none;
     }
 
-    // Atmospheric haze — vignette over disc only, not beam
+    // Atmospheric perspective: distant objects lose contrast, saturation and
+    // edge definition. The sub-pixel blur is what sells "far away" more than
+    // the size change does — crisp pixel edges always read as near.
+    // contrast() rather than brightness() is deliberate: haze *lifts* blacks
+    // toward the sky colour, where dimming crushes everything down and just
+    // reads as a turned-down lamp.
+    filter: blur(0.55px) saturate(0.84) contrast(0.86);
+    opacity: 0.88;
+
+    // Atmospheric haze — vignette over disc only, not beam. Both the paint and
+    // the mask are radial, so the layer has no edge of its own to show.
     &::after {
       content: '';
       position: absolute;
-      top: -20px;
-      left: -20px;
-      right: -20px;
-      height: 200px;
+      top: -30px;
+      left: -30px;
+      right: -30px;
+      height: 190px;
       background: radial-gradient(
         ellipse at 50% 50%,
-        transparent 25%,
-        rgba(11, 15, 26, 0.32) 55%,
-        rgba(11, 15, 26, 0.58) 100%
+        rgba(11, 15, 26, 0.13) 20%,
+        rgba(11, 15, 26, 0.31) 55%,
+        rgba(11, 15, 26, 0.46) 100%
       );
-      mask-image: radial-gradient(ellipse at 50% 50%, black 42%, transparent 88%);
-      -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 42%, transparent 88%);
+      // Radii are explicit 50%/50% from a centred origin so the ellipse meets
+      // each side at its midpoint and is already past `transparent` at every
+      // corner. A default radial-gradient sizes to `farthest-corner`, which
+      // extends *beyond* the box — the fade never finishes inside it, and the
+      // layer terminates mid-ramp along all four edges as a hard rectangle.
+      mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 20%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 20%, transparent 100%);
+      pointer-events: none;
+    }
+
+    // Distance fog across disc *and* beam. Two things make this read as haze
+    // rather than as a dark panel laid on top:
+    //   1. The colour is a pale sky-blue, not the background navy. Aerial
+    //      perspective washes distant objects *toward* the sky, so the tint
+    //      has to be lighter than what it sits on.
+    //   2. The mask reaches full transparency at every box edge (see the note
+    //      on the vignette above). Only the *paint* is biased upward toward
+    //      the disc; the mask stays centred, because an off-centre mask cannot
+    //      reach zero on its near side without collapsing on the far one.
+    &::before {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      z-index: 2;
+      background: radial-gradient(
+        ellipse 62% 46% at 50% 22%,
+        rgba(146, 178, 216, 0.13),
+        rgba(146, 178, 216, 0.09) 55%,
+        rgba(146, 178, 216, 0.05) 100%
+      );
+      mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 12%, transparent 100%);
+      -webkit-mask-image: radial-gradient(ellipse 50% 50% at 50% 50%, black 12%, transparent 100%);
       pointer-events: none;
     }
   }
@@ -305,12 +346,12 @@
       position: absolute;
       top: 100px;
       left: 100px;
-      width: 250px;
+      width: 170px;
       height: auto;
       image-rendering: pixelated;
 
       @include lg {
-        width: 325px;
+        width: 215px;
       }
     }
 
@@ -342,12 +383,12 @@
   }
 
   &__ufo-img {
-    width: 250px;
+    width: 170px;
     height: auto;
     image-rendering: pixelated;
 
     @include lg {
-      width: 325px;
+      width: 215px;
       height: auto;
     }
   }
@@ -355,10 +396,10 @@
   &__ufo-beam {
     position: relative;
     z-index: 1;
-    width: 250px;
-    height: 400px;
+    width: 170px;
+    height: 280px;
     margin-top: 0px;
-    opacity: 50%;
+    opacity: 34%;
     background: linear-gradient(
       to bottom,
       rgba(34, 211, 238, 0.28) 0%,
@@ -384,8 +425,8 @@
     }
 
     @include lg {
-      width: 325px;
-      height: 550px;
+      width: 215px;
+      height: 370px;
       margin-top: 0px;
     }
 
@@ -402,7 +443,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
     animation: scroll-indicator-fade linear both;
     animation-timeline: scroll(root);
     animation-range: 0px 150px;
@@ -412,18 +452,22 @@
     }
   }
 
+  // One chevron at the original mark's size, in cyan. The three-arrow stack
+  // was the loudest thing in the lower half of the hero and competed with the
+  // sign; a single mark still says "there is more below", and cyan keeps the
+  // pink reserved for the sign itself.
   &__scroll-arrow {
     display: block;
     width: 28px;
     height: 28px;
-    border-right: 3px solid $accent-pink;
-    border-bottom: 3px solid $accent-pink;
+    border-right: 3px solid $accent-cyan;
+    border-bottom: 3px solid $accent-cyan;
     transform: rotate(45deg);
     animation: scroll-pulse 2.5s ease-in-out infinite;
 
-    &:nth-child(1) { animation-delay: 0s; }
-    &:nth-child(2) { animation-delay: 0.35s; }
-    &:nth-child(3) { animation-delay: 0.7s; }
+    @media (prefers-reduced-motion: reduce) {
+      animation: none;
+    }
   }
 }
 
@@ -434,7 +478,11 @@
 
 @keyframes ufo-parallax {
   from { translate: 0 0; }
-  to { translate: 0 140vh; }
+  // Depth comes from how little the craft moves *relative to the viewport*.
+  // The page lifts content by scrollY; this translate gives it back. At
+  // 165vh over a 200vh range the craft keeps ~83% of the scroll, so it drifts
+  // up only a sliver instead of sweeping past like a foreground object.
+  to { translate: 0 165vh; }
 }
 
 @keyframes beam-shimmer {
@@ -452,15 +500,17 @@
   to { opacity: 0; pointer-events: none; }
 }
 
+// A slow breath with a short drift down-right, so the single mark still reads
+// as a pointer rather than a static border. Peak opacity stays low.
 @keyframes scroll-pulse {
   0%, 100% {
     opacity: 0.1;
     transform: rotate(45deg) translate(0, 0);
-    filter: drop-shadow(0 0 2px rgba(236, 72, 153, 0.3));
+    filter: drop-shadow(0 0 2px rgba(34, 211, 238, 0.3));
   }
   50% {
     opacity: 0.55;
     transform: rotate(45deg) translate(2px, 2px);
-    filter: drop-shadow(0 0 6px rgba(236, 72, 153, 0.8)) drop-shadow(0 0 12px rgba(236, 72, 153, 0.4));
+    filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.8)) drop-shadow(0 0 12px rgba(34, 211, 238, 0.4));
   }
 }

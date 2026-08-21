@@ -11,24 +11,31 @@ src/
 │   ├── layout/
 │   │   ├── navbar/                     # Fixed desktop nav + mobile drawer
 │   │   ├── footer/                     # Minimal copyright-only footer
-│   │   └── layout.component.ts         # Navbar + background + router outlet + footer
+│   │   └── layout.component.ts         # Navbar + background + router outlet + page-end dissolve + footer
 │   ├── shared/
 │   │   ├── components/
+│   │   │   ├── pixel-dissolve/         # Blue-noise block dissolve that ends the page in black
+│   │   │   │                            #   dissolve-pattern.ts = noise, dissolve-field.ts = coverage + path
 │   │   │   ├── section-header/
-│   │   │   ├── social-links/
+│   │   │   ├── social-links/           # Icon row, or icon + handle contact list
 │   │   │   └── tech-tag/
 │   │   ├── directives/
 │   │   │   ├── glow.directive.ts
 │   │   │   └── scroll-reveal.directive.ts
-│   │   └── types/
-│   │       └── glow-color.type.ts
+│   │   ├── types/
+│   │   │   └── glow-color.type.ts
+│   │   └── utils/
+│   │       └── pointer-focus.ts        # Drops focus after a pointer click so no stale focus ring
+│   │                                    #   lights up when the next key press flips :focus-visible on
 │   ├── features/
 │   │   └── home/
-│   │       ├── background-scene/       # Scene renderer, mountain renderer, worker bridge
+│   │       ├── background-scene/       # Scene renderer, mountain renderer, worker bridge,
+│   │       │                            #   seeded-random.ts for a fixed star/particle layout
 │   │       ├── hero/                   # Avatar, platform, gradient type, CSS/HTML UFO
 │   │       ├── sections/
 │   │       │   ├── about-section/
 │   │       │   ├── projects-section/
+│   │       │   │   ├── project-carousel-nav/ # One accent-aware carousel arrow
 │   │       │   │   ├── project-focus-stage/ # Stable stacked detail panels
 │   │       │   │   └── project-selector/    # Compact button-based project index
 │   │       │   ├── extras-section/
@@ -52,13 +59,13 @@ src/
 └── styles.scss
 
 public/
-├── favicon.svg                          # Pixel-C SVG favicon
+├── favicon.png / favicon.ico            # Faceted-C browser-tab icons derived from the navbar artwork
 └── assets/
-    ├── images/                          # Hero neon title plus seven project previews — six real captures, one SVG
+    ├── images/                          # Navbar logo, hero title, social card, project previews, and Extras media
     └── pixel-art/                       # Extras explorer strip plus avatar/UFO placeholders
 ```
 
-Assets are served from `public/`, not `src/assets/`. `public/assets/images/hero-title.webp` is the hero headline — a 1400×467 neon-sign render of TYLER HAWTHORN with a transparent background, downscaled from the 2172×724 source and encoded to WebP at q0.92 (298 KB) because the original PNG was 2 MB and this is the LCP element. The seven project visuals referenced by `projects.data.ts` live under `public/assets/images/`. Only Calcite Portfolio remains project-specific SVG art. Six are real captures that have replaced their placeholders:
+Assets are served from `public/`, not `src/assets/`. `public/assets/images/navbar-logo.png` is a 128×128 transparent derivative of the supplied 1254×1254 faceted-C artwork, sized for crisp high-DPI rendering in the persistent 38px navbar slot without shipping the oversized source. The same artwork supplies `public/favicon.png` and the multi-size `public/favicon.ico`, so the browser tab and navbar share one mark. `public/assets/images/hero-title.webp` is the hero headline — a 1400×467 neon-sign render of TYLER HAWTHORN with a transparent background, downscaled from the 2172×724 source and encoded to WebP at q0.92 (298 KB) because the original PNG was 2 MB and this is the LCP element. The seven project visuals referenced by `projects.data.ts` live under `public/assets/images/`. Only Calcite Portfolio remains project-specific SVG art. Six are real captures that have replaced their placeholders:
 
 - `project-live-bingo.png` — 1368×720, an in-progress match composited on the app's own `#F8FAFC` background.
 - `project-pineapple-expense.png` — 1949×1026, the capstone AWS architecture diagram lifted off its presentation slide (slide header and footer chrome cropped away) on white.
@@ -75,6 +82,8 @@ Two padding strategies are in use, depending on the source:
 - **Photographic sources** (Mochi 2026) pad with `--bg-primary` (`#0b0f1a`), the colour the focus stage already paints behind images. The photo band is cut to exactly 1.327:1 so the desktop stage renders it edge to edge with no padding visible; the narrower frames reveal side padding that blends into the card surface. This is what lets a portrait phone photo keep useful height instead of being reduced to a thin strip.
 
 Future screenshots replacing the remaining placeholders should follow whichever recipe matches the source. The recursive portfolio art is a real 1912×945 screenshot of this Projects section captured while the Calcite Portfolio tile was selected, so the nesting is three levels of genuine page — not an iframe or runtime recursion. Four web-sized Mochi competition JPEGs and five web-sized Pineapple Expense capstone JPEGs live under `public/assets/images/extras/`; the third Pineapple asset is a rendered image of the supplied project-poster PDF. `public/assets/pixel-art/extras-explorer.svg` is a 228×48 strip of six 38×48 hero-inspired player poses used by the Extras platformer.
+
+`public/assets/images/og-cover.jpg` is the social-sharing card referenced by the `og:image`/`twitter:image` tags in `src/index.html`: a real 1200×630 headless-Chrome capture of the live hero (JPEG q88, 116 KB) rather than a mockup, so the preview always matches the current hero. The meta tags use absolute `https://calcitedev.me/` URLs because scrapers do not resolve relative paths, and `twitter:card` is `summary_large_image` so the capture renders full-bleed. Re-capture it whenever the hero lockup, alias, or title changes.
 
 The Extras feature also contains `extras-level-editor/` for its standalone development toolbar,
 draft validation/persistence helpers, and editor tests. Canonical geometry lives in
@@ -115,19 +124,20 @@ LayoutComponent
 │       ├── HeroComponent
 │       ├── AboutSectionComponent
 │       ├── ProjectsSectionComponent
-│       │   ├── ProjectFocusStageComponent → TechTagComponent
+│       │   ├── ProjectFocusStageComponent → TechTagComponent, ProjectCarouselNavComponent
 │       │   └── ProjectSelectorComponent
 │       ├── ExtrasSectionComponent
 │       │   └── ExtrasPlatformerComponent
 │       │       ├── ExtrasLevelEditorComponent (development-only)
 │       │       └── ExtraMediaScreenComponent
-│       └── ContactSectionComponent → SocialLinksComponent
+│       └── ContactSectionComponent → SocialLinksComponent (list layout)
+├── PixelDissolveComponent
 └── FooterComponent
 ```
 
 `HomeComponent` is the primary smart container. It imports static data and passes typed values into presentational sections using signal inputs. Shared components are reusable display primitives; the project showcase components are feature-local because no other route consumes them.
 
-`ProjectsSectionComponent` owns `selectedSlug`, resolves `selectedProject` with a safe first-entry fallback, and announces selection changes. It guards viewport and focus behavior with `isPlatformBrowser()`. `ProjectFocusStageComponent` renders all projects into the same CSS grid cell; inactive articles remain in sizing calculations but are `visibility: hidden`, `aria-hidden`, `inert`, and non-interactive. This makes the focus stage as tall as its largest record and prevents swaps from moving later content. `ProjectSelectorComponent` renders the unchanged data order as real buttons with `aria-pressed` and `aria-controls`. External links live only in the active focus article, so selector buttons never contain nested interactive elements.
+`ProjectsSectionComponent` owns `selectedSlug`, resolves `selectedProject` with a safe first-entry fallback, and announces selection changes. It guards viewport and focus behavior with `isPlatformBrowser()`. `ProjectFocusStageComponent` renders all projects into the same CSS grid cell; inactive articles remain in sizing calculations but are `visibility: hidden`, `aria-hidden`, `inert`, and non-interactive. This makes the focus stage as tall as its largest record and prevents swaps from moving later content. The stage wraps those articles in a `__panes` grid cell and places two `ProjectCarouselNavComponent` instances outside it through named grid areas, so the arrows are siblings of the pane rather than children of any article. Because a sibling cannot inherit the `--project-accent` custom property declared on `.project-focus--{color}`, the stage passes the selected project's `glowColor` down as an `accent` input and the nav re-declares the accent itself. The stage derives the wrapping previous/next targets with computed signals and emits the chosen slug through a `projectStepped` output; `ProjectsSectionComponent.stepProject()` forwards it into the same `selectProject()` path with `focusDetails: false`, so state stays in one place and arrows do not steal focus from themselves. `ProjectSelectorComponent` renders the unchanged data order as real buttons with `aria-pressed` and `aria-controls`. External links live only in the active focus article, so selector buttons never contain nested interactive elements.
 
 `ExtrasPlatformerComponent` owns a fixed 1880×820 desktop physics space, signal-backed player and responsive-layout state, requestAnimationFrame physics, platform collision, active-island state, gallery indices, and slide-pad press state. Galleries never advance on their own: every slide change comes from a cursor arrow, a pop-out arrow, or the explorer landing on a slide pad. The player keeps a fixed 38×48 physics box while a six-frame SVG strip supplies hero-inspired idle, walk, crouch, and airborne artwork; facing mirrors only the inner sprite so the transform used for world position remains stable. The complete world scales uniformly into the available desktop width, keeping the Capstone, Keyboard, and Robotics screen-islands visible without a camera or horizontal crop. The explorer begins 58px inside the left edge of the middle Keyboard island with `activeTopicId` unset. Page-level WASD/arrow listeners move the explorer even after teleporting or clicking elsewhere on the page; editable controls are excluded, and the former pointer direction/jump controls have been removed. Arrow input alone leaves every island in standby. The first W/A/S/D press performs the keyboard-derived activation for the supporting island and dismisses the hint; subsequent landings activate normally. Clicking an inactive screen immediately teleports and activates without changing focus or dismissing that WASD hint. Active screens, collision geometry, and their visible copy rise together by 8px and deactivate only after a one-second airborne grace period. Gallery arrows sit above the inactive pane overlay; manually browsing an inactive island also teleports and activates it.
 
@@ -135,7 +145,15 @@ Islands whose topic holds more than one slide also carry a pair of analog previo
 
 `bioData.about` stores the About introduction and four history entries as typed text segments. Intro segments can select cyan or pink; history segments carry semantic emphasis while their parent entry supplies the single stage color. `AboutSectionComponent` coalesces passive scroll measurements into animation frames and applies frame-rate-independent damping to card tilt and continuous rail progress. The rail is measured from the first number's center to the last number's center; the active chapter follows the closest numbered stop. In development, `?aboutDebug=scroll` exposes a read-only tuning HUD.
 
-`FooterComponent` is a presentation-only shell with no inputs or data dependencies. `ContactSectionComponent` is the single consumer of `SocialLinksComponent` and `socialLinksData`, avoiding duplicate social rows at scroll-bottom. `LayoutComponent` owns the skip-to-content link and manually focuses `<main id="main-content">` so it behaves consistently after redirects.
+`FooterComponent` is a presentation-only shell with no inputs or data dependencies. `ContactSectionComponent` is the single consumer of `SocialLinksComponent` and `socialLinksData`, avoiding duplicate social rows at scroll-bottom. It prepends a synthetic `email` channel (a `mailto:` `SocialLink` built from `bioData.email`) to `socialLinksData` and renders the combined list through `SocialLinksComponent` in `list` layout, so email and the socials read as one set of handles rather than a CTA plus an icon row. `LayoutComponent` owns the skip-to-content link and manually focuses `<main id="main-content">` so it behaves consistently after redirects.
+
+`PixelDissolveComponent` sits between `<main>` and `FooterComponent`, pulled up over the end of the content with a negative margin so the disintegration starts just above the last contact card. `FooterComponent` follows it on a solid black ground, which is where the copyright now lives.
+
+The dissolve splits into two modules. `dissolve-pattern.ts` builds the blue-noise threshold tile once at module load — a 32x6 void-and-cluster ordering, toroidal so it tiles seamlessly at any width. `dissolve-field.ts` owns the coverage field, `dissolveCoverage(tx, ty)`, which accelerates non-linearly downward and runs ahead of itself toward the page edges, plus `buildDissolvePath()`, which walks the block grid and emits one SVG path.
+
+Coverage varying in two dimensions is why the component measures the viewport rather than staying purely declarative: an SVG `<pattern>` tiles uniformly and can only shade by row, and the alternatives that keep a fluid width — percentage-width columns, or an `objectBoundingBox` clip-path along the iso-coverage curve — both cut blocks mid-edge and lose the square-pixel look. The grid is therefore laid out against the measured pixel width, via `afterNextRender` plus a debounced `ResizeObserver` writing a signal (the app is zoneless, so the signal write drives change detection on its own). Runs of adjacent black blocks merge into single rectangles, which roughly halves both the path string and the rasteriser's work.
+
+The SVG carries no `viewBox`, so one user unit stays one CSS pixel and blocks keep a constant 10px size at every viewport width. Before the width is known — which is exactly the server-side render's state — the path is empty, so the prerendered markup carries no grid and the effect draws on hydration. It is `aria-hidden` and `pointer-events: none`, so the content it overlaps stays readable to assistive tech and clickable with a mouse. Nothing animates, so `prefers-reduced-motion` needs no special case.
 
 The fixed background belongs to `LayoutComponent`. `BackgroundSceneComponent` owns the motion policy: under `prefers-reduced-motion` it draws a still frame and redraws only on scroll, and it pauses its animation loop while `document.hidden`. The UFO is an HTML/CSS element in `HeroComponent`; the controllable rocket remains future Phase 8 work.
 
@@ -216,4 +234,4 @@ dist/portfolio/browser/
 Render static-site publish directory (planned/externally configured)
 ```
 
-The August 15 verification passes 169 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget, and the Extras platformer stylesheet regained roughly 1.4 kB of headroom once the slide pad moved into `extra-media-pad/`. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.
+The August 18 verification passes 192 tests and completes the production build. Current component-style warnings are documented in `docs/development.md`; none exceed the 8 kB error budget, and the Extras platformer stylesheet regained roughly 1.4 kB of headroom once the slide pad moved into `extra-media-pad/`. Render service settings, DNS, HTTPS, and the external deployment state must still be verified outside the repository.

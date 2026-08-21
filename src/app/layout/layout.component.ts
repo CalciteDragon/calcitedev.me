@@ -4,12 +4,19 @@ import { RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './navbar/navbar.component';
 import { FooterComponent } from './footer/footer.component';
 import { BackgroundSceneComponent } from '../features/home/background-scene/background-scene.component';
+import { PixelDissolveComponent } from '../shared/components/pixel-dissolve/pixel-dissolve.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterOutlet, NavbarComponent, FooterComponent, BackgroundSceneComponent],
+  imports: [
+    RouterOutlet,
+    NavbarComponent,
+    FooterComponent,
+    BackgroundSceneComponent,
+    PixelDissolveComponent,
+  ],
   template: `
     <a class="skip-link" href="#main-content" (click)="skipToContent($event)">Skip to content</a>
     <app-navbar />
@@ -17,6 +24,7 @@ import { BackgroundSceneComponent } from '../features/home/background-scene/back
     <main id="main-content" tabindex="-1" class="layout__content">
       <router-outlet />
     </main>
+    <app-pixel-dissolve />
     <app-footer />
   `,
   styles: [`
